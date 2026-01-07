@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHEM.OS_ULTIMATE_v11.0</title>
+    <title>KHEM.OS_ULTIMATE_v13.0_FINANCE</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <style>
         :root {
@@ -12,24 +12,24 @@
             --taskbar-bg: #c0c0c0;
             --win-title: #000080;
             --win-text: #ffffff;
+            --gold: #ffd700;
+            --user-theme: #008080;
+            --user-txt: #ffffff;
         }
 
         body {
-            background-color: var(--os-bg);
-            background-size: cover;
-            background-position: center;
+            background-color: var(--user-theme);
+            color: var(--user-txt);
             margin: 0; padding: 0;
             height: 100vh; width: 100vw;
             font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
             overflow: hidden;
-            transition: filter 0.3s, transform 0.3s;
+            transition: background-color 0.3s, filter 0.3s;
         }
 
-        /* Trolling Styles */
         body.inverted { filter: invert(1); }
         body.shaking { animation: shake 0.2s infinite; }
-        body.flipped { transform: scaleX(-1); }
-        body.grayscale { filter: grayscale(1); }
+        body.frozen { pointer-events: none !important; cursor: wait !important; }
 
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
@@ -39,14 +39,6 @@
             80% { transform: translate(-3px, 1px) rotate(0deg); }
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
-
-        @keyframes admin-glow {
-            0% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
-            33% { color: #00ff00; text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
-            66% { color: #0000ff; text-shadow: 0 0 10px #0000ff, 0 0 20px #0000ff; }
-            100% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
-        }
-        .hacker-name { animation: admin-glow 1.5s infinite linear; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
 
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -61,7 +53,7 @@
         }
 
         .d-icon { 
-            width: 85px; text-align: center; cursor: pointer; color: #fff; 
+            width: 85px; text-align: center; cursor: pointer; color: var(--user-txt); 
             text-shadow: 1px 1px 2px #000; font-size: 11px; user-select: none;
         }
         .d-icon img { width: 32px; height: 32px; margin-bottom: 5px; pointer-events: none; }
@@ -69,6 +61,7 @@
         .window { 
             position: absolute; min-width: 250px; display: none; 
             box-shadow: 4px 4px 10px rgba(0,0,0,0.4); z-index: 100;
+            color: #000; /* Standard Win98 window text */
         }
         .title-bar { cursor: move; }
 
@@ -76,36 +69,45 @@
             position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
             background: var(--taskbar-bg); border-top: 2px solid #fff;
             display: flex; align-items: center; padding: 2px 5px; z-index: 90000;
+            color: #000;
         }
         #clock { margin-left: auto; border: 2px inset #fff; padding: 2px 10px; font-size: 12px; }
 
-        #chat-content { height: 320px; background: #fff; color: #000; border: 2px inset; overflow-y: auto; padding: 8px; }
+        #chat-content { height: 300px; background: #fff; color: #000; border: 2px inset; overflow-y: auto; padding: 8px; }
         .chat-msg { margin-bottom: 12px; font-size: 12px; display: flex; align-items: flex-start; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        .avatar-sm { width: 32px; height: 32px; border: 1px solid #000; object-fit: cover; flex-shrink: 0; }
         
-        .chat-img { max-width: 200px; max-height: 200px; display: block; border: 2px solid #000; margin-top: 5px; cursor: pointer; }
-        .chat-link { color: #0000ee; text-decoration: underline; cursor: pointer; }
+        .avatar-box { 
+            width: 40px; height: 40px; border: 1px solid #000; background: #eee; 
+            flex-shrink: 0; overflow: hidden; display: flex; align-items: center; 
+            justify-content: center; font-size: 24px;
+        }
+        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .chat-img { max-width: 240px; border: 2px solid #000; margin-top: 5px; display: block; }
 
         #start-menu {
             position: fixed; bottom: 35px; left: 0; width: 220px;
             background: var(--taskbar-bg); border: 2px solid #fff;
             z-index: 99999; display: none; box-shadow: 2px -2px 10px rgba(0,0,0,0.5);
+            color: #000;
         }
         .start-item { padding: 8px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 12px; }
         .start-item:hover { background: var(--win-title); color: #fff; }
 
-        .admin-btn { width: 100%; margin-bottom: 4px; text-align: left; font-size: 11px; }
-
-        #camera-preview { width: 100%; background: #000; transform: scaleX(-1); margin-bottom: 5px; }
-
-        #mine-grid { display: grid; grid-template-columns: repeat(10, 22px); background: #bdbdbd; border: 2px inset; }
-        .mine-cell { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; background: #c0c0c0; border: 2px outset #fff; user-select: none; }
+        .color-preview {
+            width: 20px; height: 20px; border: 1px solid #000; display: inline-block; vertical-align: middle;
+        }
     </style>
 </head>
 <body onclick="window.closeStart()">
 
 <div id="loading-screen">
-    <div id="bios-text"></div>
+    <div id="bios-text">
+        KHEM.OS BIOS v13.0 (C) 2024 KHEM CORP<br>
+        CPU: PENTIUM OVERDRIVE 133MHz<br>
+        RAM: 64MB EDO RAM... OK<br>
+        NETWORK: ETHERNET 10BASE-T... INITIALIZING...
+    </div>
     <div style="width: 240px; height: 12px; border: 1px solid #555; margin-top: 20px; padding: 1px;">
         <div id="boot-progress" style="height: 100%; background: var(--toxic-green); width: 0%;"></div>
     </div>
@@ -113,128 +115,101 @@
 
 <div class="desktop-area">
     <div class="d-icon" onclick="window.openWin('chat-win')"><img src="https://win98icons.alexmeub.com/icons/png/msie2-2.png"><div>Network_Chat</div></div>
-    <div class="d-icon" onclick="window.openWin('cam-win')"><img src="https://win98icons.alexmeub.com/icons/png/camera-0.png"><div>Media_Hub</div></div>
-    <div class="d-icon" onclick="window.openWin('casino-win')"><img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png"><div>Casino</div></div>
-    <div class="d-icon" onclick="window.openWin('mine-win')"><img src="https://win98icons.alexmeub.com/icons/png/minesweeper-0.png"><div>Mines</div></div>
+    <div class="d-icon" onclick="window.openWin('photo-stream-win')"><img src="https://win98icons.alexmeub.com/icons/png/camera-0.png"><div>PhotoStream</div></div>
+    <div class="d-icon" onclick="window.openWin('profile-win')"><img src="https://win98icons.alexmeub.com/icons/png/users-1.png"><div>Customization</div></div>
 </div>
 
-<!-- PROFILE SETUP -->
-<div class="window" id="profile-win" style="width: 320px; top: 20%; left: 30%; z-index: 100000;">
-    <div class="title-bar"><div class="title-bar-text">Identity Setup</div></div>
+<!-- Photo Stream -->
+<div class="window" id="photo-stream-win" style="width: 320px; top: 100px; left: 600px;">
+    <div class="title-bar"><div class="title-bar-text">Photo Stream v1.0</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('photo-stream-win')"></button></div></div>
+    <div class="window-body">
+        <div style="width: 100%; background: #000; aspect-ratio: 4/3; margin-bottom: 10px; border: 2px inset;">
+            <video id="live-video" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+        </div>
+        <div class="field-row" style="justify-content: center; gap: 10px;">
+            <button onclick="window.startLiveStream()">Connect Camera</button>
+            <button onclick="window.broadcastPhoto()" style="font-weight:bold;">BROADCAST</button>
+        </div>
+        <canvas id="cam-canvas" style="display:none;"></canvas>
+    </div>
+</div>
+
+<!-- Chat Window -->
+<div class="window" id="chat-win" style="width: 500px; top: 40px; left: 100px;">
+    <div class="title-bar"><div class="title-bar-text">KHEM_NET Chat Room</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
+    <div class="window-body">
+        <div style="margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="background:#000; color:var(--gold); padding:2px 10px; border:2px inset; font-weight:bold;">BAL: $<span class="my-balance-display">0</span></div>
+            <button onclick="window.triggerChatPhoto()">[ ATTACH PHOTO ]</button>
+        </div>
+        <div id="chat-content"></div>
+        <div class="field-row" style="margin-top: 10px;">
+            <input id="chat-input" type="text" placeholder="Type message..." style="flex:1" onkeydown="if(event.key==='Enter') window.sendChat()">
+            <button onclick="window.sendChat()">Send</button>
+        </div>
+        <input type="file" id="chat-photo-input" hidden accept="image/*" onchange="window.handleChatPhoto(event)">
+    </div>
+</div>
+
+<!-- Profile / Customization Setup -->
+<div class="window" id="profile-win" style="width: 440px; top: 15%; left: 25%; z-index: 100001;">
+    <div class="title-bar"><div class="title-bar-text">OS Appearance & Identity</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('profile-win')"></button></div></div>
     <div class="window-body">
         <div style="display: flex; gap: 15px;">
             <div style="text-align:center">
-                <img id="pfp-preview" style="width:64px; height:64px; border:2px inset; object-fit:cover;" src="https://win98icons.alexmeub.com/icons/png/user_world-0.png">
-                <button onclick="document.getElementById('pfp-input').click()" style="width:100%; margin-top:5px;">Photo</button>
-                <input type="file" id="pfp-input" accept="image/*" style="display:none" onchange="window.handlePfp(this)">
+                <div id="pfp-preview" class="avatar-box" style="width:90px; height:90px; border:2px inset;">👤</div>
+                <div style="margin-top:5px; display:grid; grid-template-columns: 1fr; gap:2px;">
+                    <button onclick="window.triggerPfpUpload()">Upload</button>
+                    <button onclick="window.cycleAvatar()">Icon</button>
+                </div>
+                <input type="file" id="pfp-upload-input" hidden accept="image/*" onchange="window.handlePfpUpload(event)">
             </div>
             <div style="flex:1">
                 <div class="field-row-stacked">
                     <label>Network Handle:</label>
                     <input id="prof-user" type="text" maxlength="15" style="width:100%">
                 </div>
-                <div class="field-row-stacked" style="margin-top:8px">
-                    <label>Handle Color:</label>
-                    <input id="prof-color" type="color" value="#39ff14" style="width:100%">
+                <div class="field-row-stacked" style="margin-top:10px;">
+                    <label>Name Display Color (Chat):</label>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <input type="color" id="name-color-input" style="width:40px; height:25px;">
+                        <span style="font-size:10px;">(Your handle color)</span>
+                    </div>
+                </div>
+                <hr>
+                <div class="field-row-stacked" style="margin-top:10px;">
+                    <label>OS Background Color:</label>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <input type="color" id="theme-color-input" style="width:40px; height:25px;">
+                        <span style="font-size:10px;">(Desktop Wallpaper)</span>
+                    </div>
+                </div>
+                <div class="field-row-stacked" style="margin-top:10px;">
+                    <label>Desktop Text Color:</label>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <input type="color" id="text-color-input" style="width:40px; height:25px;">
+                        <span style="font-size:10px;">(Icon Labels)</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <button style="width: 100%; margin-top: 15px; font-weight: bold; height: 30px;" onclick="window.saveProfile()">SYNC & CONNECT</button>
-    </div>
-</div>
-
-<!-- CHAT WINDOW -->
-<div class="window" id="chat-win" style="width: 500px; top: 40px; left: 100px;">
-    <div class="title-bar"><div class="title-bar-text">KHEM_NET Chat Room</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
-    <div class="window-body">
-        <div id="chat-content"></div>
-        <div class="field-row" style="margin-top: 10px;">
-            <button onclick="document.getElementById('chat-img-input').click()" title="Send Image">🖼️</button>
-            <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="window.sendImage(this)">
-            <input id="chat-input" type="text" placeholder="Type message or paste link..." style="flex:1" onkeydown="if(event.key==='Enter') window.sendChat()">
-            <button onclick="window.sendChat()">Send</button>
+        <hr>
+        <div style="text-align:right;">
+            <button style="width: 120px; font-weight: bold;" onclick="window.saveProfile()">APPLY & SYNC</button>
         </div>
     </div>
 </div>
 
-<!-- CAMERA / MEDIA HUB -->
-<div class="window" id="cam-win" style="width: 320px; top: 100px; left: 650px;">
-    <div class="title-bar"><div class="title-bar-text">Media_Hub (Camera)</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('cam-win')"></button></div></div>
-    <div class="window-body">
-        <video id="camera-preview" autoplay playsinline></video>
-        <div style="display:flex; gap:5px;">
-            <button onclick="window.startCam()" style="flex:1">Start Cam</button>
-            <button id="snap-btn" onclick="window.takeSnap()" style="flex:1" disabled>Capture & Send</button>
-        </div>
-        <canvas id="cam-canvas" style="display:none"></canvas>
-    </div>
-</div>
-
-<!-- CASINO -->
-<div class="window" id="casino-win" style="width: 220px; top: 350px; left: 600px;">
-    <div class="title-bar"><div class="title-bar-text">KHEM_Casino</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('casino-win')"></button></div></div>
-    <div class="window-body">
-        <div style="background:#000; color:gold; text-align:center; padding:10px; border:2px inset; font-family:monospace;">$<span id="balance">5000</span></div>
-        <div id="reel" style="font-size: 24px; text-align: center; border: 2px inset; background: #fff; margin-bottom: 10px; padding: 5px;">🍒 🔔 💎</div>
-        <button onclick="window.spin()" style="width: 100%;">SPIN ($50)</button>
-    </div>
-</div>
-
-<!-- MINESWEEPER -->
-<div class="window" id="mine-win" style="top: 150px; left: 850px;">
-    <div class="title-bar"><div class="title-bar-text">Mines</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('mine-win')"></button></div></div>
-    <div class="window-body">
-        <div id="mine-grid"></div>
-        <button onclick="window.initMines()" style="width: 100%; margin-top: 5px;">Reset</button>
-    </div>
-</div>
-
-<!-- GOD MODE CONSOLE -->
-<div class="window" id="admin-win" style="width: 320px; top: 30%; left: 40%;">
-    <div class="title-bar" style="background: linear-gradient(90deg, #ff0000, #000)!important;">
-        <div class="title-bar-text" style="color:#fff">GOD_MODE_v11.0</div>
-        <div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('admin-win')"></button></div>
-    </div>
-    <div class="window-body" style="background:#111; color:lime; font-family:monospace; padding: 10px;">
-        <p style="margin:0 0 10px 0; border-bottom:1px solid lime; font-size:10px;">ULTIMATE_TROLLING_SUITE</p>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-            <button class="admin-btn" onclick="window.troll('shake')">EARTHQUAKE</button>
-            <button class="admin-btn" onclick="window.troll('invert')">INVERT</button>
-            <button class="admin-btn" onclick="window.troll('flip')">FLIP_UI</button>
-            <button class="admin-btn" onclick="window.troll('grayscale')">GRAYSCALE</button>
-            <button class="admin-btn" onclick="window.troll('noise')">BEEP_GLOBAL</button>
-            <button class="admin-btn" onclick="window.troll('error')">FAKE_CRASH</button>
-        </div>
-        <button class="admin-btn" onclick="window.nukeChat()" style="color:red; background:#333; margin-top:10px;">WIPE_CHAT_HISTORY</button>
-        
-        <hr style="border:0; border-top:1px dashed lime; margin:10px 0;">
-        <label style="font-size:10px;">Global System Alert:</label>
-        <div class="field-row">
-            <input type="text" id="admin-msg" style="background:#000; color:lime; border:1px solid lime; flex:1">
-            <button onclick="window.troll('broadcast')">SEND</button>
-        </div>
-    </div>
-</div>
-
-<!-- ALERT POPUP -->
+<!-- System Modals -->
 <div class="window" id="error-win" style="width: 300px; top: 45%; left: 45%; z-index: 999999;">
-    <div class="title-bar"><div class="title-bar-text" id="alert-title">System Alert</div></div>
-    <div class="window-body">
-        <div style="display:flex; gap:10px; align-items:center;">
-            <img id="alert-icon" src="https://win98icons.alexmeub.com/icons/png/msg_warning-0.png">
-            <p id="error-text">Unknown system interrupt.</p>
-        </div>
-        <div style="text-align:center; margin-top:10px;">
-            <button onclick="window.closeWin('error-win')" style="width:60px">OK</button>
-        </div>
-    </div>
+    <div class="title-bar"><div class="title-bar-text">System Alert</div></div>
+    <div class="window-body"><div style="display:flex; gap:10px;"><img src="https://win98icons.alexmeub.com/icons/png/msg_warning-0.png"><p id="error-text"></p></div><div style="text-align:center; margin-top:10px;"><button onclick="window.closeWin('error-win')" style="width:60px">OK</button></div></div>
 </div>
 
-<!-- START MENU -->
 <div id="start-menu">
-    <div style="background: var(--win-title); color: #fff; padding: 5px 10px; font-weight: bold;">KHEM.OS v11.0</div>
-    <div class="start-item" onclick="window.authAdmin()"><img src="https://win98icons.alexmeub.com/icons/png/key_win-4.png" width="16"> God Mode Access</div>
-    <div class="start-item" onclick="window.openWin('profile-win')"><img src="https://win98icons.alexmeub.com/icons/png/user_world-0.png" width="16"> Identity Setup</div>
+    <div style="background: var(--win-title); color: #fff; padding: 5px 10px; font-weight: bold;">KHEM.OS v13.0</div>
+    <div class="start-item" onclick="window.openWin('profile-win')"><img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png" width="16"> Personalization</div>
+    <div class="start-item" onclick="window.openWin('photo-stream-win')"><img src="https://win98icons.alexmeub.com/icons/png/camera-0.png" width="16"> Photo Stream</div>
     <hr>
     <div class="start-item" onclick="location.reload()"><img src="https://win98icons.alexmeub.com/icons/png/shut_down_normal-4.png" width="16"> Restart</div>
 </div>
@@ -245,263 +220,248 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const config = {
-        apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
-        authDomain: "chatroon-4ded8.firebaseapp.com",
-        databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
-        projectId: "chatroon-4ded8",
+    const firebaseConfig = JSON.parse(__firebase_config);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'khem-os-v13-finance';
+
+    let currentUser = null;
+    let userData = {
+        name: localStorage.getItem('khem_name') || "User_" + Math.floor(Math.random()*999),
+        bal: parseInt(localStorage.getItem('khem_bal')) || 1000,
+        avatar: "👤",
+        customPfp: null,
+        themeColor: localStorage.getItem('khem_theme') || "#008080",
+        textColor: localStorage.getItem('khem_txt') || "#ffffff",
+        nameColor: localStorage.getItem('khem_name_color') || "#000000"
     };
 
-    const app = initializeApp(config);
-    const db = getDatabase(app);
-    const dbPath = "khem_os_v11_media";
-    
-    let myData = {
-        name: localStorage.getItem('khem_name') || "",
-        color: localStorage.getItem('khem_color') || "#39ff14",
-        pfp: localStorage.getItem('khem_pfp') || "https://win98icons.alexmeub.com/icons/png/user_world-0.png",
-        bal: parseInt(localStorage.getItem('khem_bal')) || 5000,
-        isAdmin: false
+    const avatars = ["👤", "🥷", "🧙", "🧟", "🤖", "🦊", "🐲", "🤡"];
+    let avatarIndex = 0;
+    let streamMedia = null;
+
+    // --- UI HELPERS ---
+    window.openWin = id => { document.getElementById(id).style.display = 'block'; document.getElementById(id).style.zIndex = Date.now(); };
+    window.closeWin = id => { document.getElementById(id).style.display = 'none'; };
+    window.toggleStart = e => { e.stopPropagation(); const m = document.getElementById('start-menu'); m.style.display = m.style.display==='block' ? 'none' : 'block'; };
+    window.closeStart = () => { document.getElementById('start-menu').style.display = 'none'; };
+
+    const showMsg = (txt) => {
+        document.getElementById('error-text').innerText = txt;
+        window.openWin('error-win');
     };
 
-    // --- WINDOW DRAGGING ---
-    let draggedWin = null;
-    let offset = { x: 0, y: 0 };
-    document.addEventListener('mousedown', e => {
-        const bar = e.target.closest('.title-bar');
-        if (bar) {
-            draggedWin = bar.parentElement;
-            draggedWin.style.zIndex = Date.now();
-            offset.x = e.clientX - draggedWin.offsetLeft;
-            offset.y = e.clientY - draggedWin.offsetTop;
-        }
-    });
-    document.addEventListener('mousemove', e => {
-        if (!draggedWin) return;
-        draggedWin.style.left = (e.clientX - offset.x) + "px";
-        draggedWin.style.top = (e.clientY - offset.y) + "px";
-    });
-    document.addEventListener('mouseup', () => draggedWin = null);
+    const applyTheme = () => {
+        document.documentElement.style.setProperty('--user-theme', userData.themeColor);
+        document.documentElement.style.setProperty('--user-txt', userData.textColor);
+        document.getElementById('theme-color-input').value = userData.themeColor;
+        document.getElementById('text-color-input').value = userData.textColor;
+        document.getElementById('name-color-input').value = userData.nameColor;
+        document.getElementById('prof-user').value = userData.name;
+        
+        localStorage.setItem('khem_theme', userData.themeColor);
+        localStorage.setItem('khem_txt', userData.textColor);
+        localStorage.setItem('khem_name', userData.name);
+        localStorage.setItem('khem_name_color', userData.nameColor);
+    };
 
-    // --- BOOT SEQUENCE ---
-    const bios = document.getElementById('bios-text');
-    const lines = ["MODEM INITIALIZED", "PROTOCOL: KHEM_MEDIA_V11", "CAMERA DRIVERS: LOADED", "GOD_MODE: READY"];
-    let l = 0;
-    const bootInt = setInterval(() => {
-        if (l < lines.length) {
-            if (bios) bios.innerHTML += `<div style="margin-bottom:4px; color:lime;">> ${lines[l++]}</div>`;
-            const progress = document.getElementById('boot-progress');
-            if (progress) progress.style.width = (l * 25) + "%";
+    const updateUI = () => {
+        applyTheme();
+        document.querySelectorAll('.my-balance-display').forEach(el => el.innerText = userData.bal.toLocaleString());
+        const preview = document.getElementById('pfp-preview');
+        if(userData.customPfp) {
+            preview.innerHTML = `<img src="${userData.customPfp}">`;
         } else {
-            clearInterval(bootInt);
-            const loading = document.getElementById('loading-screen');
-            if (loading) loading.style.display = 'none';
-            if (!myData.name) window.openWin('profile-win');
-            else {
-                document.getElementById('prof-user').value = myData.name;
-                document.getElementById('prof-color').value = myData.color;
-                document.getElementById('pfp-preview').src = myData.pfp;
-                document.getElementById('balance').innerText = myData.bal;
-                window.openWin('chat-win');
-            }
+            preview.innerText = userData.avatar;
         }
-    }, 300);
-
-    // --- HELPER: Link Parser ---
-    function parseLinks(text) {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.replace(urlRegex, url => `<a href="${url}" target="_blank" class="chat-link">${url}</a>`);
-    }
-
-    // --- CORE LOGIC ---
-    window.openWin = id => {
-        const win = document.getElementById(id);
-        if (win) win.style.display = 'block';
-    };
-    window.closeWin = id => {
-        const win = document.getElementById(id);
-        if (win) win.style.display = 'none';
-    };
-    window.toggleStart = e => { 
-        e.stopPropagation(); 
-        const m = document.getElementById('start-menu'); 
-        if (m) m.style.display = m.style.display==='block' ? 'none' : 'block'; 
-    };
-    window.closeStart = () => {
-        const m = document.getElementById('start-menu');
-        if (m) m.style.display = 'none';
     };
 
-    window.handlePfp = input => {
+    // --- PHOTO STREAM ---
+    window.startLiveStream = async () => {
+        try {
+            streamMedia = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('live-video').srcObject = streamMedia;
+        } catch (e) { showMsg("Camera error."); }
+    };
+
+    window.broadcastPhoto = async () => {
+        const video = document.getElementById('live-video');
+        const canvas = document.getElementById('cam-canvas');
+        if(!video.srcObject) return showMsg("Connect camera first!");
+        canvas.width = 400; canvas.height = 300;
+        canvas.getContext('2d').drawImage(video, 0, 0, 400, 300);
+        await window.sendChat(null, canvas.toDataURL('image/jpeg', 0.6));
+        showMsg("Broadcasted!");
+    };
+
+    // --- CUSTOMIZATION ---
+    window.triggerPfpUpload = () => document.getElementById('pfp-upload-input').click();
+    window.handlePfpUpload = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
         const reader = new FileReader();
-        reader.onload = e => { myData.pfp = e.target.result; document.getElementById('pfp-preview').src = e.target.result; };
-        reader.readAsDataURL(input.files[0]);
-    };
-
-    window.saveProfile = () => {
-        const n = document.getElementById('prof-user').value;
-        if (!n) return;
-        myData.name = n;
-        myData.color = document.getElementById('prof-color').value;
-        localStorage.setItem('khem_name', n);
-        localStorage.setItem('khem_color', myData.color);
-        localStorage.setItem('khem_pfp', myData.pfp);
-        window.closeWin('profile-win');
-        window.openWin('chat-win');
-    };
-
-    window.authAdmin = () => { if(prompt("ACCESS CODE:") === "PineAppleToasterOven") { myData.isAdmin = true; window.openWin('admin-win'); } };
-
-    // --- CHAT & MEDIA ---
-    window.sendChat = () => {
-        const inp = document.getElementById('chat-input');
-        if (!inp.value) return;
-        push(ref(db, `${dbPath}/chat`), { 
-            name: myData.name, msg: inp.value, color: myData.color, pfp: myData.pfp, isAdmin: myData.isAdmin, type: 'text' 
-        });
-        inp.value = "";
-    };
-
-    window.sendImage = (input) => {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            push(ref(db, `${dbPath}/chat`), { 
-                name: myData.name, image: e.target.result, color: myData.color, pfp: myData.pfp, isAdmin: myData.isAdmin, type: 'image' 
-            });
+        reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 128;
+                canvas.getContext('2d').drawImage(img, 0, 0, 128, 128);
+                userData.customPfp = canvas.toDataURL('image/jpeg', 0.7);
+                updateUI();
+            };
+            img.src = ev.target.result;
         };
         reader.readAsDataURL(file);
     };
 
-    onValue(ref(db, `${dbPath}/chat`), snap => {
-        const box = document.getElementById('chat-content');
-        if (!box) return;
-        box.innerHTML = "";
-        snap.forEach(m => {
-            const d = m.val();
-            const nameHtml = d.isAdmin ? `<b class="hacker-name">${d.name}</b>` : `<b style="color:${d.color}">${d.name}</b>`;
-            let content = "";
-            if(d.type === 'image') {
-                content = `<img src="${d.image}" class="chat-img" onclick="window.open('${d.image}')">`;
-            } else {
-                content = `<div>${parseLinks(d.msg || "")}</div>`;
-            }
-            box.innerHTML += `<div class="chat-msg"><img src="${d.pfp}" class="avatar-sm"><div>${nameHtml}<br>${content}</div></div>`;
-        });
-        box.scrollTop = box.scrollHeight;
-    });
-
-    window.nukeChat = () => remove(ref(db, `${dbPath}/chat`));
-
-    // --- CAMERA ---
-    let stream;
-    window.startCam = async () => {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('camera-preview').srcObject = stream;
-            document.getElementById('snap-btn').disabled = false;
-        } catch(e) { alert("Camera access denied."); }
+    window.cycleAvatar = () => {
+        userData.customPfp = null;
+        avatarIndex = (avatarIndex + 1) % avatars.length;
+        userData.avatar = avatars[avatarIndex];
+        updateUI();
     };
 
-    window.takeSnap = () => {
-        const video = document.getElementById('camera-preview');
-        const canvas = document.getElementById('cam-canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1); 
-        ctx.drawImage(video, 0, 0);
-        const data = canvas.toDataURL('image/jpeg', 0.7);
-        push(ref(db, `${dbPath}/chat`), { 
-            name: myData.name, image: data, color: myData.color, pfp: myData.pfp, isAdmin: myData.isAdmin, type: 'image' 
-        });
-    };
-
-    // --- TROLLING ENGINE ---
-    window.troll = (type) => {
-        const val = document.getElementById('admin-msg').value;
-        push(ref(db, `${dbPath}/trolls`), { type, val, time: Date.now() });
-        if(type==='broadcast') document.getElementById('admin-msg').value = "";
-    };
-
-    onChildAdded(ref(db, `${dbPath}/trolls`), snap => {
-        const t = snap.val();
-        if (t.time < Date.now() - 5000) return;
-
-        if (t.type === 'shake') {
-            document.body.classList.add('shaking');
-            setTimeout(() => document.body.classList.remove('shaking'), 3000);
-        } else if (t.type === 'invert') {
-            document.body.classList.toggle('inverted');
-        } else if (t.type === 'flip') {
-            document.body.classList.toggle('flipped');
-        } else if (t.type === 'grayscale') {
-            document.body.classList.toggle('grayscale');
-        } else if (t.type === 'noise') {
-            const a = new (window.AudioContext || window.webkitAudioContext)();
-            const o = a.createOscillator();
-            const g = a.createGain();
-            o.connect(g); g.connect(a.destination);
-            o.type = 'square'; o.frequency.setValueAtTime(440, a.currentTime);
-            o.start(); o.stop(a.currentTime + 0.3);
-        } else if (t.type === 'error') {
-            document.getElementById('alert-title').innerText = "Kernel Panic";
-            document.getElementById('alert-icon').src = "https://win98icons.alexmeub.com/icons/png/msg_error-0.png";
-            document.getElementById('error-text').innerText = "The remote administrator has disconnected your session. System crash imminent.";
-            window.openWin('error-win');
-        } else if (t.type === 'broadcast') {
-            document.getElementById('alert-title').innerText = "ADMIN_BROADCAST";
-            document.getElementById('alert-icon').src = "https://win98icons.alexmeub.com/icons/png/msg_information-0.png";
-            document.getElementById('error-text').innerText = t.val;
-            window.openWin('error-win');
+    window.saveProfile = async () => {
+        userData.name = document.getElementById('prof-user').value || "Anonymous";
+        userData.themeColor = document.getElementById('theme-color-input').value;
+        userData.textColor = document.getElementById('text-color-input').value;
+        userData.nameColor = document.getElementById('name-color-input').value;
+        
+        if(currentUser) {
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid), { 
+                ...userData, 
+                uid: currentUser.uid 
+            });
         }
-    });
-
-    // --- GAMES & CLOCK ---
-    window.spin = () => {
-        if (myData.bal < 50) return alert("You're broke!");
-        myData.bal -= 50;
-        const items = ['🍒','💎','7️⃣','🔔','🍀','💀'];
-        const r = [items[Math.floor(Math.random()*6)], items[Math.floor(Math.random()*6)], items[Math.floor(Math.random()*6)]];
-        document.getElementById('reel').innerText = r.join(" ");
-        if (r[0] === r[1] && r[1] === r[2]) { myData.bal += 3000; alert("BIG WIN!"); }
-        document.getElementById('balance').innerText = myData.bal;
-        localStorage.setItem('khem_bal', myData.bal);
+        updateUI();
+        window.closeWin('profile-win');
     };
 
-    window.initMines = () => {
-        const g = document.getElementById('mine-grid'); 
-        if (!g) return;
-        g.innerHTML = "";
-        for(let i=0; i<100; i++){
-            const c = document.createElement('div'); c.className='mine-cell';
-            c.onclick = () => { 
-                const bomb = Math.random() < 0.15;
-                c.innerText = bomb ? '💀' : '1'; 
-                c.style.background = bomb ? 'red' : '#eee';
-                c.style.border = '1px solid #777';
-                if(bomb) { 
-                    document.body.classList.add('shaking'); 
-                    setTimeout(()=>document.body.classList.remove('shaking'), 500); 
-                }
+    // --- CHAT LOGIC ---
+    window.triggerChatPhoto = () => document.getElementById('chat-photo-input').click();
+    window.handleChatPhoto = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                const scale = 400 / img.width;
+                canvas.width = 400; canvas.height = img.height * scale;
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                await window.sendChat(null, canvas.toDataURL('image/jpeg', 0.6));
             };
-            g.appendChild(c);
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const setupListeners = () => {
+        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'chat'), (snap) => {
+            const box = document.getElementById('chat-content');
+            box.innerHTML = "";
+            const msgs = [];
+            snap.forEach(d => msgs.push(d.data()));
+            msgs.sort((a,b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
+
+            msgs.slice(-50).forEach(m => {
+                const pfp = m.customPfp ? `<img src="${m.customPfp}">` : (m.avatar || '👤');
+                const content = m.img ? `<img class="chat-img" src="${m.img}" onclick="window.open(this.src)">` : `<div>${m.msg || ''}</div>`;
+                const userStyle = `color: ${m.nameColor || '#000000'}`;
+                
+                box.innerHTML += `
+                    <div class="chat-msg">
+                        <div class="avatar-box">${pfp}</div>
+                        <div style="flex:1">
+                            <b style="${userStyle}">${m.name}</b>
+                            ${content}
+                        </div>
+                    </div>
+                `;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+    };
+
+    window.sendChat = async (text = null, photo = null) => {
+        const inp = document.getElementById('chat-input');
+        const msgText = text || inp.value;
+        if(!msgText && !photo) return;
+        if(!currentUser) return;
+
+        try {
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chat'), {
+                uid: currentUser.uid,
+                name: userData.name,
+                avatar: userData.avatar,
+                customPfp: userData.customPfp,
+                nameColor: userData.nameColor,
+                msg: msgText || "",
+                img: photo || null,
+                timestamp: Timestamp.now()
+            });
+            inp.value = "";
+        } catch (e) { console.error(e); }
+    };
+
+    // --- AUTH ---
+    const initApp = async () => {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+            await signInAnonymously(auth);
         }
     };
-    
-    // Ensure domestic initialization
-    window.initMines();
-    
-    setInterval(() => {
-        const d = new Date();
-        const clk = document.getElementById('clock');
-        if (clk) clk.innerText = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0');
-    }, 1000);
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) return;
+        currentUser = user;
+        const ref = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
+        const snap = await getDoc(ref);
+        if(snap.exists()) {
+            userData = { ...userData, ...snap.data() };
+        } else {
+            await setDoc(ref, { ...userData, uid: user.uid });
+        }
+        updateUI();
+        setupListeners();
+    });
+
+    // Boot Loader
+    window.onload = () => {
+        const p = document.getElementById('boot-progress');
+        let val = 0;
+        const int = setInterval(() => {
+            val += 5;
+            p.style.width = val + "%";
+            if(val >= 100) {
+                clearInterval(int);
+                document.getElementById('loading-screen').style.display = 'none';
+                initApp();
+            }
+        }, 25);
+        
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('clock').innerText = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0');
+        }, 1000);
+    };
+
+    // Dragging
+    let drag = null, ox = 0, oy = 0;
+    document.addEventListener('mousedown', e => {
+        const bar = e.target.closest('.title-bar');
+        if(bar) { drag = bar.parentElement; ox = e.clientX - drag.offsetLeft; oy = e.clientY - drag.offsetTop; drag.style.zIndex = Date.now(); }
+    });
+    document.addEventListener('mousemove', e => { if(drag) { drag.style.left = (e.clientX - ox) + 'px'; drag.style.top = (e.clientY - oy) + 'px'; }});
+    document.addEventListener('mouseup', () => drag = null);
+
 </script>
 </body>
 </html>
