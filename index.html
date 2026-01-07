@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHEM.OS_ULTIMATE_v10.0</title>
+    <title>KHEM.OS_ULTIMATE_v10.1</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <style>
         :root {
@@ -24,7 +24,6 @@
             height: 100vh; width: 100vw;
             font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
             overflow: hidden;
-            transition: background 0.3s ease;
         }
 
         /* Rainbow Hacker Name Animation */
@@ -40,7 +39,6 @@
             animation: rainbow 2s infinite linear;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
         .hacker-tag {
             background: #000;
@@ -51,20 +49,11 @@
             margin-right: 5px;
         }
 
-        .dark-mode-win .title-bar { background: #333 !important; }
-
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; color: var(--bios-text); z-index: 30000;
-            display: flex; flex-direction: column; justify-content: flex-start; 
-            align-items: flex-start; padding: 40px; font-family: 'Courier New', monospace;
-            overflow: hidden;
+            display: flex; flex-direction: column; padding: 40px; font-family: 'Courier New', monospace;
         }
-        .bios-line { margin-bottom: 5px; font-size: 14px; opacity: 0; animation: fadeIn 0.1s forwards; }
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        .loading-bar-container { width: 300px; height: 14px; border: 1px solid #555; margin-top: 20px; padding: 2px; }
-        .loading-fill { height: 100%; background: var(--toxic-green); width: 0%; box-shadow: 0 0 8px var(--toxic-green); }
 
         #taskbar {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
@@ -73,18 +62,8 @@
             z-index: 10000; box-sizing: border-box;
         }
         #start-btn { font-weight: bold; display: flex; align-items: center; gap: 5px; height: 28px; }
-        .taskbar-divider { width: 2px; height: 20px; background: #808080; border-right: 1px solid #fff; margin: 0 5px; }
         #clock { margin-left: auto; border: 2px inset #fff; padding: 2px 10px; font-size: 12px; background: #c0c0c0; }
         
-        #start-menu {
-            position: fixed; bottom: 35px; left: 0; width: 220px;
-            background: var(--taskbar-bg); border: 2px solid #fff;
-            border-bottom: none; z-index: 9999; display: none;
-            box-shadow: 2px -2px 10px rgba(0,0,0,0.5);
-        }
-        .start-item { padding: 8px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 12px; }
-        .start-item:hover { background: var(--win-title); color: #fff; }
-
         .window { position: absolute; z-index: 10; box-shadow: 4px 4px 15px rgba(0,0,0,0.3); display: none; min-width: 200px; }
         .title-bar { cursor: grab; user-select: none; }
         
@@ -95,28 +74,31 @@
         .chat-msg { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; font-size: 12px; }
         .avatar-sm { width: 32px; height: 32px; border: 1px solid #000; background: #eee; object-fit: cover; }
         #chat-content { height: 280px; background: #fff; color: #000; border: 2px inset; overflow-y: scroll; padding: 8px; }
-        .chat-img { max-width: 200px; max-height: 150px; border: 2px solid #c0c0c0; margin-top: 5px; cursor: pointer; }
         
         /* Cam Grid Styles */
         #cam-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 10px;
             padding: 10px;
-            background: #000;
-            min-height: 200px;
+            background: #444;
+            min-height: 250px;
+            max-height: 400px;
             border: 2px inset;
+            overflow-y: auto;
         }
         .cam-container {
             border: 2px solid #c0c0c0;
-            background: #222;
+            background: #000;
             position: relative;
             aspect-ratio: 4/3;
+            overflow: hidden;
         }
         .cam-container video {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            background: #222;
         }
         .cam-label {
             position: absolute;
@@ -128,155 +110,85 @@
             font-size: 10px;
             padding: 2px;
             text-align: center;
+            z-index: 5;
         }
-
-        .pfp-preview { width: 64px; height: 64px; border: 2px inset #fff; background: #eee; object-fit: cover; margin-bottom: 10px; }
-
-        .mine-cell { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 14px; user-select: none; box-sizing: border-box; }
-        .cell-hidden { background: #c0c0c0; border: 2px outset #fff; }
-        .cell-revealed { background: #bdbdbd; border: 1px solid #7b7b7b; }
-        
-        #casino-reel { height: 40px; background: #222; border: 2px inset; display: flex; align-items: center; justify-content: center; font-size: 24px; letter-spacing: 5px; margin-bottom: 10px; }
+        .local-tag {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--toxic-green);
+            color: black;
+            font-size: 8px;
+            padding: 1px 3px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body onclick="window.hideStart()">
 
-<div id="login-lock" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:25000; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center;">
-    <img src="https://win98icons.alexmeub.com/icons/png/key_win-4.png" width="64" style="margin-bottom:20px;">
-    <h2 style="font-family:monospace; color:var(--toxic-green);">KHEM.OS_SECURITY_GATE</h2>
-    <p>Identity verification required to establish network handshake.</p>
-</div>
-
 <div id="loading-screen">
-    <div id="bios-log"></div>
-    <div class="loading-bar-container" id="load-bar-ui" style="display:none;">
-        <div id="loading-fill" class="loading-fill"></div>
-    </div>
+    <div id="bios-log">KHEM_CAM Handshake Engine...<br>Initializing WebRTC Protocols...</div>
 </div>
 
 <div class="desktop-area" id="desktop">
     <div class="d-icon" onclick="window.openWin('chat-win')"><img src="https://win98icons.alexmeub.com/icons/png/msie2-2.png"><div>Network_Chat</div></div>
     <div class="d-icon" onclick="window.openWin('cam-win')"><img src="https://win98icons.alexmeub.com/icons/png/camera-0.png"><div>KHEM_Cam</div></div>
-    <div class="d-icon" onclick="window.openWin('paint-win')"><img src="https://win98icons.alexmeub.com/icons/png/paint_old-0.png"><div>Shared_Paint</div></div>
-    <div class="d-icon" onclick="window.openWin('gamble-win')"><img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png"><div>KHEM_Casino</div></div>
-    <div class="d-icon" onclick="window.openWin('mine-win')"><img src="https://win98icons.alexmeub.com/icons/png/minesweeper-0.png"><div>Minesweeper</div></div>
-    <div class="d-icon" onclick="window.openWin('display-win')"><img src="https://win98icons.alexmeub.com/icons/png/display_properties-0.png"><div>Display</div></div>
-</div>
-
-<div id="start-menu">
-    <div style="background: var(--win-title); color: #fff; padding: 5px 10px; font-weight: bold; font-size: 14px;">KHEM.OS v10.0</div>
-    <div class="start-item" onclick="window.authAdmin()"><img src="https://win98icons.alexmeub.com/icons/png/key_win-4.png" width="16"> Admin Console</div>
-    <div class="start-item" onclick="window.openWin('profile-win')"><img src="https://win98icons.alexmeub.com/icons/png/user_world-0.png" width="16"> Edit Profile</div>
-    <div class="start-item" onclick="window.openWin('display-win')"><img src="https://win98icons.alexmeub.com/icons/png/display_properties-0.png" width="16"> Settings</div>
-    <hr>
-    <div class="start-item" onclick="location.reload()"><img src="https://win98icons.alexmeub.com/icons/png/shut_down_normal-4.png" width="16"> Shutdown</div>
+    <div class="d-icon" onclick="window.openWin('profile-win')"><img src="https://win98icons.alexmeub.com/icons/png/user_world-0.png"><div>Identity</div></div>
 </div>
 
 <div id="taskbar">
     <button id="start-btn" onclick="window.toggleStart(event)"><img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" width="16"> Start</button>
-    <div class="taskbar-divider"></div>
     <div id="clock">00:00</div>
 </div>
 
 <!-- PROFILE SETUP -->
-<div class="window" id="profile-win" style="width: 320px; top: 25%; left: 35%; z-index: 26000;">
+<div class="window" id="profile-win" style="width: 320px; top: 100px; left: 100px;">
     <div class="title-bar"><div class="title-bar-text">Identity Setup</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('profile-win')"></button></div></div>
     <div class="window-body">
-        <div style="display: flex; gap: 15px;">
-            <div style="text-align:center">
-                <img id="pfp-preview" class="pfp-preview" src="https://win98icons.alexmeub.com/icons/png/user_world-0.png">
-                <button onclick="document.getElementById('pfp-input').click()" style="width:100%">Photo</button>
-                <input type="file" id="pfp-input" accept="image/*" style="display:none">
-            </div>
-            <div style="flex:1">
-                <div class="field-row-stacked">
-                    <label>Network Handle:</label>
-                    <input id="prof-user" type="text" maxlength="15" style="width:100%">
-                </div>
-                <div class="field-row-stacked" style="margin-top:8px">
-                    <label>Handle Color:</label>
-                    <input id="prof-color" type="color" value="#39ff14" style="width:100%">
-                </div>
-            </div>
+        <div class="field-row-stacked">
+            <label>Username:</label>
+            <input id="prof-user" type="text" maxlength="15" value="GuestUser">
         </div>
-        <button style="width: 100%; margin-top: 15px; font-weight: bold; height: 30px;" onclick="window.saveProfile()">SYNC & CONNECT</button>
+        <button style="width: 100%; margin-top: 15px;" onclick="window.saveProfile()">Save Identity</button>
     </div>
 </div>
 
 <!-- WEBCAM WINDOW -->
-<div class="window" id="cam-win" style="width: 500px; top: 50px; left: 300px;">
-    <div class="title-bar"><div class="title-bar-text">KHEM_CAM_NETWORK</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('cam-win')"></button></div></div>
+<div class="window" id="cam-win" style="width: 600px; top: 50px; left: 200px;">
+    <div class="title-bar"><div class="title-bar-text">KHEM_CAM_MULTIUSER</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('cam-win')"></button></div></div>
     <div class="window-body">
+        <div class="field-row" style="margin-bottom:10px;">
+            <label>Select Camera:</label>
+            <select id="cam-selector" style="flex:1"></select>
+            <button id="cam-toggle-btn" onclick="window.toggleWebcam()">GO LIVE</button>
+        </div>
+        
         <div id="cam-grid">
             <!-- Cam slots will appear here -->
         </div>
-        <div class="status-bar" style="margin-top:5px; padding:2px;">
-            <p id="cam-status" class="status-bar-field">Webcam: Offline</p>
-            <button onclick="window.toggleWebcam()" style="margin-left:auto;">GO LIVE</button>
+
+        <div class="status-bar" style="margin-top:10px;">
+            <p class="status-bar-field">Status: <span id="cam-status">Offline</span></p>
+            <p class="status-bar-field">Network: Peer-to-Peer Visual Only</p>
         </div>
-        <p style="font-size:9px; color:#555; margin-top:5px;">Note: Visuals only. Use Chat for communication.</p>
     </div>
 </div>
 
 <!-- CHAT WINDOW -->
-<div class="window" id="chat-win" style="width: 400px; top: 100px; left: 50px;">
-    <div class="title-bar"><div class="title-bar-text">KHEM_NET_v10.0</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
+<div class="window" id="chat-win" style="width: 350px; top: 150px; left: 50px;">
+    <div class="title-bar"><div class="title-bar-text">Chat_Network</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
     <div class="window-body">
         <div id="chat-content"></div>
         <div class="field-row" style="margin-top:5px">
-            <input id="chat-input" type="text" style="flex:1" placeholder="Enter message..." onkeydown="if(event.key==='Enter') window.sendChat()">
-            <button onclick="document.getElementById('chat-img-input').click()">📎</button>
-            <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="window.handleChatImage(this)">
-            <button onclick="window.sendChat()">SEND</button>
+            <input id="chat-input" type="text" style="flex:1" placeholder="Type here..." onkeydown="if(event.key==='Enter') window.sendChat()">
+            <button onclick="window.sendChat()">Send</button>
         </div>
     </div>
 </div>
-
-<!-- MINESWEEPER -->
-<div class="window" id="mine-win" style="width: 260px; top: 100px; left: 800px;">
-    <div class="title-bar"><div class="title-bar-text">Minesweeper</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('mine-win')"></button></div></div>
-    <div class="window-body">
-        <div style="background:#c0c0c0; border:2px inset; padding:5px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
-            <div id="mine-count" style="background:black; color:red; font-family:monospace; padding:2px 5px; font-size:20px;">010</div>
-            <button onclick="window.initMines()" style="padding:2px; font-size:16px;">🙂</button>
-            <div id="mine-timer" style="background:black; color:red; font-family:monospace; padding:2px 5px; font-size:20px;">000</div>
-        </div>
-        <div id="mine-grid" style="display:grid; grid-template-columns:repeat(10,22px); gap:0; background:#808080; border:2px inset; margin: 0 auto;"></div>
-    </div>
-</div>
-
-<!-- ADMIN CONSOLE -->
-<div class="window" id="admin-win" style="width: 320px; top: 30%; left: 40%;">
-    <div class="title-bar" style="background: #000 !important; border-bottom: 1px solid var(--toxic-green) !important;">
-        <div class="title-bar-text" style="color: var(--toxic-green);">[ROOT]@KHEM_KERNEL_ACCESS</div>
-        <div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('admin-win')"></button></div>
-    </div>
-    <div class="window-body" style="background: #000; color: var(--toxic-green); font-family: 'Courier New', monospace;">
-        <p style="text-shadow: 0 0 5px var(--toxic-green);">-- ADMIN PRIVILEGES ACTIVE --</p>
-        <button onclick="window.adminGlobalMute()" style="width:100%; background:#222; color:red;">[ ERASE_LOGS ]</button>
-        <button onclick="window.adminFlash()" style="width:100%; margin-top:5px; background:#222; color:var(--toxic-green);">[ SYSTEM_GLITCH_ALERT ]</button>
-        <button onclick="window.adminNukePaint()" style="width:100%; margin-top:5px; background:#222; color:yellow;">[ PURGE_CANVAS ]</button>
-        <p style="font-size: 10px; margin-top: 10px; opacity: 0.7;">Status: Monitoring Network...</p>
-    </div>
-</div>
-
-<!-- CASINO & UTILS -->
-<div class="window" id="gamble-win" style="width: 250px; top: 350px; left: 600px;">
-    <div class="title-bar"><div class="title-bar-text">Casino</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('gamble-win')"></button></div></div>
-    <div class="window-body">
-        <div style="background:#000; color:gold; text-align:center; padding:10px; margin-bottom:10px; border:2px inset; font-family:monospace; font-size:18px;">$<span id="gamble-bal">0</span></div>
-        <div id="casino-reel">🍒 🔔 💎</div>
-        <input id="bet-amt" type="number" value="50" min="1" style="width:100%">
-        <button onclick="window.playCasino()" style="width:100%; margin-top:10px;">SPIN</button>
-    </div>
-</div>
-
-<div class="window" id="paint-win" style="width: 420px; top: 400px; left: 50px;"><div class="title-bar"><div class="title-bar-text">Shared_Paint</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('paint-win')"></button></div></div><div class="window-body"><canvas id="paint-canvas" width="400" height="300" style="background:#fff; border:2px inset; cursor:crosshair;"></canvas><div class="field-row" style="margin-top:5px"><input type="color" id="brush-color" value="#000000"><button onclick="window.clearPaint()">Local Clear</button></div></div></div>
-<div class="window" id="display-win" style="width: 300px; top: 200px; left: 600px;"><div class="title-bar"><div class="title-bar-text">Display</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('display-win')"></button></div></div><div class="window-body"><fieldset><legend>Background</legend><select style="width: 100%;" onchange="window.updateBg(this.value)"><option value="classic">Teal</option><option value="cyber">Cyber</option><option value="xp">XP Bliss</option><option value="matrix">Matrix</option></select></fieldset><fieldset style="margin-top:10px"><div class="field-row"><input type="checkbox" id="dark-mode-chk" onchange="window.toggleDarkMode(this.checked)"><label for="dark-mode-chk">Dark Mode</label></div></fieldset></div></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove, serverTimestamp, query, limitToLast, onChildAdded, onDisconnect, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove, set, onDisconnect, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
@@ -290,316 +202,219 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dbVer = "v10_webcam_remaster"; 
-    const myUid = localStorage.getItem('khem_uid_v10') || 'U-' + Math.random().toString(36).substr(2, 6);
-    localStorage.setItem('khem_uid_v10', myUid);
+    const dbPath = "khem_cam_v10_1";
+    const myUid = localStorage.getItem('khem_uid') || 'U-' + Math.random().toString(36).substr(2, 6);
+    localStorage.setItem('khem_uid', myUid);
 
-    const PW = "PineAppleToasterOven";
-    let isAdmin = false;
+    let myUsername = localStorage.getItem('khem_name') || "Hacker_" + myUid.slice(-3);
     let localStream = null;
+    let peers = {}; // Store RTCPeerConnection objects
+    const iceConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
-    let myData = { 
-        username: localStorage.getItem('khem_name') || null, 
-        color: localStorage.getItem('khem_color') || '#39ff14', 
-        pfp: localStorage.getItem('khem_pfp') || 'https://win98icons.alexmeub.com/icons/png/user_world-0.png',
-        bal: parseInt(localStorage.getItem('khem_bal')) || 5000,
-        bg: localStorage.getItem('khem_bg') || 'classic',
-        dark: localStorage.getItem('khem_dark') === 'true'
-    };
-
-    // --- BOOT ---
-    const biosLog = document.getElementById('bios-log');
-    const lines = ["KHEMBIOS v5.0", "CPU: KHEM-ULTRA @ 1.2GHz", "RAM: 1024MB OK", "WEBCAM_DRIVER: LOADED", "VERSION: 10.0 (STABLE)", "Mounting Local Drives...", "Starting KHEM.OS..."];
-    let lIdx = 0;
-    function runBios() {
-        if(lIdx < lines.length) {
-            const d = document.createElement('div'); d.className='bios-line'; d.innerText=lines[lIdx++]; biosLog.appendChild(d);
-            setTimeout(runBios, 200);
-        } else {
-            document.getElementById('load-bar-ui').style.display='block';
-            let p = 0;
-            const iv = setInterval(() => {
-                p += 5; document.getElementById('loading-fill').style.width = p + "%";
-                if(p >= 100) { clearInterval(iv); bootSystem(); }
-            }, 30);
-        }
-    }
-    runBios();
-
-    function bootSystem() {
+    // --- SYSTEM INIT ---
+    setTimeout(() => {
         document.getElementById('loading-screen').style.display = 'none';
-        window.updateBg(myData.bg);
-        window.toggleDarkMode(myData.dark);
-        document.getElementById('gamble-bal').innerText = myData.bal;
-        
-        if(!myData.username) {
-            document.getElementById('login-lock').style.display = 'flex';
-            window.openWin('profile-win');
-        } else {
-            document.getElementById('prof-user').value = myData.username;
-            document.getElementById('pfp-preview').src = myData.pfp;
-            window.openWin('chat-win');
-        }
+        window.openWin('cam-win');
+        initCameraList();
+    }, 1500);
+
+    window.toggleStart = (e) => { e.stopPropagation(); };
+    window.openWin = (id) => { document.getElementById(id).style.display = 'block'; };
+    window.closeWin = (id) => { document.getElementById(id).style.display = 'none'; };
+    window.saveProfile = () => {
+        myUsername = document.getElementById('prof-user').value;
+        localStorage.setItem('khem_name', myUsername);
+        window.closeWin('profile-win');
+    };
+
+    // --- WEBCAM LOGIC ---
+    async function initCameraList() {
+        const selector = document.getElementById('cam-selector');
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+            selector.innerHTML = videoDevices.map(d => `<option value="${d.deviceId}">${d.label || 'Camera '+ (selector.length+1)}</option>`).join('');
+        } catch (e) { console.error("Could not list cams", e); }
     }
 
-    // --- CORE ---
-    window.toggleStart = (e) => { e.stopPropagation(); const m = document.getElementById('start-menu'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; };
-    window.hideStart = () => document.getElementById('start-menu').style.display = 'none';
-    window.openWin = (id) => { const w = document.getElementById(id); w.style.display = 'block'; w.style.zIndex = Math.floor(Date.now()/1000); };
-    window.closeWin = (id) => {
-        document.getElementById(id).style.display = 'none';
-        if(id === 'cam-win' && localStream) window.toggleWebcam(); // Turn off cam when window closed
-    };
-    
-    document.addEventListener('mousedown', (e) => {
-        const win = e.target.closest('.window');
-        if (win && e.target.closest('.title-bar') && e.target.tagName !== 'BUTTON') {
-            win.style.zIndex = Math.floor(Date.now()/1000);
-            let ox = e.clientX - win.offsetLeft, oy = e.clientY - win.offsetTop;
-            const move = (me) => { win.style.left = (me.clientX - ox)+'px'; win.style.top = (me.clientY - oy)+'px'; };
-            const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
-            document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
-        }
-    });
-
-    // --- PROFILE ---
-    document.getElementById('pfp-input').onchange = (e) => {
-        const f = e.target.files[0]; if(!f) return;
-        const r = new FileReader(); r.onload = (ev) => { myData.pfp = ev.target.result; document.getElementById('pfp-preview').src = ev.target.result; };
-        r.readAsDataURL(f);
-    };
-    window.saveProfile = () => {
-        const u = document.getElementById('prof-user').value.trim();
-        if(!u) return alert("System Handle Required.");
-        myData.username = u;
-        myData.color = document.getElementById('prof-color').value;
-        localStorage.setItem('khem_name', u);
-        localStorage.setItem('khem_color', myData.color);
-        localStorage.setItem('khem_pfp', myData.pfp);
-        document.getElementById('login-lock').style.display = 'none';
-        window.closeWin('profile-win');
-        window.openWin('chat-win');
-    };
-
-    // --- WEBCAM SYSTEM (KHEM_CAM) ---
-    // Using a simplified peer discovery: we announce ourselves in the database.
-    // Real peer-to-peer usually requires TURN/STUN, here we simulate multi-view via simple registration
     window.toggleWebcam = async () => {
-        const statusEl = document.getElementById('cam-status');
-        if(localStream) {
-            localStream.getTracks().forEach(t => t.stop());
-            localStream = null;
-            statusEl.innerText = "Webcam: Offline";
-            remove(ref(db, `${dbVer}/presence/${myUid}`));
+        if (localStream) {
+            stopWebcam();
             return;
         }
 
+        const deviceId = document.getElementById('cam-selector').value;
         try {
-            // Audio: false per request
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-            statusEl.innerText = "Webcam: ONLINE";
-            
-            // Register presence
-            const presenceRef = ref(db, `${dbVer}/presence/${myUid}`);
-            set(presenceRef, {
-                uid: myUid,
-                name: myData.username,
-                isAdmin: isAdmin,
-                active: true
+            localStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { deviceId: deviceId ? { exact: deviceId } : undefined }, 
+                audio: false 
             });
-            onDisconnect(presenceRef).remove();
+            
+            document.getElementById('cam-status').innerText = "LIVE";
+            document.getElementById('cam-toggle-btn').innerText = "STOP CAM";
+            
+            // 1. Create Local Video UI
+            createVideoElement(myUid, myUsername, localStream, true);
 
-            // Note: In a production WebRTC app, we'd exchange SDP offers here.
-            // For this simulation/demo, we'll show how the grid populates.
-            updateCamGrid();
+            // 2. Announce presence to others
+            const myPresenceRef = ref(db, `${dbPath}/presence/${myUid}`);
+            set(myPresenceRef, { name: myUsername, active: true });
+            onDisconnect(myPresenceRef).remove();
+
+            // 3. Watch for others and start connections
+            setupSignaling();
+
         } catch (err) {
-            alert("CAMERA_ERROR: Could not access hardware.");
-            console.error(err);
+            alert("CAM_ERROR: Ensure you allowed camera permissions.");
         }
     };
 
-    function updateCamGrid() {
-        const grid = document.getElementById('cam-grid');
-        onValue(ref(db, `${dbVer}/presence`), (snapshot) => {
-            grid.innerHTML = "";
-            snapshot.forEach(child => {
-                const user = child.val();
-                const container = document.createElement('div');
-                container.className = 'cam-container';
-                
-                const video = document.createElement('video');
-                video.autoplay = true;
-                video.playsinline = true;
+    function stopWebcam() {
+        if (localStream) {
+            localStream.getTracks().forEach(t => t.stop());
+            localStream = null;
+        }
+        remove(ref(db, `${dbPath}/presence/${myUid}`));
+        remove(ref(db, `${dbPath}/signals/${myUid}`)); // Clear my signaling mailbox
+        document.getElementById('cam-status').innerText = "Offline";
+        document.getElementById('cam-toggle-btn').innerText = "GO LIVE";
+        document.getElementById('cam-grid').innerHTML = "";
+        
+        // Close all peer connections
+        Object.values(peers).forEach(pc => pc.close());
+        peers = {};
+    }
 
-                if(user.uid === myUid && localStream) {
-                    video.srcObject = localStream;
-                    video.muted = true;
-                } else {
-                    // Placeholder for peer stream (In full WebRTC, this would be the remote stream)
-                    video.poster = "https://win98icons.alexmeub.com/icons/png/camera-0.png";
-                    video.style.opacity = "0.5";
+    // --- WEBRTC SIGNALING ---
+    function setupSignaling() {
+        // A: Listen for others already online
+        onValue(ref(db, `${dbPath}/presence`), (snap) => {
+            const users = snap.val() || {};
+            Object.keys(users).forEach(uid => {
+                if (uid !== myUid && !peers[uid]) {
+                    initPeerConnection(uid, users[uid].name, true); // We are the "caller"
                 }
-
-                const label = document.createElement('div');
-                label.className = 'cam-label';
-                label.innerText = user.isAdmin ? `[HACKER] ${user.name}` : user.name;
-                if(user.isAdmin) label.style.color = "var(--toxic-green)";
-
-                container.appendChild(video);
-                container.appendChild(label);
-                grid.appendChild(container);
             });
+        });
+
+        // B: Listen for incoming signals (Offers, Answers, ICE) in my mailbox
+        onChildAdded(ref(db, `${dbPath}/signals/${myUid}`), async (snap) => {
+            const { from, signal } = snap.val();
+            let pc = peers[from];
+            
+            if (!pc) {
+                // Find user's name from presence
+                onValue(ref(db, `${dbPath}/presence/${from}`), s => {
+                    const name = s.val() ? s.val().name : "Peer";
+                    pc = initPeerConnection(from, name, false);
+                    handleSignal(pc, from, signal);
+                }, { onlyOnce: true });
+            } else {
+                handleSignal(pc, from, signal);
+            }
+            remove(snap.ref); // Delete signal after processing
         });
     }
 
-    // --- CHAT + PHOTOS ---
-    window.handleChatImage = (input) => {
-        const file = input.files[0]; if(!file) return;
-        if(file.size > 800000) return alert("File too large for network buffer.");
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            push(ref(db, `${dbVer}/messages`), { 
-                uid: myUid, img: e.target.result, name: myData.username, 
-                pfp: myData.pfp, color: myData.color, isAdmin: isAdmin 
-            });
-            input.value = "";
+    async function handleSignal(pc, from, signal) {
+        if (signal.sdp) {
+            await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+            if (signal.sdp.type === 'offer') {
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                sendSignal(from, { sdp: pc.localDescription });
+            }
+        } else if (signal.ice) {
+            await pc.addIceCandidate(new RTCIceCandidate(signal.ice));
+        }
+    }
+
+    function initPeerConnection(targetUid, targetName, isCaller) {
+        const pc = new RTCPeerConnection(iceConfig);
+        peers[targetUid] = pc;
+
+        // Add local tracks to peer connection
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+        // When remote stream arrives
+        pc.ontrack = (event) => {
+            createVideoElement(targetUid, targetName, event.streams[0], false);
         };
-        reader.readAsDataURL(file);
-    };
 
+        // When local ICE candidates are found
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                sendSignal(targetUid, { ice: event.candidate });
+            }
+        };
+
+        // If we are the caller, send offer
+        if (isCaller) {
+            pc.onnegotiationneeded = async () => {
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                sendSignal(targetUid, { sdp: pc.localDescription });
+            };
+        }
+
+        return pc;
+    }
+
+    function sendSignal(to, signal) {
+        push(ref(db, `${dbPath}/signals/${to}`), { from: myUid, signal });
+    }
+
+    function createVideoElement(uid, name, stream, isLocal) {
+        let container = document.getElementById(`cam-${uid}`);
+        if (!container) {
+            container = document.createElement('div');
+            container.id = `cam-${uid}`;
+            container.className = 'cam-container';
+            const label = document.createElement('div');
+            label.className = 'cam-label';
+            label.innerText = name;
+            container.appendChild(label);
+            if (isLocal) {
+                const tag = document.createElement('span');
+                tag.className = 'local-tag';
+                tag.innerText = "YOU";
+                container.appendChild(tag);
+            }
+            document.getElementById('cam-grid').appendChild(container);
+        }
+
+        let video = container.querySelector('video');
+        if (!video) {
+            video = document.createElement('video');
+            video.autoplay = true;
+            video.playsinline = true;
+            if (isLocal) video.muted = true;
+            container.appendChild(video);
+        }
+        video.srcObject = stream;
+    }
+
+    // --- CHAT SYSTEM ---
     window.sendChat = () => {
-        const i = document.getElementById('chat-input'); if(!i.value) return;
-        push(ref(db, `${dbVer}/messages`), { 
-            uid: myUid, text: i.value, name: myData.username, 
-            pfp: myData.pfp, color: myData.color, isAdmin: isAdmin 
-        });
-        i.value = "";
+        const input = document.getElementById('chat-input');
+        if (!input.value) return;
+        push(ref(db, `${dbPath}/chat`), { name: myUsername, text: input.value, uid: myUid });
+        input.value = "";
     };
 
-    onValue(query(ref(db, `${dbVer}/messages`), limitToLast(40)), s => {
-        const c = document.getElementById('chat-content'); c.innerHTML = "";
-        s.forEach(snap => {
-            const m = snap.val();
-            let nameHTML = `<b style="color:${m.color}">${m.name}</b>`;
-            if(m.isAdmin) nameHTML = `<span class="hacker-tag">HACKER</span><b class="hacker-name">${m.name}</b>`;
-            const content = m.img ? `<img src="${m.img}" class="chat-img" onclick="window.open('${m.img}')">` : m.text;
-            c.innerHTML += `<div class="chat-msg"><img src="${m.pfp}" class="avatar-sm"><div>${nameHTML}<br>${content}</div></div>`;
+    onValue(ref(db, `${dbPath}/chat`), snap => {
+        const cont = document.getElementById('chat-content');
+        cont.innerHTML = "";
+        snap.forEach(msg => {
+            const data = msg.val();
+            cont.innerHTML += `<div class="chat-msg"><b>${data.name}:</b> ${data.text}</div>`;
         });
-        c.scrollTop = c.scrollHeight;
+        cont.scrollTop = cont.scrollHeight;
     });
 
-    // --- MINESWEEPER ---
-    let mineBoard = [];
-    window.initMines = () => {
-        const g = document.getElementById('mine-grid'); g.innerHTML = "";
-        mineBoard = Array(100).fill(0);
-        let mines = 0;
-        while(mines < 12) {
-            let r = Math.floor(Math.random()*100);
-            if(mineBoard[r] !== 'M') { mineBoard[r] = 'M'; mines++; }
-        }
-        for(let i=0; i<100; i++) {
-            const c = document.createElement('div'); c.className = 'mine-cell cell-hidden';
-            c.dataset.idx = i;
-            c.onmousedown = (e) => {
-                if(e.button === 2) { 
-                    c.innerText = c.innerText === '🚩' ? '' : '🚩';
-                    e.preventDefault();
-                } else if(c.innerText !== '🚩') revealMine(i, c);
-            };
-            c.oncontextmenu = (e) => e.preventDefault();
-            g.appendChild(c);
-        }
-    };
-    function revealMine(i, el) {
-        if(el.classList.contains('cell-revealed')) return;
-        if(mineBoard[i] === 'M') {
-            document.querySelectorAll('.mine-cell').forEach((cell, idx) => {
-                if(mineBoard[idx] === 'M') { cell.innerText = '💣'; cell.style.background = 'red'; }
-            });
-            alert("SYSTEM_FAILURE: Mine Detonated."); window.initMines();
-        } else {
-            let count = 0;
-            const x = i % 10, y = Math.floor(i / 10);
-            for(let dx=-1; dx<=1; dx++) {
-                for(let dy=-1; dy<=1; dy++) {
-                    let nx = x + dx, ny = y + dy;
-                    if(nx>=0 && nx<10 && ny>=0 && ny<10 && mineBoard[ny * 10 + nx] === 'M') count++;
-                }
-            }
-            el.className = 'mine-cell cell-revealed';
-            el.innerText = count > 0 ? count : "";
-            el.style.color = ['','blue','green','red','darkblue','brown','cyan','black','grey'][count];
-            if(count === 0) {
-                for(let dx=-1; dx<=1; dx++) {
-                    for(let dy=-1; dy<=1; dy++) {
-                        let nx = x + dx, ny = y + dy;
-                        if(nx>=0 && nx<10 && ny>=0 && ny<10) {
-                            const nextIdx = ny * 10 + nx;
-                            const nextEl = document.getElementById('mine-grid').children[nextIdx];
-                            if(nextEl && !nextEl.classList.contains('cell-revealed')) revealMine(nextIdx, nextEl);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    window.initMines();
-
-    // --- CASINO ---
-    window.playCasino = () => {
-        const bet = parseInt(document.getElementById('bet-amt').value);
-        if(bet > myData.bal) return alert("Balance Low.");
-        myData.bal -= bet; document.getElementById('gamble-bal').innerText = myData.bal;
-        const reels = ['🍒', '🔔', '💎', '🍀', '7️⃣'];
-        const display = document.getElementById('casino-reel');
-        display.innerText = "⏳ ⏳ ⏳";
-        setTimeout(() => {
-            const r1 = reels[Math.floor(Math.random()*reels.length)], r2 = reels[Math.floor(Math.random()*reels.length)], r3 = reels[Math.floor(Math.random()*reels.length)];
-            display.innerText = `${r1} ${r2} ${r3}`;
-            if(r1 === r2 && r2 === r3) { myData.bal += bet * 25; alert("JACKPOT!"); }
-            else if(r1 === r2 || r2 === r3 || r1 === r3) myData.bal += bet * 2;
-            document.getElementById('gamble-bal').innerText = myData.bal;
-            localStorage.setItem('khem_bal', myData.bal);
-        }, 600);
-    };
-
-    // --- PAINT ---
-    const pCanvas = document.getElementById('paint-canvas'), pCtx = pCanvas.getContext('2d');
-    pCanvas.onmousedown = (e) => {
-        const r = pCanvas.getBoundingClientRect();
-        const paint = (me) => {
-            const x = me.clientX-r.left, y = me.clientY-r.top, color = document.getElementById('brush-color').value;
-            pCtx.fillStyle = color; pCtx.fillRect(x,y,4,4);
-            push(ref(db, `${dbVer}/paint`), { x, y, c: color });
-        };
-        const stop = () => { document.removeEventListener('mousemove', paint); document.removeEventListener('mouseup', stop); };
-        document.addEventListener('mousemove', paint); document.addEventListener('mouseup', stop);
-        paint(e);
-    };
-    onChildAdded(ref(db, `${dbVer}/paint`), s => { const p = s.val(); pCtx.fillStyle = p.c; pCtx.fillRect(p.x, p.y, 4, 4); });
-    window.clearPaint = () => pCtx.clearRect(0,0,400,300);
-
-    // --- UTILS ---
-    window.updateBg = (v) => {
-        myData.bg = v; localStorage.setItem('khem_bg', v);
-        const m = { classic:'none', cyber:'url("https://images.wallpaperscraft.com/image/single/night_city_street_futuristic_117075_1600x900.jpg")', xp:'url("https://wallpaperaccess.com/full/2454508.jpg")', matrix:'url("https://media.giphy.com/media/o0vwzuFwCGAFO/giphy.gif")' };
-        document.body.style.backgroundImage = m[v];
-    };
-    window.toggleDarkMode = (on) => { myData.dark = on; localStorage.setItem('khem_dark', on); document.querySelectorAll('.window').forEach(w => on ? w.classList.add('dark-mode-win') : w.classList.remove('dark-mode-win')); };
-    setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), 1000);
-
-    // --- ADMIN ---
-    window.authAdmin = () => {
-        if(prompt("ENTER_ROOT_KEY:") === PW) {
-            isAdmin = true; window.openWin('admin-win');
-            alert("ADMIN_ACCESS: Rainbow identity active.");
-        } else alert("INVALID_KEY.");
-    };
-    window.adminGlobalMute = () => remove(ref(db, `${dbVer}/messages`));
-    window.adminNukePaint = () => remove(ref(db, `${dbVer}/paint`));
-    window.adminFlash = () => push(ref(db, `${dbVer}/alerts`), { t: "⚠️ SYSTEM BREACH DETECTED ⚠️", ts: serverTimestamp() });
-    onChildAdded(ref(db, `${dbVer}/alerts`), s => { if(Date.now()-s.val().ts < 5000) alert(s.val().t); });
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    }, 1000);
 
 </script>
 </body>
