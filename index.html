@@ -3,234 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>~*~ Retro_Chat_Gold_Edition_v3.2 ~*~</title>
+    <title>~*~ KHEM.OS_v6.1_PATCHED ~*~</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <style>
         :root {
-            --bg-color: #008080;
+            --bg-color: #1a1a1a;
+            --toxic-green: #39ff14;
+            --toxic-red: #ff3300;
+            --shake-x: 0px;
+            --shake-y: 0px;
         }
 
         body {
             background-color: var(--bg-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            margin: 0; padding: 0;
+            height: 100vh; width: 100vw;
             font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
             overflow: hidden;
-            transition: background-color 0.5s ease;
+            background-image: radial-gradient(circle, #222 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #ccc;
+            transform: translate(var(--shake-x), var(--shake-y));
         }
 
-        .main-window {
-            width: 550px;
-            max-width: 95vw;
+        /* --- CRT OVERLAY --- */
+        #scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 2px 100%;
+            z-index: 9998; pointer-events: none;
         }
 
-        #chat-content {
-            height: 280px;
-            background: #fff;
-            border: 2px inset #d2d2d2;
-            padding: 10px;
-            overflow-y: scroll;
-            margin-bottom: 10px;
+        /* --- WINDOWS --- */
+        .window { 
+            position: absolute; 
+            z-index: 10; 
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.5); 
+            min-width: 200px;
         }
+        .title-bar { cursor: grab; user-select: none; }
+        .title-bar:active { cursor: grabbing; }
 
-        .message-entry {
-            margin-bottom: 8px;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            animation: fadeIn 0.2s ease-in;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Profile Picture Styling */
-        .pfp-icon {
-            width: 24px;
-            height: 24px;
-            border: 1px solid #000;
-            background: #ccc;
-            object-fit: cover;
-            flex-shrink: 0;
-            image-rendering: pixelated;
-        }
-
-        .user-tag {
-            font-weight: bold;
-            text-shadow: 0.5px 0.5px 0px #ccc;
-        }
-
-        .timestamp {
-            font-size: 10px;
-            color: #888;
-        }
-
-        .admin-controls {
-            margin-left: auto;
-            color: red;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 10px;
-            border: 1px solid red;
-            padding: 0 4px;
-            background: #eee;
-        }
-
-        .admin-controls:hover {
-            background: red;
-            color: white;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 5px;
-        }
-
-        #message-input {
-            flex-grow: 1;
-        }
-
-        .welcome-banner {
-            background: silver;
-            border: 1px solid gray;
-            padding: 2px;
-            margin-bottom: 10px;
+        /* --- CHAT --- */
+        .main-window { width: 500px; top: 50px; left: 50px; }
+        #chat-content { 
+            height: 280px; 
+            background: #050505; 
+            color: var(--toxic-green); 
+            border: 2px inset #444; 
+            overflow-y: scroll; 
+            padding: 10px; 
+            font-family: monospace; 
             font-size: 12px;
         }
+        .message-entry { margin-bottom: 8px; border-bottom: 1px solid #1a1a1a; padding-bottom: 4px; }
+        .pfp-icon { width: 28px; height: 28px; border: 1px solid var(--toxic-green); vertical-align: middle; margin-right: 5px; }
 
-        .admin-badge {
-            background: #ff0000;
-            color: white;
-            padding: 0 3px;
-            font-size: 10px;
-            margin-right: 5px;
-            font-weight: bold;
-            border: 1px solid #000;
+        /* --- MP3 PLAYER --- */
+        #mp3-window { width: 350px; top: 100px; left: 600px; display: none; }
+        .visualizer-container {
+            height: 100px; background: #000; border: 2px inset #555;
+            margin-bottom: 10px; display: flex; align-items: flex-end;
+            gap: 2px; padding: 0 5px; overflow: hidden;
+        }
+        .bar { background: var(--toxic-green); flex-grow: 1; min-width: 2px; }
+
+        /* --- DESKTOP --- */
+        .desktop-icons { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 25px; align-items: center; }
+        .icon { text-align: center; width: 80px; cursor: pointer; color: white; text-shadow: 2px 2px 2px black; font-size: 11px; user-select: none; }
+        .icon img { width: 32px; filter: drop-shadow(0 0 5px var(--toxic-green)); pointer-events: none; }
+        .icon:hover { background: rgba(57, 255, 20, 0.2); outline: 1px dotted var(--toxic-green); }
+
+        /* --- SPLASH --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: var(--toxic-red); font-family: monospace;
         }
 
-        /* ADMIN PANEL STYLING */
-        #admin-panel-ui {
-            display: none;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 250px;
-            z-index: 1000;
-        }
+        /* --- ADMIN PANEL --- */
+        #admin-panel { width: 320px; top: 400px; left: 50px; display: none; }
 
-        .smiley-btn {
-            min-width: 25px !important;
-            height: 20px !important;
-            padding: 0 !important;
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            margin-right: 8px;
-            cursor: pointer !important;
-            vertical-align: middle;
-        }
-
-        .color-preview {
-            width: 20px;
-            height: 20px;
-            display: inline-block;
-            border: 1px solid #000;
-            vertical-align: middle;
-            background-size: cover;
-        }
-
-        .admin-section {
-            border-top: 1px solid #888;
-            margin-top: 10px;
-            padding-top: 5px;
-        }
-
-        /* Hidden file input */
-        #pfp-upload {
-            display: none;
+        .glitch-active { animation: glitch 0.15s infinite; }
+        @keyframes glitch {
+            0% { transform: translate(2px, -2px); filter: hue-rotate(90deg); }
+            50% { transform: translate(-2px, 2px); filter: invert(1); }
+            100% { transform: translate(1px, 1px); filter: hue-rotate(0deg); }
         }
     </style>
 </head>
 <body>
 
-<div class="window main-window">
+<div id="scanlines"></div>
+
+<!-- SPLASH SCREEN -->
+<div id="splash-screen">
+    <div style="font-size: 50px; margin-bottom: 15px;">☣</div>
+    <h1 style="letter-spacing: 8px;">KHEM.OS</h1>
+    <div id="load-text">MOUNTING SYSTEM...</div>
+    <div style="width: 200px; height: 8px; border: 1px solid var(--toxic-red); margin-top: 15px; background: #111;">
+        <div id="load-bar" style="height: 100%; background: var(--toxic-red); width: 0%;"></div>
+    </div>
+</div>
+
+<!-- CHAT WINDOW -->
+<div class="window main-window" id="chat-win">
     <div class="title-bar">
-        <div class="title-bar-text">
-            <button class="smiley-btn" id="admin-trigger" title="Root Access">☺</button>
-            Chat_Client_v3.2_GOLD.exe
-        </div>
+        <div class="title-bar-text">KHEM_TERMINAL_v6.1</div>
         <div class="title-bar-controls">
             <button aria-label="Minimize"></button>
             <button aria-label="Close"></button>
         </div>
     </div>
     <div class="window-body">
-        <marquee id="marquee-text" class="welcome-banner" scrollamount="3">
-            Welcome to the Chatroom! | Upload your Profile Picture from your PC! | User ID visibility enabled.
-        </marquee>
-
-        <div id="chat-content">
-            <div class="message-entry"><i>*** Syncing with RetroNet... ***</i></div>
+        <div id="chat-content"></div>
+        <div class="field-row" style="margin-top: 10px;">
+            <input id="msg-input" type="text" style="flex-grow: 1; background: #000; color: var(--toxic-green); border: 1px solid #444;" placeholder="Input data...">
+            <button id="send-btn">SEND</button>
         </div>
-
-        <div class="controls-pane">
-            <div class="field-row-stacked">
-                <label for="username">Your Identity:</label>
-                <div style="display: flex; gap: 5px; align-items: center;">
-                    <input type="file" id="pfp-upload" accept="image/*">
-                    <img id="my-pfp-preview" class="pfp-icon" src="https://via.placeholder.com/24?text=?" alt="PFP" style="cursor: pointer;" title="Click icon to upload a picture from your device">
-                    <input id="username" type="text" readonly style="width: 130px; background: #eee;" />
-                    <div id="my-color-preview" class="color-preview" title="Your Color"></div>
-                    <button id="change-name-btn">Update Profile</button>
-                </div>
-                <p style="font-size: 10px; margin: 2px 0;">Device ID: <span id="user-id-display">...</span></p>
-            </div>
-
-            <div class="input-group">
-                <input id="message-input" type="text" placeholder="Send a broadcast..." maxlength="200" />
-                <button id="send-button">Send</button>
-            </div>
+        <div class="field-row" style="font-size: 10px; justify-content: space-between;">
+            <span id="uid-display">IDENT: SCANNING...</span>
+            <button onclick="window.editProfile()" style="height: 18px; padding: 0 5px;">MOD_PROFILE</button>
         </div>
     </div>
 </div>
 
-<!-- FLOATING ADMIN PANEL -->
-<div class="window" id="admin-panel-ui">
+<!-- MP3 PLAYER -->
+<div class="window" id="mp3-window">
     <div class="title-bar">
-        <div class="title-bar-text">Admin Control Center</div>
+        <div class="title-bar-text">MP3Together_PUMP</div>
         <div class="title-bar-controls">
-            <button aria-label="Close" onclick="document.getElementById('admin-panel-ui').style.display='none'"></button>
+            <button aria-label="Close" onclick="document.getElementById('mp3-window').style.display='none'"></button>
         </div>
     </div>
     <div class="window-body">
-        <p><b>Global Settings</b></p>
-        <div class="field-row">
-            <label>Site BG:</label>
-            <input type="color" id="admin-bg-picker" value="#008080">
+        <div style="font-size: 11px; color: var(--toxic-green); margin-bottom: 5px; height: 14px; overflow: hidden;" id="track-name">TRACK: SILENT</div>
+        <div class="visualizer-container" id="visualizer"></div>
+        <div class="field-row-stacked">
+            <label>Load MP3 to Channel:</label>
+            <input type="file" id="audio-upload" accept="audio/*">
         </div>
-        <div class="field-row">
-            <label>Banner:</label>
-            <input type="text" id="admin-banner-input" style="width: 100px;">
-            <button id="admin-banner-btn">Set</button>
+        <div class="field-row" style="justify-content: center; margin-top: 10px;">
+            <button id="sync-btn" style="color: var(--toxic-green);">CONNECT AUDIO</button>
+            <button id="skip-btn" style="display:none; color: red;">SKIP</button>
         </div>
-        
-        <div class="admin-section">
-            <p><b>Database Operations</b></p>
-            <button id="clear-chat-btn" style="width: 100%; color: red;">WIPE ALL LOGS</button>
-        </div>
+    </div>
+</div>
 
-        <div class="admin-section">
-            <p><b>User Management</b></p>
-            <p style="font-size: 10px">Type ID to force rename:</p>
-            <input type="text" id="target-id" placeholder="User ID" style="width: 100%">
-            <button id="force-rename-btn" style="width: 100%; margin-top: 5px;">Force Rename</button>
+<!-- ADMIN PANEL -->
+<div class="window" id="admin-panel">
+    <div class="title-bar">
+        <div class="title-bar-text">ROOT_OVERRIDE_CONSOLE</div>
+        <div class="title-bar-controls">
+            <button aria-label="Close" onclick="document.getElementById('admin-panel').style.display='none'"></button>
         </div>
+    </div>
+    <div class="window-body">
+        <div class="field-row">
+            <label>Target:</label>
+            <select id="user-sel" style="width: 100%;"></select>
+        </div>
+        <button onclick="window.adminRename()" style="width: 100%;">FORCE RENAME</button>
+        <hr>
+        <div class="field-row">
+            <button onclick="window.sendEvent('shake')">SHAKE</button>
+            <button onclick="window.sendEvent('glitch')">GLITCH</button>
+            <button onclick="window.sendEvent('reset')">RESTORE</button>
+        </div>
+        <input type="color" id="bg-picker" style="width: 100%; height: 25px; margin-top: 10px;">
+    </div>
+</div>
+
+<!-- DESKTOP -->
+<div class="desktop-icons">
+    <div class="icon" id="icon-mp3">
+        <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd-4.png">
+        <div>MP3Together</div>
+    </div>
+    <div class="icon" id="icon-root">
+        <img src="https://win98icons.alexmeub.com/icons/png/warning_outline-0.png" style="filter: hue-rotate(100deg);">
+        <div>KHEM.ROOT</div>
     </div>
 </div>
 
@@ -251,235 +205,215 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const chatRef = ref(db, 'messages');
-    const settingsRef = ref(db, 'settings');
+    const usersRef = ref(db, 'users');
+    const musicRef = ref(db, 'music_v2');
+    const eventsRef = ref(db, 'global_events');
 
     let isAdmin = false;
-    let myUid = "";
-    let myProfile = { 
-        username: "Guest", 
-        nameChanges: 0, 
-        color: "#000080", 
-        pfp: "" 
-    };
+    let myUid = localStorage.getItem('khem_uid_v6') || 'khem-' + Math.random().toString(36).substr(2, 6);
+    localStorage.setItem('khem_uid_v6', myUid);
+    document.getElementById('uid-display').innerText = "IDENT: " + myUid;
 
-    const chatContent = document.getElementById('chat-content');
-    const messageInput = document.getElementById('message-input');
-    const usernameInput = document.getElementById('username');
-    const myColorPreview = document.getElementById('my-color-preview');
-    const myPfpPreview = document.getElementById('my-pfp-preview');
-    const pfpUploadInput = document.getElementById('pfp-upload');
-    const sendButton = document.getElementById('send-button');
-    const changeNameBtn = document.getElementById('change-name-btn');
-    const adminTrigger = document.getElementById('admin-trigger');
-    const adminPanel = document.getElementById('admin-panel-ui');
-    const userIdDisplay = document.getElementById('user-id-display');
+    // --- CRITICAL FIX: WINDOW DRAGGING ---
+    function initDragging() {
+        const windows = document.querySelectorAll('.window');
+        windows.forEach(win => {
+            const titleBar = win.querySelector('.title-bar');
+            let isDragging = false;
+            let offset = { x: 0, y: 0 };
 
-    // Generate Fingerprint
-    function generateId() {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = "top";
-        ctx.font = "14px 'Arial'";
-        ctx.fillText("RetroChatV3", 2, 2);
-        return canvas.toDataURL().slice(-20, -4).replace(/[/+=]/g, "Z");
+            titleBar.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offset.x = e.clientX - win.offsetLeft;
+                offset.y = e.clientY - win.offsetTop;
+                
+                // Bring to front
+                windows.forEach(w => w.style.zIndex = 10);
+                win.style.zIndex = 100;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                win.style.left = (e.clientX - offset.x) + "px";
+                win.style.top = (e.clientY - offset.y) + "px";
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        });
     }
 
-    myUid = generateId();
-    userIdDisplay.innerText = myUid;
-
-    // --- GLOBAL SETTINGS LISTENER ---
-    onValue(settingsRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            if (data.bgColor) document.documentElement.style.setProperty('--bg-color', data.bgColor);
-            if (data.bannerText) document.getElementById('marquee-text').innerText = data.bannerText;
+    // --- CRITICAL FIX: ADMIN LOGIN ---
+    document.getElementById('icon-root').addEventListener('dblclick', () => {
+        const pass = prompt("SYSTEM ACCESS KEY REQUIRED:");
+        if (pass === "PineappleToasterOven42069") {
+            isAdmin = true;
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('skip-btn').style.display = 'inline-block';
+            alert("ROOT PRIVILEGES ACTIVATED.");
+            renderChat();
+        } else if (pass !== null) {
+            alert("ACCESS DENIED: INCORRECT KEY");
         }
     });
 
-    // --- USER PROFILE LISTENER ---
-    const myProfileRef = ref(db, `users/${myUid}`);
-    onValue(myProfileRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            myProfile = data;
-        } else {
-            set(myProfileRef, myProfile);
-        }
-        usernameInput.value = myProfile.username;
-        myColorPreview.style.backgroundColor = myProfile.color || "#000080";
-        myPfpPreview.src = myProfile.pfp || "https://via.placeholder.com/24?text=?";
-        
-        if (myProfile.nameChanges >= 1 && !isAdmin) {
-            changeNameBtn.disabled = true;
-            changeNameBtn.innerText = "Locked";
-        }
+    document.getElementById('icon-mp3').addEventListener('dblclick', () => {
+        document.getElementById('mp3-window').style.display = 'block';
     });
 
-    // --- FILE UPLOAD & COMPRESSION LOGIC ---
-    myPfpPreview.onclick = () => {
-        pfpUploadInput.click();
-    };
-
-    pfpUploadInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // Allowing larger original files (up to 5MB) for better user experience
-        if (file.size > 5000000) {
-            alert("File is too large! Please choose an image under 5MB.");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const img = new Image();
-            img.onload = () => {
-                // Auto-resize and compress to fit in the database (approx 100x100 max)
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 96;
-                const MAX_HEIGHT = 96;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                // High compression for low DB overhead but keeps image recognizable
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                
-                update(myProfileRef, { pfp: compressedBase64 }).then(() => {
-                    myPfpPreview.src = compressedBase64;
+    // --- AUDIO & SYNC ---
+    let audio = new Audio();
+    let audioCtx, analyser, dataArray;
+    
+    document.getElementById('sync-btn').onclick = () => {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            const source = audioCtx.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            analyser.fftSize = 64;
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+            
+            const viz = document.getElementById('visualizer');
+            viz.innerHTML = '';
+            for(let i=0; i<bufferLength; i++) {
+                const b = document.createElement('div');
+                b.className = 'bar';
+                viz.appendChild(b);
+            }
+            
+            const updateViz = () => {
+                requestAnimationFrame(updateViz);
+                analyser.getByteFrequencyData(dataArray);
+                const bars = viz.querySelectorAll('.bar');
+                dataArray.forEach((v, i) => {
+                    if(bars[i]) bars[i].style.height = (v/2.5) + "%";
                 });
             };
-            img.src = event.target.result;
+            updateViz();
+        }
+        audio.play().catch(() => alert("Click again to confirm audio playback."));
+    };
+
+    onValue(musicRef, (s) => {
+        const d = s.val();
+        if(!d || !d.url) return;
+        document.getElementById('track-name').innerText = "TRACK: " + (d.name || "UNNAMED");
+        const offset = (Date.now() - d.startTime) / 1000;
+        if (audio.src !== d.url) {
+            audio.src = d.url;
+            audio.load();
+        }
+        if (Math.abs(audio.currentTime - offset) > 2) audio.currentTime = offset;
+        audio.play().catch(() => {});
+    });
+
+    document.getElementById('audio-upload').onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            update(musicRef, { url: ev.target.result, name: file.name, startTime: Date.now() });
         };
         reader.readAsDataURL(file);
     };
 
-    // --- USER ACTIONS ---
-    changeNameBtn.onclick = () => {
-        if (myProfile.nameChanges >= 1 && !isAdmin) return;
-        
-        const newName = prompt("Choose your PERMANENT Handle:", myProfile.username);
-        if (!newName) return;
-        
-        const newColor = prompt("Enter a CSS Color (e.g. red, #00ff00):", myProfile.color);
-        if (!newColor) return;
+    // --- CHAT LOGIC ---
+    let users = {};
+    let messages = [];
 
-        update(myProfileRef, {
-            username: newName.substring(0, 15),
-            color: newColor,
-            nameChanges: 1
+    onValue(usersRef, s => {
+        users = s.val() || {};
+        if(!users[myUid]) set(ref(db, `users/${myUid}`), { username: "Subj_"+myUid.slice(-3), color: "#00ff41", pfp: "" });
+        const sel = document.getElementById('user-sel');
+        sel.innerHTML = "";
+        Object.keys(users).forEach(u => {
+            const o = document.createElement('option');
+            o.value = u; o.innerText = users[u].username; sel.appendChild(o);
         });
+    });
+
+    onValue(query(chatRef, limitToLast(50)), s => {
+        messages = [];
+        s.forEach(c => messages.push({ k: c.key, ...c.val() }));
+        renderChat();
+    });
+
+    function renderChat() {
+        const c = document.getElementById('chat-content');
+        c.innerHTML = "";
+        messages.forEach(m => {
+            const u = users[m.uid] || { username: "DEAD_NODE", color: "#666" };
+            const div = document.createElement('div');
+            div.className = 'message-entry';
+            div.innerHTML = `
+                <img class="pfp-icon" src="${u.pfp || 'https://win98icons.alexmeub.com/icons/png/user_world-0.png'}">
+                <span style="color:${u.color}; font-weight:bold">${u.username}:</span> 
+                <span>${m.text}</span>
+                ${isAdmin ? `<button style="float:right; height:16px; padding:0 2px" onclick="window.del('${m.k}')">X</button>` : ''}
+            `;
+            c.appendChild(div);
+        });
+        c.scrollTop = c.scrollHeight;
+    }
+
+    document.getElementById('send-btn').onclick = () => {
+        const t = document.getElementById('msg-input').value;
+        if(!t) return;
+        push(chatRef, { uid: myUid, text: t, time: serverTimestamp() });
+        document.getElementById('msg-input').value = "";
+    };
+
+    // --- PROFILE ---
+    window.editProfile = () => {
+        const n = prompt("Change Designation:", users[myUid].username);
+        const c = prompt("Change Color (CSS/Hex):", users[myUid].color);
+        if(n) update(ref(db, `users/${myUid}`), { username: n, color: c || "#00ff41" });
     };
 
     // --- ADMIN ACTIONS ---
-    adminTrigger.onclick = (e) => {
-        e.stopPropagation();
-        const code = prompt("OVERRIDE CODE:");
-        if (code === "PineappleToasterOven42069") {
-            isAdmin = true;
-            adminPanel.style.display = "block";
-            alert("SYSTEM OVERRIDE SUCCESSFUL");
-            loadMessages();
+    window.adminRename = () => {
+        const uid = document.getElementById('user-sel').value;
+        const n = prompt("Force Rename:");
+        if(uid && n) update(ref(db, `users/${uid}`), { username: n });
+    };
+
+    window.sendEvent = (type) => update(eventsRef, { type, timestamp: Date.now() });
+    
+    onValue(eventsRef, s => {
+        const ev = s.val();
+        if(!ev) return;
+        document.body.classList.toggle('glitch-active', ev.type === 'glitch');
+        if(ev.type === 'shake') {
+            let count = 0;
+            const si = setInterval(() => {
+                document.body.style.setProperty('--shake-x', (Math.random()*10-5)+'px');
+                document.body.style.setProperty('--shake-y', (Math.random()*10-5)+'px');
+                if(++count > 20) { clearInterval(si); document.body.style.setProperty('--shake-x','0px'); document.body.style.setProperty('--shake-y','0px'); }
+            }, 50);
         }
-    };
+        if(ev.type === 'reset') { document.body.style.backgroundColor = '#1a1a1a'; document.body.classList.remove('glitch-active'); }
+        if(ev.bg) document.body.style.backgroundColor = ev.bg;
+    });
 
-    // Global BG Change
-    document.getElementById('admin-bg-picker').onchange = (e) => {
-        update(settingsRef, { bgColor: e.target.value });
-    };
+    document.getElementById('bg-picker').onchange = (e) => update(eventsRef, { bg: e.target.value });
+    window.del = (k) => remove(ref(db, `messages/${k}`));
+    document.getElementById('skip-btn').onclick = () => remove(musicRef);
 
-    // Global Banner Change
-    document.getElementById('admin-banner-btn').onclick = () => {
-        const txt = document.getElementById('admin-banner-input').value;
-        update(settingsRef, { bannerText: txt });
-    };
+    // --- STARTUP ---
+    setTimeout(() => {
+        let p = 0;
+        const iv = setInterval(() => {
+            p += 4;
+            document.getElementById('load-bar').style.width = p + "%";
+            if(p >= 100) { clearInterval(iv); document.getElementById('splash-screen').style.display = 'none'; }
+        }, 50);
+    }, 400);
 
-    // Wipe Chat
-    document.getElementById('clear-chat-btn').onclick = () => {
-        if (confirm("PURGE ALL DATA?")) remove(chatRef);
-    };
-
-    // Force Rename Target
-    document.getElementById('force-rename-btn').onclick = () => {
-        const tid = document.getElementById('target-id').value;
-        const newN = prompt("New Name for this ID:");
-        if (tid && newN) {
-            update(ref(db, `users/${tid}`), { username: newN, nameChanges: 0 });
-            alert("Target updated.");
-        }
-    };
-
-    // --- CHAT LOGIC ---
-    function sendMessage() {
-        const text = messageInput.value.trim();
-        if (!text) return;
-        push(chatRef, {
-            uid: myUid,
-            username: myProfile.username,
-            text: text,
-            color: myProfile.color || "#000080",
-            pfp: myProfile.pfp || "",
-            isAdmin: isAdmin,
-            time: serverTimestamp()
-        });
-        messageInput.value = "";
-    }
-
-    sendButton.onclick = sendMessage;
-    messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
-
-    window.deleteMsg = (key) => {
-        if (isAdmin && confirm("Delete message?")) remove(ref(db, `messages/${key}`));
-    };
-
-    function loadMessages() {
-        onValue(query(chatRef, limitToLast(50)), (snapshot) => {
-            chatContent.innerHTML = "";
-            const data = snapshot.val();
-            if (!data) return;
-
-            Object.keys(data).forEach((key) => {
-                const msg = data[key];
-                const entry = document.createElement('div');
-                entry.className = 'message-entry';
-                const time = msg.time ? new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
-                
-                let html = `
-                    <span class="timestamp">[${time}]</span>
-                    <img class="pfp-icon" src="${msg.pfp || 'https://via.placeholder.com/24?text=?'}" onerror="this.src='https://via.placeholder.com/24?text=?'">
-                    ${msg.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-                    <span class="user-tag" style="color: ${msg.color || '#000080'}" title="ID: ${msg.uid}">${msg.username}:</span>
-                    <span class="text-body">${msg.text}</span>
-                `;
-
-                if (isAdmin) {
-                    html += `<span class="admin-controls" onclick="deleteMsg('${key}')" title="Delete msg by ${msg.uid}">X</span>`;
-                }
-
-                entry.innerHTML = html;
-                chatContent.appendChild(entry);
-            });
-            chatContent.scrollTop = chatContent.scrollHeight;
-        });
-    }
-
-    loadMessages();
+    initDragging();
 </script>
 </body>
 </html>
