@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHEM.OS_ULTIMATE_v9.6</title>
+    <title>KHEM.OS_ULTIMATE_v9.7</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <style>
         :root {
@@ -106,9 +106,12 @@
         
         #casino-reel { height: 40px; background: #222; border: 2px inset; display: flex; align-items: center; justify-content: center; font-size: 24px; letter-spacing: 5px; margin-bottom: 10px; }
         
-        /* Webcam Styles */
+        /* Webcam & Voice Styles */
         #webcam-view { width: 100%; height: auto; background: #000; border: 2px inset; margin-bottom: 10px; transform: scaleX(-1); }
         .cam-controls { display: flex; gap: 5px; margin-bottom: 10px; }
+        
+        .voice-meter { width: 100%; height: 20px; background: #000; border: 2px inset; position: relative; overflow: hidden; }
+        .voice-level { height: 100%; background: linear-gradient(90deg, #0f0, #ff0, #f00); width: 0%; transition: width 0.1s; }
     </style>
 </head>
 <body onclick="window.hideStart()">
@@ -128,6 +131,7 @@
 
 <div class="desktop-area" id="desktop">
     <div class="d-icon" onclick="window.openWin('chat-win')"><img src="https://win98icons.alexmeub.com/icons/png/msie2-2.png"><div>Network_Chat</div></div>
+    <div class="d-icon" onclick="window.openWin('voice-win')"><img src="https://win98icons.alexmeub.com/icons/png/loudspeaker_rays-0.png"><div>Voice_Terminal</div></div>
     <div class="d-icon" onclick="window.openWin('paint-win')"><img src="https://win98icons.alexmeub.com/icons/png/paint_old-0.png"><div>Shared_Paint</div></div>
     <div class="d-icon" onclick="window.openWin('gamble-win')"><img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png"><div>KHEM_Casino</div></div>
     <div class="d-icon" onclick="window.openWin('mine-win')"><img src="https://win98icons.alexmeub.com/icons/png/minesweeper-0.png"><div>Minesweeper</div></div>
@@ -135,9 +139,10 @@
 </div>
 
 <div id="start-menu">
-    <div style="background: var(--win-title); color: #fff; padding: 5px 10px; font-weight: bold; font-size: 14px;">KHEM.OS v9.6</div>
+    <div style="background: var(--win-title); color: #fff; padding: 5px 10px; font-weight: bold; font-size: 14px;">KHEM.OS v9.7</div>
     <div class="start-item" onclick="window.authAdmin()"><img src="https://win98icons.alexmeub.com/icons/png/key_win-4.png" width="16"> Admin Console</div>
     <div class="start-item" onclick="window.openWin('profile-win')"><img src="https://win98icons.alexmeub.com/icons/png/user_world-0.png" width="16"> Edit Profile</div>
+    <div class="start-item" onclick="window.openWin('voice-win')"><img src="https://win98icons.alexmeub.com/icons/png/loudspeaker_rays-0.png" width="16"> Voice Chat</div>
     <div class="start-item" onclick="window.openWin('display-win')"><img src="https://win98icons.alexmeub.com/icons/png/display_properties-0.png" width="16"> Settings</div>
     <hr>
     <div class="start-item" onclick="location.reload()"><img src="https://win98icons.alexmeub.com/icons/png/shut_down_normal-4.png" width="16"> Shutdown</div>
@@ -176,16 +181,39 @@
 
 <!-- CHAT WINDOW -->
 <div class="window" id="chat-win" style="width: 480px; top: 50px; left: 100px;">
-    <div class="title-bar"><div class="title-bar-text">KHEM_NET_v9.6</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
+    <div class="title-bar"><div class="title-bar-text">KHEM_NET_v9.7</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
     <div class="window-body">
         <div id="chat-content"></div>
         <div class="field-row" style="margin-top:5px">
             <input id="chat-input" type="text" style="flex:1" placeholder="Enter message..." onkeydown="if(event.key==='Enter') window.sendChat()">
+            <button onclick="window.openWin('voice-win')" title="Voice Terminal">🎙️</button>
             <button onclick="window.openWin('webcam-win')" title="Setup Photo">📷</button>
             <button onclick="document.getElementById('chat-img-input').click()" title="Upload Image">📎</button>
             <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="window.handleChatImage(this)">
             <button onclick="window.sendChat()">SEND</button>
         </div>
+    </div>
+</div>
+
+<!-- VOICE CHAT WINDOW -->
+<div class="window" id="voice-win" style="width: 300px; top: 100px; left: 600px;">
+    <div class="title-bar"><div class="title-bar-text">Voice_Terminal</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.stopVoice()"></button></div></div>
+    <div class="window-body">
+        <p style="margin-top:0;">Broadcast status: <b id="voice-status" style="color:red">OFFLINE</b></p>
+        <div class="voice-meter">
+            <div id="voice-level" class="voice-level"></div>
+        </div>
+        <div class="field-row" style="margin-top:10px; justify-content: center;">
+            <button id="voice-start-btn" onclick="window.startVoice()" style="flex:1">CONNECT MIC</button>
+            <button id="voice-stop-btn" onclick="window.stopVoice()" style="flex:1" disabled>DISCONNECT</button>
+        </div>
+        <fieldset style="margin-top:10px">
+            <legend>Audio Logic</legend>
+            <div class="field-row">
+                <input type="checkbox" id="voice-echo" checked>
+                <label for="voice-echo">Network Feedback (Echo)</label>
+            </div>
+        </fieldset>
     </div>
 </div>
 
@@ -263,9 +291,9 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dbVer = "v9_6_stable"; 
-    const myUid = localStorage.getItem('khem_uid_v96') || 'U-' + Math.random().toString(36).substr(2, 6);
-    localStorage.setItem('khem_uid_v96', myUid);
+    const dbVer = "v9_7_stable"; 
+    const myUid = localStorage.getItem('khem_uid_v97') || 'U-' + Math.random().toString(36).substr(2, 6);
+    localStorage.setItem('khem_uid_v97', myUid);
 
     const PW = "PineAppleToasterOven";
     let isAdmin = false;
@@ -281,7 +309,7 @@
 
     // --- BOOT ---
     const biosLog = document.getElementById('bios-log');
-    const lines = ["KHEMBIOS v4.96", "CPU: KHEM-ULTRA @ 1.2GHz", "RAM: 1024MB OK", "NETWORK: ENCRYPTED", "VERSION: 9.6 (ADMIN_ENHANCED)", "Establishing Network Handshake...", "Starting KHEM.OS..."];
+    const lines = ["KHEMBIOS v4.97", "CPU: KHEM-ULTRA @ 1.2GHz", "RAM: 1024MB OK", "NETWORK: ENCRYPTED", "AUDIO_DRIVERS: LOADED", "VERSION: 9.7 (VOICE_READY)", "Establishing Network Handshake...", "Starting KHEM.OS..."];
     let lIdx = 0;
     function runBios() {
         if(lIdx < lines.length) {
@@ -331,6 +359,74 @@
         }
     });
 
+    // --- VOICE CHAT FEATURE ---
+    let voiceStream = null;
+    let audioContext = null;
+    let analyser = null;
+    let dataArray = null;
+    let voiceIv = null;
+
+    window.startVoice = async () => {
+        try {
+            voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioContext.createMediaStreamSource(voiceStream);
+            
+            // Analyser for visual meter
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            source.connect(analyser);
+            
+            // Loopback/Echo if checked
+            const echoNode = audioContext.createGain();
+            echoNode.gain.value = document.getElementById('voice-echo').checked ? 1.0 : 0;
+            source.connect(echoNode);
+            echoNode.connect(audioContext.destination);
+
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            
+            document.getElementById('voice-status').innerText = "LIVE";
+            document.getElementById('voice-status').style.color = "var(--toxic-green)";
+            document.getElementById('voice-start-btn').disabled = true;
+            document.getElementById('voice-stop-btn').disabled = false;
+
+            voiceIv = setInterval(() => {
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+                let level = (sum / dataArray.length) * 1.5;
+                document.getElementById('voice-level').style.width = Math.min(level, 100) + "%";
+            }, 50);
+
+            // Announce in chat
+            push(ref(db, `${dbVer}/messages`), { 
+                uid: 'SYSTEM', text: `🎙️ ${myData.username} has joined the voice terminal.`, name: "OS_VOICE", 
+                pfp: "https://win98icons.alexmeub.com/icons/png/loudspeaker_rays-0.png", color: "yellow", isAdmin: false 
+            });
+
+        } catch (err) {
+            alert("AUDIO_ERROR: Microphone access denied or drivers missing.");
+        }
+    };
+
+    window.stopVoice = () => {
+        if(voiceStream) {
+            voiceStream.getTracks().forEach(track => track.stop());
+            voiceStream = null;
+        }
+        if(audioContext) {
+            audioContext.close();
+            audioContext = null;
+        }
+        clearInterval(voiceIv);
+        document.getElementById('voice-level').style.width = "0%";
+        document.getElementById('voice-status').innerText = "OFFLINE";
+        document.getElementById('voice-status').style.color = "red";
+        document.getElementById('voice-start-btn').disabled = false;
+        document.getElementById('voice-stop-btn').disabled = true;
+        window.closeWin('voice-win');
+    };
+
     // --- WEBCAM FEATURE ---
     let camStream = null;
     window.startWebcam = async () => {
@@ -358,7 +454,6 @@
         canvas.width = 400;
         canvas.height = 300;
         
-        // Mirror flip for the photo
         context.translate(400, 0);
         context.scale(-1, 1);
         context.drawImage(video, 0, 0, 400, 300);
