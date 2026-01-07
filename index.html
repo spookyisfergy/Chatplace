@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHEM.OS_ULTIMATE_v11.5</title>
+    <title>KHEM.OS_ULTIMATE_v13.0</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <style>
         :root {
@@ -16,8 +16,6 @@
 
         body {
             background-color: var(--os-bg);
-            background-size: cover;
-            background-position: center;
             margin: 0; padding: 0;
             height: 100vh; width: 100vw;
             font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
@@ -25,39 +23,37 @@
             transition: filter 0.3s, transform 0.3s;
         }
 
-        /* Trolling Styles */
+        /* Trolling/Visual Effects */
         body.inverted { filter: invert(1); }
         body.shaking { animation: shake 0.2s infinite; }
         body.flipped { transform: scaleX(-1); }
         body.grayscale { filter: grayscale(1); }
+        body.crashed { background: #0000aa !important; }
 
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            40% { transform: translate(3px, 2px) rotate(-1deg); }
-            60% { transform: translate(-1px, -1px) rotate(1deg); }
-            80% { transform: translate(-3px, 1px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+            50% { transform: translate(-2px, -1px) rotate(1deg); }
+            100% { transform: translate(1px, 1px) rotate(0deg); }
         }
 
         @keyframes admin-glow {
-            0% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
-            33% { color: #00ff00; text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
-            66% { color: #0000ff; text-shadow: 0 0 10px #0000ff, 0 0 20px #0000ff; }
-            100% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+            0% { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+            33% { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+            66% { color: #0000ff; text-shadow: 0 0 10px #0000ff; }
+            100% { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
         }
-        .hacker-name { animation: admin-glow 1.5s infinite linear; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .hacker-aura { animation: admin-glow 1.5s infinite linear; font-weight: bold; }
+        .glitch-text { text-decoration: line-through; font-style: italic; letter-spacing: 2px; }
 
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #d1d1d1; z-index: 100000;
+            background: #000; color: var(--toxic-green); z-index: 100000;
             display: flex; flex-direction: column; padding: 40px; font-family: monospace;
         }
 
         .desktop-area { 
             position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 35px); 
-            padding: 20px; display: flex; flex-direction: column; flex-wrap: wrap; 
-            align-content: flex-start; gap: 20px; 
+            padding: 20px; display: flex; flex-direction: column; flex-wrap: wrap; gap: 20px; align-content: flex-start;
         }
 
         .d-icon { 
@@ -66,10 +62,7 @@
         }
         .d-icon img { width: 32px; height: 32px; margin-bottom: 5px; pointer-events: none; }
 
-        .window { 
-            position: absolute; min-width: 250px; display: none; 
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.4); z-index: 100;
-        }
+        .window { position: absolute; min-width: 250px; display: none; box-shadow: 4px 4px 10px rgba(0,0,0,0.4); z-index: 100; }
         .title-bar { cursor: move; }
 
         #taskbar {
@@ -77,14 +70,14 @@
             background: var(--taskbar-bg); border-top: 2px solid #fff;
             display: flex; align-items: center; padding: 2px 5px; z-index: 90000;
         }
-        #clock { margin-left: auto; border: 2px inset #fff; padding: 2px 10px; font-size: 12px; }
 
-        #chat-content { height: 320px; background: #fff; color: #000; border: 2px inset; overflow-y: auto; padding: 8px; }
-        .chat-msg { margin-bottom: 12px; font-size: 12px; display: flex; align-items: flex-start; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        #chat-content { height: 300px; background: #fff; color: #000; border: 2px inset; overflow-y: auto; padding: 8px; }
+        .chat-msg { margin-bottom: 8px; font-size: 12px; display: flex; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .avatar-sm { width: 32px; height: 32px; border: 1px solid #000; object-fit: cover; flex-shrink: 0; }
         
-        .chat-img { max-width: 200px; max-height: 200px; display: block; border: 2px solid #000; margin-top: 5px; cursor: pointer; }
-        .chat-link { color: #0000ee; text-decoration: underline; cursor: pointer; }
+        #shop-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; height: 250px; overflow-y: auto; padding: 5px; background: #fff; border: 2px inset; }
+        .item-card { border: 1px solid #777; padding: 5px; text-align: center; background: #eee; font-size: 11px; }
+        .item-card img { width: 60px; height: 60px; object-fit: contain; background: #fff; border: 1px solid #000; }
 
         #start-menu {
             position: fixed; bottom: 35px; left: 0; width: 220px;
@@ -94,17 +87,25 @@
         .start-item { padding: 8px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 12px; }
         .start-item:hover { background: var(--win-title); color: #fff; }
 
-        .admin-btn { width: 100%; margin-bottom: 4px; text-align: left; font-size: 11px; }
-
-        #camera-preview { width: 100%; background: #000; transform: scaleX(-1); margin-bottom: 5px; }
+        .smiley-pop { position: absolute; font-size: 40px; pointer-events: none; animation: popUp 1s ease-out forwards; z-index: 10000; }
+        @keyframes popUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-100px) scale(2); } }
 
         #mine-grid { display: grid; grid-template-columns: repeat(10, 22px); background: #bdbdbd; border: 2px inset; }
         .mine-cell { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; background: #c0c0c0; border: 2px outset #fff; user-select: none; }
         
-        .flex-msg { background: linear-gradient(45deg, gold, yellow, gold); color: #000; padding: 5px; border: 1px solid #000; font-weight: bold; box-shadow: 2px 2px 0px #000; }
+        .flex-msg-item { border: 2px solid gold; padding: 5px; background: #fff; display: inline-block; text-align: center; margin-top: 5px; box-shadow: 0 0 5px gold; }
+        .bsod { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0000aa; color: #fff; padding: 40px; font-family: monospace; z-index: 2000000; }
     </style>
 </head>
 <body onclick="window.closeStart()">
+
+<div id="bsod-screen" class="bsod">
+    <h1 style="background:#fff; color:#0000aa; display:inline-block; padding:0 10px;">KHEM.OS</h1>
+    <p>A problem has been detected and KHEM.OS has been shut down to prevent damage to your virtual sanity.</p>
+    <p>ADMIN_FORCED_CRASH_0x0000DEAD</p>
+    <p>Press RESTART to attempt recovery.</p>
+    <button onclick="location.reload()">RESTART</button>
+</div>
 
 <div id="loading-screen">
     <div id="bios-text"></div>
@@ -115,8 +116,10 @@
 
 <div class="desktop-area">
     <div class="d-icon" onclick="window.openWin('chat-win')"><img src="https://win98icons.alexmeub.com/icons/png/msie2-2.png"><div>Network_Chat</div></div>
-    <div class="d-icon" onclick="window.openWin('cam-win')"><img src="https://win98icons.alexmeub.com/icons/png/camera-0.png"><div>Media_Hub</div></div>
+    <div class="d-icon" onclick="window.openWin('shop-win')"><img src="https://win98icons.alexmeub.com/icons/png/envelope_closed-0.png"><div>Marketplace</div></div>
+    <div class="d-icon" onclick="window.openWin('inventory-win')"><img src="https://win98icons.alexmeub.com/icons/png/briefcase-0.png"><div>My_Stuff</div></div>
     <div class="d-icon" onclick="window.openWin('casino-win')"><img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png"><div>Casino</div></div>
+    <div class="d-icon" onclick="window.openWin('cam-win')"><img src="https://win98icons.alexmeub.com/icons/png/camera-0.png"><div>Media_Hub</div></div>
     <div class="d-icon" onclick="window.openWin('mine-win')"><img src="https://win98icons.alexmeub.com/icons/png/minesweeper-0.png"><div>Mines</div></div>
 </div>
 
@@ -145,41 +148,54 @@
     </div>
 </div>
 
+<!-- SHOP WINDOW -->
+<div class="window" id="shop-win" style="width: 400px; top: 50px; left: 450px;">
+    <div class="title-bar"><div class="title-bar-text">Marketplace</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('shop-win')"></button></div></div>
+    <div class="window-body">
+        <div id="shop-list"></div>
+        <hr>
+        <p><b>List New Item (Max 800MB):</b></p>
+        <div class="field-row">
+            <input type="text" id="new-item-name" placeholder="Item Name" style="flex:1">
+            <input type="number" id="new-item-price" placeholder="Price" style="width:60px">
+            <button onclick="document.getElementById('item-upload').click()">Img/File</button>
+            <input type="file" id="item-upload" hidden onchange="window.listItem(this)">
+        </div>
+    </div>
+</div>
+
+<!-- INVENTORY WINDOW -->
+<div class="window" id="inventory-win" style="width: 320px; top: 100px; left: 870px;">
+    <div class="title-bar"><div class="title-bar-text">My Inventory</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('inventory-win')"></button></div></div>
+    <div class="window-body">
+        <div id="inv-list" style="height:250px; overflow-y:auto; background:#fff; border:2px inset; padding:5px;"></div>
+    </div>
+</div>
+
 <!-- CHAT WINDOW -->
-<div class="window" id="chat-win" style="width: 500px; top: 40px; left: 100px;">
-    <div class="title-bar"><div class="title-bar-text">KHEM_NET Chat Room</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
+<div class="window" id="chat-win" style="width: 450px; top: 40px; left: 50px;">
+    <div class="title-bar"><div class="title-bar-text">KHEM_NET Chat</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
     <div class="window-body">
         <div id="chat-content"></div>
         <div class="field-row" style="margin-top: 10px;">
-            <button onclick="document.getElementById('chat-img-input').click()" title="Send Image">🖼️</button>
-            <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="window.sendImage(this)">
-            <input id="chat-input" type="text" placeholder="Type message or paste link..." style="flex:1" onkeydown="if(event.key==='Enter') window.sendChat()">
+            <button onclick="document.getElementById('chat-img-input').click()" title="Send File (800MB)">📁</button>
+            <input type="file" id="chat-img-input" style="display:none" onchange="window.sendImage(this)">
+            <input id="chat-input" type="text" placeholder="Type message..." style="flex:1" onkeydown="if(event.key==='Enter') window.sendChat()">
             <button onclick="window.sendChat()">Send</button>
         </div>
     </div>
 </div>
 
-<!-- CAMERA / MEDIA HUB -->
+<!-- MEDIA HUB (CAMERA) -->
 <div class="window" id="cam-win" style="width: 320px; top: 100px; left: 650px;">
-    <div class="title-bar"><div class="title-bar-text">Media_Hub (Camera)</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('cam-win')"></button></div></div>
+    <div class="title-bar"><div class="title-bar-text">Media Hub</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('cam-win')"></button></div></div>
     <div class="window-body">
-        <video id="camera-preview" autoplay playsinline></video>
-        <div style="display:flex; gap:5px;">
-            <button onclick="window.startCam()" style="flex:1">Start Cam</button>
-            <button id="snap-btn" onclick="window.takeSnap()" style="flex:1" disabled>Capture & Send</button>
+        <video id="camera-preview" autoplay playsinline style="width:100%; background:#000; transform: scaleX(-1);"></video>
+        <div style="display:flex; gap:5px; margin-top:5px;">
+            <button onclick="window.startCam()" style="flex:1">Start</button>
+            <button id="snap-btn" onclick="window.takeSnap()" style="flex:1" disabled>Capture</button>
         </div>
         <canvas id="cam-canvas" style="display:none"></canvas>
-    </div>
-</div>
-
-<!-- CASINO -->
-<div class="window" id="casino-win" style="width: 220px; top: 350px; left: 600px;">
-    <div class="title-bar"><div class="title-bar-text">KHEM_Casino</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('casino-win')"></button></div></div>
-    <div class="window-body">
-        <div style="background:#000; color:gold; text-align:center; padding:10px; border:2px inset; font-family:monospace; margin-bottom: 5px;">$<span id="balance">5000</span></div>
-        <div id="reel" style="font-size: 24px; text-align: center; border: 2px inset; background: #fff; margin-bottom: 10px; padding: 5px;">🍒 🔔 💎</div>
-        <button onclick="window.spin()" style="width: 100%; margin-bottom: 5px;">SPIN ($50)</button>
-        <button onclick="window.flexWealth()" style="width: 100%; background: linear-gradient(gold, #ffcc00); color: black; font-weight: bold;">💎 FLEX WEALTH 💎</button>
     </div>
 </div>
 
@@ -192,72 +208,79 @@
     </div>
 </div>
 
-<!-- GOD MODE CONSOLE -->
-<div class="window" id="admin-win" style="width: 320px; top: 30%; left: 40%;">
-    <div class="title-bar" style="background: linear-gradient(90deg, #ff0000, #000)!important;">
-        <div class="title-bar-text" style="color:#fff">GOD_MODE_v11.5</div>
+<!-- ADMIN CONSOLE -->
+<div class="window" id="admin-win" style="width: 350px; top: 30%; left: 35%;">
+    <div class="title-bar" style="background:linear-gradient(90deg, #800, #000)!important;">
+        <div class="title-bar-text">ADMIN_COMMAND_CENTER_v13.0</div>
         <div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('admin-win')"></button></div>
     </div>
-    <div class="window-body" style="background:#111; color:lime; font-family:monospace; padding: 10px;">
-        <p style="margin:0 0 10px 0; border-bottom:1px solid lime; font-size:10px;">ULTIMATE_TROLLING_SUITE</p>
+    <div class="window-body" style="background:#111; color:lime; font-family:monospace; padding:10px; font-size: 11px;">
+        <p style="border-bottom:1px solid #333">MODERATION</p>
+        <div class="field-row">
+            <input type="checkbox" id="intercept-toggle"> <label for="intercept-toggle">INTERCEPT_MSG</label>
+            <button onclick="window.troll('mute')">SILENCE_ALL</button>
+        </div>
+        
+        <div id="intercept-box" style="display:none; margin-top:5px; border:1px solid red; padding:5px;">
+            <p id="pending-msg-info" style="color:yellow;"></p>
+            <input type="text" id="intercept-edit" style="width:100%; background:#222; color:#fff;">
+            <button onclick="window.releaseIntercept()">RELEASE</button>
+        </div>
+
+        <p style="border-bottom:1px solid #333; margin-top:10px;">IDENTITY</p>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-            <button class="admin-btn" onclick="window.troll('shake')">EARTHQUAKE</button>
-            <button class="admin-btn" onclick="window.troll('invert')">INVERT</button>
-            <button class="admin-btn" onclick="window.troll('flip')">FLIP_UI</button>
-            <button class="admin-btn" onclick="window.troll('grayscale')">GRAYSCALE</button>
-            <button class="admin-btn" onclick="window.troll('noise')">BEEP_GLOBAL</button>
-            <button class="admin-btn" onclick="window.troll('error')">FAKE_CRASH</button>
-        </div>
-        
-        <hr style="border:0; border-top:1px dashed lime; margin:10px 0;">
-        <p style="font-size:10px; margin-bottom: 5px;">ECONOMY CONTROL</p>
-        <div class="field-row">
-            <input type="number" id="admin-cash-amt" value="1000" style="background:#000; color:gold; border:1px solid gold; width:80px;">
-            <button class="admin-btn" onclick="window.troll('give_cash')" style="background:#333; color:gold;">GRANT_WEALTH_GLOBAL</button>
+            <button onclick="window.toggleAdminStyle('aura')">AURA</button>
+            <button onclick="window.toggleAdminStyle('glitch')">GLITCH</button>
+            <input type="color" id="admin-color-picker" onchange="window.updateAdminColor(this.value)" style="width:100%">
         </div>
 
-        <button class="admin-btn" onclick="window.nukeChat()" style="color:red; background:#333; margin-top:10px; width:100%;">WIPE_CHAT_HISTORY</button>
-        
-        <hr style="border:0; border-top:1px dashed lime; margin:10px 0;">
-        <label style="font-size:10px;">Global System Alert:</label>
-        <div class="field-row">
-            <input type="text" id="admin-msg" style="background:#000; color:lime; border:1px solid lime; flex:1">
-            <button onclick="window.troll('broadcast')">SEND</button>
+        <p style="border-bottom:1px solid #333; margin-top:10px;">GLOBAL OVERRIDE</p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <button onclick="window.troll('shake')">SHAKE</button>
+            <button onclick="window.troll('invert')">INVERT</button>
+            <button onclick="window.troll('flip')">FLIP</button>
+            <button onclick="window.troll('grayscale')">GRAY</button>
+            <button onclick="window.troll('crash')" style="color:red; font-weight:bold;">CRASH_ALL</button>
+            <button onclick="window.troll('rainbow')" style="color:cyan;">RAINBOW_MODE</button>
         </div>
+
+        <p style="border-bottom:1px solid #333; margin-top:10px;">ECONOMY_HACK</p>
+        <div class="field-row">
+            <input type="text" id="target-user" placeholder="Name or *" style="width:80px; background:#000; color:lime;">
+            <input type="number" id="gift-amt" placeholder="Amt" style="width:50px; background:#000; color:lime;">
+            <button onclick="window.adminGift()">GIVE_CASH</button>
+        </div>
+        <button onclick="window.adminItemAction('remove')" style="width:100%; color:orange; margin-top:5px;">STEAL_INVENTORY</button>
+        <button onclick="window.adminClearAll()" style="width:100%; color:red; margin-top:5px;">WIPE_MARKET</button>
     </div>
 </div>
 
-<!-- ALERT POPUP -->
-<div class="window" id="error-win" style="width: 300px; top: 45%; left: 45%; z-index: 999999;">
-    <div class="title-bar"><div class="title-bar-text" id="alert-title">System Alert</div></div>
+<!-- CASINO -->
+<div class="window" id="casino-win" style="width: 200px; top: 400px; left: 500px;">
+    <div class="title-bar"><div class="title-bar-text">Casino</div></div>
     <div class="window-body">
-        <div style="display:flex; gap:10px; align-items:center;">
-            <img id="alert-icon" src="https://win98icons.alexmeub.com/icons/png/msg_warning-0.png">
-            <p id="error-text">Unknown system interrupt.</p>
-        </div>
-        <div style="text-align:center; margin-top:10px;">
-            <button onclick="window.closeWin('error-win')" style="width:60px">OK</button>
-        </div>
+        <div style="background:#000; color:gold; text-align:center; padding:10px; border:2px inset; font-family:monospace; margin-bottom: 5px;">$<span id="balance">5000</span></div>
+        <button onclick="window.spin()" style="width:100%">SPIN ($50)</button>
     </div>
 </div>
 
-<!-- START MENU -->
 <div id="start-menu">
-    <div style="background: var(--win-title); color: #fff; padding: 5px 10px; font-weight: bold;">KHEM.OS v11.5</div>
-    <div class="start-item" onclick="window.authAdmin()"><img src="https://win98icons.alexmeub.com/icons/png/key_win-4.png" width="16"> God Mode Access</div>
-    <div class="start-item" onclick="window.openWin('profile-win')"><img src="https://win98icons.alexmeub.com/icons/png/user_world-0.png" width="16"> Identity Setup</div>
+    <div style="background: var(--win-title); color: #fff; padding: 5px 10px; font-weight: bold;">KHEM.OS v13.0</div>
+    <div class="start-item" onclick="window.authAdmin()">🔑 Admin Access</div>
+    <div class="start-item" onclick="window.openWin('profile-win')">👤 Profile Setup</div>
+    <div class="start-item" onclick="window.openWin('shop-win')">🛍️ Marketplace</div>
     <hr>
-    <div class="start-item" onclick="location.reload()"><img src="https://win98icons.alexmeub.com/icons/png/shut_down_normal-4.png" width="16"> Restart</div>
+    <div class="start-item" onclick="location.reload()">🔄 Restart</div>
 </div>
 
 <div id="taskbar">
-    <button onclick="window.toggleStart(event)" id="start-btn">Start</button>
-    <div id="clock">00:00</div>
+    <button onclick="window.toggleStart(event)">Start</button>
+    <div style="margin-left:auto; border:2px inset; padding:2px 10px;" id="clock">00:00</div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, set, onChildAdded, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const config = {
         apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
@@ -268,19 +291,33 @@
 
     const app = initializeApp(config);
     const db = getDatabase(app);
-    const dbPath = "khem_os_v11_media";
-    
+    const dbPath = "khem_os_v13_0";
+
     let myData = {
         name: localStorage.getItem('khem_name') || "",
         color: localStorage.getItem('khem_color') || "#39ff14",
         pfp: localStorage.getItem('khem_pfp') || "https://win98icons.alexmeub.com/icons/png/user_world-0.png",
         bal: parseInt(localStorage.getItem('khem_bal')) || 5000,
-        isAdmin: false
+        isAdmin: false,
+        aura: false,
+        glitch: false,
+        isMuted: false,
+        inventory: JSON.parse(localStorage.getItem('khem_inv')) || []
     };
 
-    // --- WINDOW DRAGGING ---
-    let draggedWin = null;
-    let offset = { x: 0, y: 0 };
+    // --- PROFANITY FILTER ---
+    const blacklist = ["fuck", "shit", "nigger", "faggot", "cunt", "retard", "bitch", "slut", "whore", "nigga"];
+    function sanitize(text) {
+        if (!text) return "";
+        const lower = text.toLowerCase();
+        for (let word of blacklist) {
+            if (lower.includes(word)) return "Im A Bad Person i tried to type something bad";
+        }
+        return text;
+    }
+
+    // Window Dragging
+    let draggedWin = null, offset = { x: 0, y: 0 };
     document.addEventListener('mousedown', e => {
         const bar = e.target.closest('.title-bar');
         if (bar) {
@@ -297,55 +334,34 @@
     });
     document.addEventListener('mouseup', () => draggedWin = null);
 
-    // --- BOOT SEQUENCE ---
+    // Boot Sequence
     const bios = document.getElementById('bios-text');
-    const lines = ["MODEM INITIALIZED", "PROTOCOL: KHEM_MEDIA_V11.5", "CAMERA DRIVERS: LOADED", "GOD_MODE: READY", "ECONOMY: SYNCED"];
-    let l = 0;
-    const bootInt = setInterval(() => {
-        if (l < lines.length) {
-            if (bios) bios.innerHTML += `<div style="margin-bottom:4px; color:lime;">> ${lines[l++]}</div>`;
-            const progress = document.getElementById('boot-progress');
-            if (progress) progress.style.width = (l * 20) + "%";
-        } else {
-            clearInterval(bootInt);
-            const loading = document.getElementById('loading-screen');
-            if (loading) loading.style.display = 'none';
-            if (!myData.name) window.openWin('profile-win');
-            else {
-                document.getElementById('prof-user').value = myData.name;
-                document.getElementById('prof-color').value = myData.color;
-                document.getElementById('pfp-preview').src = myData.pfp;
-                document.getElementById('balance').innerText = myData.bal;
-                window.openWin('chat-win');
-            }
+    const lines = ["MODEM_SYNC_OK", "MEM_V13.0_LOAD", "CAM_DRIVERS_INIT", "FILE_LIMIT_800MB_SET", "PROF_FILTER_ACTIVE"];
+    lines.forEach((l, i) => {
+        setTimeout(() => {
+            bios.innerHTML += `<div style="color:lime">> ${l}</div>`;
+            document.getElementById('boot-progress').style.width = ((i+1) * 20) + "%";
+        }, i * 250);
+    });
+    setTimeout(() => {
+        document.getElementById('loading-screen').style.display='none';
+        if (!myData.name) window.openWin('profile-win');
+        else {
+            document.getElementById('prof-user').value = myData.name;
+            document.getElementById('prof-color').value = myData.color;
+            document.getElementById('pfp-preview').src = myData.pfp;
+            document.getElementById('balance').innerText = myData.bal;
+            window.openWin('chat-win');
         }
-    }, 300);
+    }, 1500);
 
-    // --- HELPER: Link Parser ---
-    function parseLinks(text) {
-        if (!text) return "";
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.replace(urlRegex, url => `<a href="${url}" target="_blank" class="chat-link">${url}</a>`);
-    }
-
-    // --- CORE LOGIC ---
-    window.openWin = id => {
-        const win = document.getElementById(id);
-        if (win) win.style.display = 'block';
-    };
-    window.closeWin = id => {
-        const win = document.getElementById(id);
-        if (win) win.style.display = 'none';
-    };
-    window.toggleStart = e => { 
-        e.stopPropagation(); 
-        const m = document.getElementById('start-menu'); 
-        if (m) m.style.display = m.style.display==='block' ? 'none' : 'block'; 
-    };
-    window.closeStart = () => {
-        const m = document.getElementById('start-menu');
-        if (m) m.style.display = 'none';
-    };
+    // Window Controls
+    window.openWin = id => document.getElementById(id).style.display = 'block';
+    window.closeWin = id => document.getElementById(id).style.display = 'none';
+    window.toggleStart = e => { e.stopPropagation(); const m = document.getElementById('start-menu'); m.style.display = m.style.display==='block'?'none':'block'; };
+    window.closeStart = () => document.getElementById('start-menu').style.display = 'none';
+    
+    window.authAdmin = () => { if(prompt("ACCESS:")==="pine") { myData.isAdmin=true; window.openWin('admin-win'); } };
 
     window.handlePfp = input => {
         const reader = new FileReader();
@@ -356,174 +372,295 @@
     window.saveProfile = () => {
         const n = document.getElementById('prof-user').value;
         if (!n) return;
-        myData.name = n;
+        myData.name = sanitize(n);
         myData.color = document.getElementById('prof-color').value;
-        localStorage.setItem('khem_name', n);
+        localStorage.setItem('khem_name', myData.name);
         localStorage.setItem('khem_color', myData.color);
         localStorage.setItem('khem_pfp', myData.pfp);
         window.closeWin('profile-win');
         window.openWin('chat-win');
     };
 
-    window.authAdmin = () => { if(prompt("ACCESS CODE:") === "PineAppleToasterOven") { myData.isAdmin = true; window.openWin('admin-win'); } };
-
-    // --- CHAT & MEDIA ---
+    // Chat logic
     window.sendChat = () => {
+        if(myData.isMuted) return alert("You have been silenced by an Administrator.");
         const inp = document.getElementById('chat-input');
-        if (!inp.value) return;
-        push(ref(db, `${dbPath}/chat`), { 
-            name: myData.name, msg: inp.value, color: myData.color, pfp: myData.pfp, isAdmin: myData.isAdmin, type: 'text' 
-        });
-        inp.value = "";
+        if(!inp.value) return;
+        const rawMsg = sanitize(inp.value);
+        if(rawMsg.toLowerCase().includes("smile")) window.spawnSmiley();
+
+        onValue(ref(db, `${dbPath}/config/intercept`), snap => {
+            if(snap.val() && !myData.isAdmin) {
+                push(ref(db, `${dbPath}/intercept_queue`), { from: myData.name, msg: rawMsg, data: { ...myData, bal: null, inventory: null } });
+                inp.value = "";
+                alert("Intercepted by Moderator...");
+            } else {
+                window.postMsg(rawMsg, myData);
+                inp.value = "";
+            }
+        }, { onlyOnce: true });
     };
 
-    window.flexWealth = () => {
-        push(ref(db, `${dbPath}/chat`), { 
-            name: myData.name, msg: `I AM A HIGH ROLLER WITH $${myData.bal} IN MY ACCOUNT! 💎💎💎`, color: myData.color, pfp: myData.pfp, isAdmin: myData.isAdmin, type: 'flex' 
-        });
+    window.postMsg = (msg, sender, type='text', extra={}) => {
+        push(ref(db, `${dbPath}/chat`), { ...sender, msg, type, ...extra, time: Date.now() });
     };
 
     window.sendImage = (input) => {
+        if(myData.isMuted) return;
         const file = input.files[0];
-        if (!file) return;
+        // 800MB check (800 * 1024 * 1024 bytes)
+        if (file.size > 800 * 1024 * 1024) {
+            alert("File too large! Max 800MB.");
+            return;
+        }
         const reader = new FileReader();
-        reader.onload = (e) => {
-            push(ref(db, `${dbPath}/chat`), { 
-                name: myData.name, image: e.target.result, color: myData.color, pfp: myData.pfp, isAdmin: myData.isAdmin, type: 'image' 
-            });
-        };
+        reader.onload = e => window.postMsg(e.target.result, myData, 'image');
         reader.readAsDataURL(file);
+    };
+
+    window.spawnSmiley = () => {
+        const s = document.createElement('div');
+        s.className = 'smiley-pop';
+        s.innerText = ['😊','😎','😂','🤡','👽'][Math.floor(Math.random()*5)];
+        s.style.left = Math.random() * 80 + 10 + "%";
+        s.style.top = "80%";
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 1000);
     };
 
     onValue(ref(db, `${dbPath}/chat`), snap => {
         const box = document.getElementById('chat-content');
-        if (!box) return;
         box.innerHTML = "";
         snap.forEach(m => {
             const d = m.val();
-            const nameHtml = d.isAdmin ? `<b class="hacker-name">${d.name}</b>` : `<b style="color:${d.color}">${d.name}</b>`;
-            let content = "";
+            let style = "";
+            if(d.aura) style += " hacker-aura";
+            if(d.glitch) style += " glitch-text";
+            let content = `<span>${d.msg}</span>`;
             if(d.type === 'image') {
-                content = `<img src="${d.image}" class="chat-img" onclick="window.open('${d.image}')">`;
-            } else if(d.type === 'flex') {
-                content = `<div class="flex-msg">${d.msg}</div>`;
-            } else {
-                content = `<div>${parseLinks(d.msg || "")}</div>`;
+                if(d.msg.startsWith('data:image/')) {
+                    content = `<img src="${d.msg}" style="max-width:200px; border:1px solid #000;">`;
+                } else {
+                    content = `<div style="padding:5px; border:1px dashed #777;">Uploaded File (Binary Blob)</div>`;
+                }
             }
-            box.innerHTML += `<div class="chat-msg"><img src="${d.pfp}" class="avatar-sm"><div>${nameHtml}<br>${content}</div></div>`;
+            if(d.type === 'flex') {
+                content = `<div class="flex-msg-item">
+                    <b>FLEX: ${d.itemName}</b><br>
+                    <img src="${d.msg}" style="width:60px; margin:5px 0;"><br>
+                    <span style="color:green; font-weight:bold;">Paid: $${d.paidPrice}</span>
+                </div>`;
+            }
+            
+            box.innerHTML += `<div class="chat-msg"><img src="${d.pfp}" class="avatar-sm"><div><b style="color:${d.color}" class="${style}">${d.name}</b>: ${content}</div></div>`;
         });
         box.scrollTop = box.scrollHeight;
     });
 
-    window.nukeChat = () => remove(ref(db, `${dbPath}/chat`));
+    // Marketplace
+    window.listItem = (input) => {
+        const file = input.files[0];
+        if (file.size > 800 * 1024 * 1024) return alert("File too large (800MB max)");
+        
+        const nameInput = document.getElementById('new-item-name');
+        const priceInput = document.getElementById('new-item-price');
+        const name = nameInput.value;
+        const price = parseInt(priceInput.value);
+        if(!name || !price) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            push(ref(db, `${dbPath}/market`), { name, price, img: e.target.result, seller: myData.name });
+            nameInput.value = "";
+            priceInput.value = "";
+        };
+        reader.readAsDataURL(file);
+    };
 
-    // --- CAMERA ---
+    onValue(ref(db, `${dbPath}/market`), snap => {
+        const list = document.getElementById('shop-list');
+        list.innerHTML = "";
+        snap.forEach(i => {
+            const item = i.val();
+            const isMine = item.seller === myData.name;
+            list.innerHTML += `<div class="item-card">
+                <img src="${item.img}"><br>
+                <b>${item.name}</b><br>
+                <span style="color:green">$${item.price}</span><br>
+                ${isMine 
+                    ? `<button onclick="window.unlistItem('${i.key}')" style="background: #ffaaaa">Remove</button>` 
+                    : `<button onclick="window.buyItem('${i.key}', ${item.price})">Buy</button>`
+                }
+            </div>`;
+        });
+    });
+
+    window.unlistItem = (id) => {
+        if(confirm("Remove this listing?")) {
+            remove(ref(db, `${dbPath}/market/${id}`));
+        }
+    };
+
+    window.buyItem = async (id, price) => {
+        if(myData.bal < price) return alert("Insufficient funds.");
+        
+        const itemSnap = await get(ref(db, `${dbPath}/market/${id}`));
+        const item = itemSnap.val();
+        
+        if(!item) {
+            alert("Item sold or removed!");
+            return;
+        }
+
+        await remove(ref(db, `${dbPath}/market/${id}`));
+        
+        myData.bal -= price;
+        myData.inventory.push({ name: item.name, img: item.img, boughtAt: price });
+        
+        localStorage.setItem('khem_bal', myData.bal);
+        localStorage.setItem('khem_inv', JSON.stringify(myData.inventory));
+        document.getElementById('balance').innerText = myData.bal;
+        window.updateInv();
+        alert(`Successfully acquired ${item.name}!`);
+    };
+
+    window.updateInv = () => {
+        const inv = document.getElementById('inv-list');
+        inv.innerHTML = "";
+        myData.inventory.forEach((it, idx) => {
+            inv.innerHTML += `<div style="display:flex; align-items:center; gap:5px; border-bottom:1px solid #ccc; padding: 3px;">
+                <img src="${it.img}" style="width:24px; height:24px; object-fit: contain;">
+                <span style="flex:1; font-size:10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${it.name}</span>
+                <button onclick="window.flexItem(${idx})" title="Flex original price">Flex</button>
+                <button onclick="window.resellItem(${idx})" style="background: #ccffcc" title="Put back on market">Resell</button>
+            </div>`;
+        });
+    };
+    window.updateInv();
+
+    window.resellItem = (idx) => {
+        const it = myData.inventory[idx];
+        const newPrice = prompt(`Resell "${it.name}" for how much?`, it.boughtAt || 100);
+        if(!newPrice || isNaN(newPrice)) return;
+
+        push(ref(db, `${dbPath}/market`), { 
+            name: it.name, 
+            price: parseInt(newPrice), 
+            img: it.img, 
+            seller: myData.name 
+        });
+
+        myData.inventory.splice(idx, 1);
+        localStorage.setItem('khem_inv', JSON.stringify(myData.inventory));
+        window.updateInv();
+        alert("Relisted!");
+    };
+
+    window.flexItem = (idx) => {
+        const it = myData.inventory[idx];
+        // Now passing the 'boughtAt' price in the flex data
+        push(ref(db, `${dbPath}/chat`), { 
+            ...myData, 
+            msg: it.img, 
+            itemName: it.name, 
+            paidPrice: it.boughtAt || "Unknown",
+            type: 'flex' 
+        });
+    };
+
+    // Camera
     let stream;
     window.startCam = async () => {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
             document.getElementById('camera-preview').srcObject = stream;
             document.getElementById('snap-btn').disabled = false;
-        } catch(e) { alert("Camera access denied."); }
+        } catch(e) { alert("Cam Fail"); }
     };
-
     window.takeSnap = () => {
         const video = document.getElementById('camera-preview');
         const canvas = document.getElementById('cam-canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1); 
-        ctx.drawImage(video, 0, 0);
-        const data = canvas.toDataURL('image/jpeg', 0.7);
-        push(ref(db, `${dbPath}/chat`), { 
-            name: myData.name, image: data, color: myData.color, pfp: myData.pfp, isAdmin: myData.isAdmin, type: 'image' 
-        });
+        ctx.translate(canvas.width, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0);
+        window.postMsg(canvas.toDataURL('image/jpeg', 0.7), myData, 'image');
     };
 
-    // --- TROLLING ENGINE ---
-    window.troll = (type) => {
-        let val = document.getElementById('admin-msg').value;
-        if(type === 'give_cash') {
-            val = document.getElementById('admin-cash-amt').value;
-        }
-        push(ref(db, `${dbPath}/trolls`), { type, val, time: Date.now() });
-        if(type==='broadcast') document.getElementById('admin-msg').value = "";
+    // Intercept
+    let pending = null;
+    document.getElementById('intercept-toggle').onchange = e => set(ref(db, `${dbPath}/config/intercept`), e.target.checked);
+    onValue(ref(db, `${dbPath}/intercept_queue`), snap => {
+        if(!myData.isAdmin) return;
+        const box = document.getElementById('intercept-box');
+        if(snap.size > 0) {
+            box.style.display = 'block';
+            snap.forEach(m => { pending = { key: m.key, ...m.val() }; document.getElementById('pending-msg-info').innerText = `Review: ${pending.msg}`; document.getElementById('intercept-edit').value = pending.msg; return true; });
+        } else box.style.display = 'none';
+    });
+    window.releaseIntercept = () => {
+        window.postMsg(`[MOD] ${document.getElementById('intercept-edit').value}`, pending.data);
+        remove(ref(db, `${dbPath}/intercept_queue/${pending.key}`));
     };
 
+    // Trolls & Admin Commands
+    window.troll = type => push(ref(db, `${dbPath}/trolls`), { type, time: Date.now() });
     onChildAdded(ref(db, `${dbPath}/trolls`), snap => {
-        const t = snap.val();
-        if (t.time < Date.now() - 5000) return;
-
-        if (t.type === 'shake') {
-            document.body.classList.add('shaking');
-            setTimeout(() => document.body.classList.remove('shaking'), 3000);
-        } else if (t.type === 'invert') {
-            document.body.classList.toggle('inverted');
-        } else if (t.type === 'flip') {
-            document.body.classList.toggle('flipped');
-        } else if (t.type === 'grayscale') {
-            document.body.classList.toggle('grayscale');
-        } else if (t.type === 'noise') {
-            const a = new (window.AudioContext || window.webkitAudioContext)();
-            const o = a.createOscillator();
-            const g = a.createGain();
-            o.connect(g); g.connect(a.destination);
-            o.type = 'square'; o.frequency.setValueAtTime(440, a.currentTime);
-            o.start(); o.stop(a.currentTime + 0.3);
-        } else if (t.type === 'error') {
-            document.getElementById('alert-title').innerText = "Kernel Panic";
-            document.getElementById('alert-icon').src = "https://win98icons.alexmeub.com/icons/png/msg_error-0.png";
-            document.getElementById('error-text').innerText = "The remote administrator has disconnected your session. System crash imminent.";
-            window.openWin('error-win');
-        } else if (t.type === 'broadcast') {
-            document.getElementById('alert-title').innerText = "ADMIN_BROADCAST";
-            document.getElementById('alert-icon').src = "https://win98icons.alexmeub.com/icons/png/msg_information-0.png";
-            document.getElementById('error-text').innerText = t.val;
-            window.openWin('error-win');
-        } else if (t.type === 'give_cash') {
-            const amt = parseInt(t.val) || 0;
-            myData.bal += amt;
-            document.getElementById('balance').innerText = myData.bal;
-            localStorage.setItem('khem_bal', myData.bal);
-            
-            // Notification
-            document.getElementById('alert-title').innerText = "BANK_STIMULUS";
-            document.getElementById('alert-icon').src = "https://win98icons.alexmeub.com/icons/png/envelope_closed-0.png";
-            document.getElementById('error-text').innerText = `You have received a $${amt} Stimulus from Central Command!`;
-            window.openWin('error-win');
+        const t = snap.val(); if(t.time < Date.now() - 5000) return;
+        
+        if(t.type === 'shake') { document.body.classList.add('shaking'); setTimeout(()=>document.body.classList.remove('shaking'), 2000); }
+        else if(t.type === 'invert') document.body.classList.toggle('inverted');
+        else if(t.type === 'flip') document.body.classList.toggle('flipped');
+        else if(t.type === 'grayscale') document.body.classList.toggle('grayscale');
+        else if(t.type === 'mute') { myData.isMuted = true; setTimeout(()=>myData.isMuted=false, 10000); alert("Global Silence initiated by Admin."); }
+        else if(t.type === 'crash') { document.getElementById('bsod-screen').style.display = 'block'; }
+        else if(t.type === 'rainbow') { 
+            let i = 0; 
+            const int = setInterval(()=>{
+                document.body.style.backgroundColor = `hsl(${i}, 50%, 50%)`;
+                i+=10; if(i>360) clearInterval(int);
+            }, 50);
+        }
+        else if(t.type === 'give_cash' && (t.target === myData.name || t.target === "*")) { 
+            myData.bal += parseInt(t.val); 
+            document.getElementById('balance').innerText = myData.bal; 
+            localStorage.setItem('khem_bal', myData.bal); 
+        }
+        else if(t.type === 'steal' && (t.target === myData.name || t.target === "*")) { 
+            myData.inventory = []; 
+            localStorage.setItem('khem_inv', "[]"); 
+            window.updateInv(); 
+            alert("AN ADMIN STOLE ALL YOUR ITEMS!"); 
         }
     });
 
-    // --- GAMES & CLOCK ---
+    window.adminGift = () => push(ref(db, `${dbPath}/trolls`), { type: 'give_cash', target: document.getElementById('target-user').value, val: document.getElementById('gift-amt').value, time: Date.now() });
+    window.adminItemAction = (type) => push(ref(db, `${dbPath}/trolls`), { type: 'steal', target: document.getElementById('target-user').value, time: Date.now() });
+    window.toggleAdminStyle = type => { myData[type] = !myData[type]; alert(type + " ENABLED"); };
+    window.updateAdminColor = val => { myData.color = val; localStorage.setItem('khem_color', val); };
+    window.adminClearAll = () => remove(ref(db, `${dbPath}/market`));
+
+    // Casino
     window.spin = () => {
-        if (myData.bal < 50) return alert("You're broke!");
-        myData.bal -= 50;
-        const items = ['🍒','💎','7️⃣','🔔','🍀','💀'];
-        const r = [items[Math.floor(Math.random()*6)], items[Math.floor(Math.random()*6)], items[Math.floor(Math.random()*6)]];
-        document.getElementById('reel').innerText = r.join(" ");
-        if (r[0] === r[1] && r[1] === r[2]) { 
-            let winAmt = 3000;
-            if(r[0] === '7️⃣') winAmt = 10000;
-            myData.bal += winAmt; 
-            alert(`JACKPOT: $${winAmt}!!`); 
+        if(myData.bal < 50) return; myData.bal -= 50;
+        if(Math.random() > 0.95) { 
+            myData.bal += 5000; 
+            alert("JACKPOT!!! $5000"); 
+        } else if (Math.random() > 0.8) {
+            myData.bal += 200;
+            alert("WIN $200");
         }
         document.getElementById('balance').innerText = myData.bal;
         localStorage.setItem('khem_bal', myData.bal);
     };
 
+    // Mines
     window.initMines = () => {
-        const g = document.getElementById('mine-grid'); 
-        if (!g) return;
-        g.innerHTML = "";
-        for(let i=0; i<100; i++){
+        const g = document.getElementById('mine-grid'); g.innerHTML = "";
+        for(let i=0; i<100; i++) {
             const c = document.createElement('div'); c.className='mine-cell';
             c.onclick = () => { 
-                const bomb = Math.random() < 0.15;
-                c.innerText = bomb ? '💀' : '1'; 
+                const bomb = Math.random() < 0.20; 
+                c.innerText = bomb ? '💣' : '🚩'; 
                 c.style.background = bomb ? 'red' : '#eee';
-                c.style.border = '1px solid #777';
                 if(bomb) { 
                     document.body.classList.add('shaking'); 
                     setTimeout(()=>document.body.classList.remove('shaking'), 500); 
@@ -532,14 +669,11 @@
             g.appendChild(c);
         }
     };
-    
-    // Ensure initialization
     window.initMines();
-    
+
     setInterval(() => {
         const d = new Date();
-        const clk = document.getElementById('clock');
-        if (clk) clk.innerText = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0');
+        document.getElementById('clock').innerText = d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0');
     }, 1000);
 </script>
 </body>
