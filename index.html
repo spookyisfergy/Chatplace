@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>~*~ Retro_Chat_v1.0 ~*~</title>
-    <!-- Authentic Windows 98 Design Framework -->
+    <title>~*~ Retro_Chat_Admin_v2.0 ~*~</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <style>
         body {
-            background-color: #008080; /* Classic Win98 Desktop Teal */
+            background-color: #008080;
             margin: 0;
             padding: 20px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -20,7 +20,7 @@
         }
 
         .main-window {
-            width: 450px;
+            width: 500px;
             max-width: 95vw;
         }
 
@@ -36,26 +36,34 @@
         .message-entry {
             margin-bottom: 6px;
             font-size: 13px;
-            line-height: 1.4;
-            word-wrap: break-word;
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
         }
 
         .user-tag {
             font-weight: bold;
-            color: #000080; /* Classic Navy */
-            margin-right: 5px;
         }
 
         .timestamp {
             font-size: 10px;
             color: #888;
-            margin-right: 5px;
         }
 
-        .controls-pane {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .admin-controls {
+            margin-left: auto;
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 10px;
+            border: 1px solid red;
+            padding: 0 2px;
+            background: #eee;
+        }
+
+        .admin-controls:hover {
+            background: red;
+            color: white;
         }
 
         .input-group {
@@ -75,65 +83,92 @@
             font-size: 12px;
         }
 
-        /* Scrollbar styling for extra nostalgia */
-        #chat-content::-webkit-scrollbar {
-            width: 16px;
+        .admin-badge {
+            background: #ff0000;
+            color: white;
+            padding: 0 3px;
+            font-size: 10px;
+            margin-right: 5px;
         }
-        #chat-content::-webkit-scrollbar-track {
-            background: #dfdfdf;
-        }
-        #chat-content::-webkit-scrollbar-thumb {
-            background: silver;
+
+        #admin-panel {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
             border: 2px outset #fff;
+            background: #c0c0c0;
         }
+
+        .smiley-btn {
+            min-width: 25px !important;
+            height: 20px !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 8px;
+            cursor: pointer !important;
+            vertical-align: middle;
+        }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="window main-window">
     <div class="title-bar">
-        <div class="title-bar-text">Chat_Client.exe</div>
+        <div class="title-bar-text">
+            <button class="smiley-btn" id="admin-trigger" title="Admin Login">☺</button>
+            Chat_Client_v2.0.exe
+        </div>
         <div class="title-bar-controls">
             <button aria-label="Minimize"></button>
-            <button aria-label="Maximize"></button>
             <button aria-label="Close"></button>
         </div>
     </div>
     <div class="window-body">
         <marquee class="welcome-banner" scrollamount="3">
-            Welcome to the Nostalgia Zone! Please be kind. A/S/L? | Running version 1.0.4-beta | Online and Connected
+            Welcome to the Chatroom! | Admin Code is Pineapple... | One name change only!
         </marquee>
 
         <div id="chat-content">
-            <div class="message-entry"><i>*** Connecting to chatroon-4ded8 server... ***</i></div>
+            <div class="message-entry"><i>*** Connecting to terminal... ***</i></div>
+        </div>
+
+        <div id="admin-panel">
+            <div class="window">
+                <div class="title-bar"><div class="title-bar-text">Admin.exe</div></div>
+                <div class="window-body">
+                    <p style="margin: 0 0 10px 0;">Logged in as ROOT</p>
+                    <button id="clear-chat-btn">PURGE ALL MESSAGES</button>
+                </div>
+            </div>
         </div>
 
         <div class="controls-pane">
-            <div class="field-row-stacked" style="width: 150px">
-                <label for="username">Screen Name:</label>
-                <input id="username" type="text" value="CoolGuest99" maxlength="15" />
+            <div class="field-row-stacked">
+                <label for="username">Your Handle:</label>
+                <div style="display: flex; gap: 5px;">
+                    <input id="username" type="text" readonly style="width: 150px; background: #eee;" />
+                    <button id="change-name-btn">Update Name</button>
+                </div>
+                <p id="name-notice" style="font-size: 10px; margin: 2px 0;">Unique ID: <span id="user-id-display">...</span></p>
             </div>
 
             <div class="input-group">
-                <input id="message-input" type="text" placeholder="Type your message..." />
+                <input id="message-input" type="text" placeholder="Enter message..." />
                 <button id="send-button">Send</button>
             </div>
-        </div>
-
-        <div class="status-bar" style="margin-top: 15px;">
-            <p class="status-bar-field">Status: Online</p>
-            <p class="status-bar-field">Encrypted: No</p>
-            <p class="status-bar-field">CPU: 133MHz</p>
         </div>
     </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, serverTimestamp, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, set, remove, serverTimestamp, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // Your provided Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
         authDomain: "chatroon-4ded8.firebaseapp.com",
@@ -144,65 +179,151 @@
         appId: "1:779421378038:web:2e4b804b316b23882f93d7"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const chatRef = ref(db, 'messages');
+
+    let isAdmin = false;
+    let myUid = "";
+    let myProfile = { username: "Guest" + Math.floor(Math.random() * 999), nameChanges: 0 };
 
     const chatContent = document.getElementById('chat-content');
     const messageInput = document.getElementById('message-input');
     const usernameInput = document.getElementById('username');
     const sendButton = document.getElementById('send-button');
+    const changeNameBtn = document.getElementById('change-name-btn');
+    const adminTrigger = document.getElementById('admin-trigger');
+    const adminPanel = document.getElementById('admin-panel');
+    const clearChatBtn = document.getElementById('clear-chat-btn');
+    const userIdDisplay = document.getElementById('user-id-display');
 
-    // Function to send a message
-    function sendMessage() {
-        const text = messageInput.value.trim();
-        const user = usernameInput.value.trim() || "Anonymous";
-
-        if (text !== "") {
-            push(chatRef, {
-                username: user,
-                text: text,
-                time: serverTimestamp()
-            }).catch(err => {
-                console.error("Firebase Error:", err);
-                const errDiv = document.createElement('div');
-                errDiv.style.color = "red";
-                errDiv.innerHTML = `<i>*** Error: Check your Firebase Rules! ***</i>`;
-                chatContent.appendChild(errDiv);
-            });
-            messageInput.value = "";
-        }
+    // Generate Hardware-based ID
+    function generateId() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = "top";
+        ctx.font = "14px 'Arial'";
+        ctx.fillText("RetroChatV2", 2, 2);
+        return canvas.toDataURL().slice(-20, -4).replace(/[/+=]/g, "X");
     }
 
-    // Handle button click and Enter key
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
+    myUid = generateId();
+    userIdDisplay.innerText = myUid;
 
-    // Listen for new messages (Last 50 to keep it clean)
-    const recentMessages = query(chatRef, limitToLast(50));
-    onChildAdded(recentMessages, (snapshot) => {
+    // Load/Create Profile
+    const myProfileRef = ref(db, `users/${myUid}`);
+    onValue(myProfileRef, (snapshot) => {
         const data = snapshot.val();
-        
-        const entry = document.createElement('div');
-        entry.className = 'message-entry';
-
-        const date = data.time ? new Date(data.time) : new Date();
-        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        entry.innerHTML = `
-            <span class="timestamp">[${timeStr}]</span>
-            <span class="user-tag">${data.username}:</span>
-            <span class="text-body">${data.text}</span>
-        `;
-
-        chatContent.appendChild(entry);
-        
-        // Auto-scroll to bottom
-        chatContent.scrollTop = chatContent.scrollHeight;
+        if (data) {
+            myProfile = data;
+        } else {
+            set(myProfileRef, myProfile);
+        }
+        usernameInput.value = myProfile.username;
+        if (myProfile.nameChanges >= 1) {
+            changeNameBtn.disabled = true;
+            changeNameBtn.innerText = "Locked";
+        }
     });
+
+    // Fix: Name Update Logic
+    changeNameBtn.onclick = () => {
+        if (myProfile.nameChanges >= 1) {
+            alert("Handle is permanently locked.");
+            return;
+        }
+        const newName = prompt("Choose your PERMANENT Screen Name:");
+        if (newName && newName.trim().length > 0) {
+            const finalName = newName.trim().substring(0, 15);
+            set(myProfileRef, {
+                username: finalName,
+                nameChanges: 1
+            }).then(() => {
+                alert("Name updated successfully. This is now permanent.");
+            });
+        }
+    };
+
+    // Fix: Admin Login Logic
+    adminTrigger.onclick = (e) => {
+        e.stopPropagation();
+        const code = prompt("SYSTEM ACCESS CODE REQUIRED:");
+        if (code === "PineappleToasterOven42069") {
+            isAdmin = true;
+            adminPanel.style.display = "block";
+            alert("ADMINISTRATOR PRIVILEGES ACTIVATED");
+            loadMessages(); // Refresh UI to show delete buttons
+        } else if (code !== null) {
+            alert("INVALID CODE");
+        }
+    };
+
+    clearChatBtn.onclick = () => {
+        if (confirm("DANGER: WIPE ALL MESSAGES?")) {
+            remove(chatRef);
+        }
+    };
+
+    function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text) return;
+        push(chatRef, {
+            uid: myUid,
+            username: myProfile.username,
+            text: text,
+            isAdmin: isAdmin,
+            time: serverTimestamp()
+        });
+        messageInput.value = "";
+    }
+
+    sendButton.onclick = sendMessage;
+    messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+
+    window.deleteMsg = (key) => {
+        if (isAdmin && confirm("Remove message?")) {
+            remove(ref(db, `messages/${key}`));
+        }
+    };
+
+    function loadMessages() {
+        const recentQuery = query(chatRef, limitToLast(50));
+        onValue(recentQuery, (snapshot) => {
+            chatContent.innerHTML = "";
+            const data = snapshot.val();
+            
+            if (!data) {
+                chatContent.innerHTML = '<div class="message-entry"><i>*** No logs found ***</i></div>';
+                return;
+            }
+
+            Object.keys(data).forEach((key) => {
+                const msg = data[key];
+                const entry = document.createElement('div');
+                entry.className = 'message-entry';
+                
+                const time = msg.time ? new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '??:??';
+                
+                let html = `
+                    <span class="timestamp">[${time}]</span>
+                    ${msg.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+                    <span class="user-tag" style="color: ${msg.isAdmin ? 'red' : '#000080'}">${msg.username}:</span>
+                    <span class="text-body">${msg.text}</span>
+                `;
+
+                if (isAdmin) {
+                    html += `<span class="admin-controls" onclick="deleteMsg('${key}')">DEL</span>`;
+                }
+
+                entry.innerHTML = html;
+                chatContent.appendChild(entry);
+            });
+            chatContent.scrollTop = chatContent.scrollHeight;
+        });
+    }
+
+    loadMessages();
+
 </script>
 </body>
 </html>
