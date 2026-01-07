@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>~*~ Retro_Chat_Gold_Edition_v3.1 ~*~</title>
+    <title>~*~ Retro_Chat_Gold_Edition_v3.2 ~*~</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <style>
         :root {
@@ -150,6 +150,11 @@
             margin-top: 10px;
             padding-top: 5px;
         }
+
+        /* Hidden file input */
+        #pfp-upload {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -158,7 +163,7 @@
     <div class="title-bar">
         <div class="title-bar-text">
             <button class="smiley-btn" id="admin-trigger" title="Root Access">☺</button>
-            Chat_Client_v3.1_GOLD.exe
+            Chat_Client_v3.2_GOLD.exe
         </div>
         <div class="title-bar-controls">
             <button aria-label="Minimize"></button>
@@ -167,7 +172,7 @@
     </div>
     <div class="window-body">
         <marquee id="marquee-text" class="welcome-banner" scrollamount="3">
-            Welcome to the Chatroom! | Set your Profile Picture today! | User ID visibility enabled.
+            Welcome to the Chatroom! | Upload your Profile Picture from your PC! | User ID visibility enabled.
         </marquee>
 
         <div id="chat-content">
@@ -178,7 +183,8 @@
             <div class="field-row-stacked">
                 <label for="username">Your Identity:</label>
                 <div style="display: flex; gap: 5px; align-items: center;">
-                    <img id="my-pfp-preview" class="pfp-icon" src="https://via.placeholder.com/24?text=?" alt="PFP">
+                    <input type="file" id="pfp-upload" accept="image/*">
+                    <img id="my-pfp-preview" class="pfp-icon" src="https://via.placeholder.com/24?text=?" alt="PFP" style="cursor: pointer;" title="Click to upload new image">
                     <input id="username" type="text" readonly style="width: 130px; background: #eee;" />
                     <div id="my-color-preview" class="color-preview" title="Your Color"></div>
                     <button id="change-name-btn">Update Profile</button>
@@ -253,7 +259,7 @@
         username: "Guest", 
         nameChanges: 0, 
         color: "#000080", 
-        pfp: "https://via.placeholder.com/24?text=?" 
+        pfp: "" 
     };
 
     const chatContent = document.getElementById('chat-content');
@@ -261,6 +267,7 @@
     const usernameInput = document.getElementById('username');
     const myColorPreview = document.getElementById('my-color-preview');
     const myPfpPreview = document.getElementById('my-pfp-preview');
+    const pfpUploadInput = document.getElementById('pfp-upload');
     const sendButton = document.getElementById('send-button');
     const changeNameBtn = document.getElementById('change-name-btn');
     const adminTrigger = document.getElementById('admin-trigger');
@@ -308,6 +315,33 @@
         }
     });
 
+    // --- FILE UPLOAD LOGIC ---
+    myPfpPreview.onclick = () => {
+        if (myProfile.nameChanges >= 1 && !isAdmin) {
+            alert("Profile is locked.");
+            return;
+        }
+        pfpUploadInput.click();
+    };
+
+    pfpUploadInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Limit size to ~50KB for Realtime DB stability
+        if (file.size > 50000) {
+            alert("File too large! Keep images under 50KB for retro compatibility.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const base64 = event.target.result;
+            update(myProfileRef, { pfp: base64 });
+        };
+        reader.readAsDataURL(file);
+    };
+
     // --- USER ACTIONS ---
     changeNameBtn.onclick = () => {
         if (myProfile.nameChanges >= 1 && !isAdmin) return;
@@ -318,13 +352,9 @@
         const newColor = prompt("Enter a CSS Color (e.g. red, #00ff00):", myProfile.color);
         if (!newColor) return;
 
-        const newPfp = prompt("Enter Image URL for Profile Picture:", myProfile.pfp);
-        if (!newPfp) return;
-
-        set(myProfileRef, {
+        update(myProfileRef, {
             username: newName.substring(0, 15),
             color: newColor,
-            pfp: newPfp,
             nameChanges: 1
         });
     };
@@ -376,7 +406,7 @@
             username: myProfile.username,
             text: text,
             color: myProfile.color || "#000080",
-            pfp: myProfile.pfp || "https://via.placeholder.com/24?text=?",
+            pfp: myProfile.pfp || "",
             isAdmin: isAdmin,
             time: serverTimestamp()
         });
