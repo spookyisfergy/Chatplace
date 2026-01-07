@@ -184,7 +184,7 @@
                 <label for="username">Your Identity:</label>
                 <div style="display: flex; gap: 5px; align-items: center;">
                     <input type="file" id="pfp-upload" accept="image/*">
-                    <img id="my-pfp-preview" class="pfp-icon" src="https://via.placeholder.com/24?text=?" alt="PFP" style="cursor: pointer;" title="Click to upload new image">
+                    <img id="my-pfp-preview" class="pfp-icon" src="https://via.placeholder.com/24?text=?" alt="PFP" style="cursor: pointer;" title="Click icon to upload a picture from your device">
                     <input id="username" type="text" readonly style="width: 130px; background: #eee;" />
                     <div id="my-color-preview" class="color-preview" title="Your Color"></div>
                     <button id="change-name-btn">Update Profile</button>
@@ -317,10 +317,7 @@
 
     // --- FILE UPLOAD LOGIC ---
     myPfpPreview.onclick = () => {
-        if (myProfile.nameChanges >= 1 && !isAdmin) {
-            alert("Profile is locked.");
-            return;
-        }
+        // Allow unlimited PFP updates even if profile name is locked
         pfpUploadInput.click();
     };
 
@@ -328,16 +325,21 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        // Limit size to ~50KB for Realtime DB stability
-        if (file.size > 50000) {
-            alert("File too large! Keep images under 50KB for retro compatibility.");
+        // Limit size to ~60KB for stability. 
+        // Note: Base64 increases file size by ~33%.
+        if (file.size > 60000) {
+            alert("File too large! Please choose an image under 60KB.");
             return;
         }
 
         const reader = new FileReader();
         reader.onload = (event) => {
             const base64 = event.target.result;
-            update(myProfileRef, { pfp: base64 });
+            // Update the profile in the database
+            update(myProfileRef, { pfp: base64 }).then(() => {
+                // Update current preview locally
+                myPfpPreview.src = base64;
+            });
         };
         reader.readAsDataURL(file);
     };
