@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ Retro_Chat_v1.0 ~*~</title>
+    <!-- Authentic Windows 98 Design Framework -->
+    <link rel="stylesheet" href="https://unpkg.com/98.css">
+    <style>
+        body {
+            background-color: #008080; /* Classic Win98 Desktop Teal */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .main-window {
+            width: 450px;
+            max-width: 95vw;
+        }
+
+        #chat-content {
+            height: 300px;
+            background: #fff;
+            border: 2px inset #d2d2d2;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+
+        .message-entry {
+            margin-bottom: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .user-tag {
+            font-weight: bold;
+            color: #000080; /* Classic Navy */
+            margin-right: 5px;
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: #888;
+            margin-right: 5px;
+        }
+
+        .controls-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        #message-input {
+            flex-grow: 1;
+        }
+
+        .welcome-banner {
+            background: silver;
+            border: 1px solid gray;
+            padding: 2px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        /* Scrollbar styling for extra nostalgia */
+        #chat-content::-webkit-scrollbar {
+            width: 16px;
+        }
+        #chat-content::-webkit-scrollbar-track {
+            background: #dfdfdf;
+        }
+        #chat-content::-webkit-scrollbar-thumb {
+            background: silver;
+            border: 2px outset #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="window main-window">
+    <div class="title-bar">
+        <div class="title-bar-text">Chat_Client.exe</div>
+        <div class="title-bar-controls">
+            <button aria-label="Minimize"></button>
+            <button aria-label="Maximize"></button>
+            <button aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="window-body">
+        <marquee class="welcome-banner" scrollamount="3">
+            Welcome to the Nostalgia Zone! Please be kind. A/S/L? | Running version 1.0.4-beta | Online and Connected
+        </marquee>
+
+        <div id="chat-content">
+            <div class="message-entry"><i>*** Connecting to chatroon-4ded8 server... ***</i></div>
+        </div>
+
+        <div class="controls-pane">
+            <div class="field-row-stacked" style="width: 150px">
+                <label for="username">Screen Name:</label>
+                <input id="username" type="text" value="CoolGuest99" maxlength="15" />
+            </div>
+
+            <div class="input-group">
+                <input id="message-input" type="text" placeholder="Type your message..." />
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+
+        <div class="status-bar" style="margin-top: 15px;">
+            <p class="status-bar-field">Status: Online</p>
+            <p class="status-bar-field">Encrypted: No</p>
+            <p class="status-bar-field">CPU: 133MHz</p>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, serverTimestamp, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Your provided Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
+        authDomain: "chatroon-4ded8.firebaseapp.com",
+        databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
+        projectId: "chatroon-4ded8",
+        storageBucket: "chatroon-4ded8.firebasestorage.app",
+        messagingSenderId: "779421378038",
+        appId: "1:779421378038:web:2e4b804b316b23882f93d7"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const chatRef = ref(db, 'messages');
+
+    const chatContent = document.getElementById('chat-content');
+    const messageInput = document.getElementById('message-input');
+    const usernameInput = document.getElementById('username');
+    const sendButton = document.getElementById('send-button');
+
+    // Function to send a message
+    function sendMessage() {
+        const text = messageInput.value.trim();
+        const user = usernameInput.value.trim() || "Anonymous";
+
+        if (text !== "") {
+            push(chatRef, {
+                username: user,
+                text: text,
+                time: serverTimestamp()
+            }).catch(err => {
+                console.error("Firebase Error:", err);
+                const errDiv = document.createElement('div');
+                errDiv.style.color = "red";
+                errDiv.innerHTML = `<i>*** Error: Check your Firebase Rules! ***</i>`;
+                chatContent.appendChild(errDiv);
+            });
+            messageInput.value = "";
+        }
+    }
+
+    // Handle button click and Enter key
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // Listen for new messages (Last 50 to keep it clean)
+    const recentMessages = query(chatRef, limitToLast(50));
+    onChildAdded(recentMessages, (snapshot) => {
+        const data = snapshot.val();
+        
+        const entry = document.createElement('div');
+        entry.className = 'message-entry';
+
+        const date = data.time ? new Date(data.time) : new Date();
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        entry.innerHTML = `
+            <span class="timestamp">[${timeStr}]</span>
+            <span class="user-tag">${data.username}:</span>
+            <span class="text-body">${data.text}</span>
+        `;
+
+        chatContent.appendChild(entry);
+        
+        // Auto-scroll to bottom
+        chatContent.scrollTop = chatContent.scrollHeight;
+    });
+</script>
+</body>
+</html>
