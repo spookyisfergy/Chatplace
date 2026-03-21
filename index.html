@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SANDBOXELS ULTRA - MULTIPLAYER</title>
+    <title>SANDBOXELS ULTRA - FIXED MULTIPLAYER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;700&display=swap');
         
-        :root {
-            --neon-blue: #00f2ff;
-            --panel-bg: rgba(8, 8, 12, 0.98);
-        }
-
         body {
-            background: #010103;
+            background: #050508;
             color: #e0e0e0;
             font-family: 'JetBrains Mono', monospace;
             height: 100vh;
@@ -40,126 +35,91 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            border: 1px solid #222;
+            border: 1px solid #111;
         }
 
         .hud-panel {
             position: absolute;
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 242, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border-radius: 12px;
-            box-shadow: 0 0 40px rgba(0,0,0,1);
+            background: rgba(10, 10, 15, 0.95);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
             z-index: 100;
-            user-select: none;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-width: 300px;
+            width: 320px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
         }
 
         .panel-header {
-            background: linear-gradient(90deg, rgba(0, 242, 255, 0.1), transparent);
-            padding: 12px;
-            cursor: move;
+            padding: 10px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 10px;
-            letter-spacing: 2px;
+            font-size: 11px;
+            letter-spacing: 1px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 242, 255, 0.05);
         }
 
         .element-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            gap: 6px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
             padding: 12px;
-            flex-grow: 1;
+            max-height: 300px;
             overflow-y: auto;
-            max-height: 350px;
         }
 
         .el-btn {
             aspect-ratio: 1;
-            border-radius: 6px;
+            border-radius: 4px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.1s ease;
-            position: relative;
             cursor: pointer;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
+            transition: 0.1s;
         }
 
-        .el-btn:hover { border-color: var(--neon-blue); transform: scale(1.1); z-index: 10; }
-        .el-btn.active { border-color: #fff; box-shadow: 0 0 15px var(--neon-blue); transform: scale(1.05); }
+        .el-btn:hover { border-color: #00f2ff; background: rgba(0, 242, 255, 0.1); }
+        .el-btn.active { border-color: #fff; box-shadow: 0 0 10px #00f2ff; background: rgba(0, 242, 255, 0.2); }
+        .el-btn span { font-size: 8px; margin-top: 2px; color: #aaa; font-weight: bold; }
 
-        .category-tab {
-            padding: 8px 4px;
-            font-size: 8px;
-            text-align: center;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            font-weight: 700;
-            color: #666;
-            flex: 1;
-        }
-
-        .category-tab.active {
-            color: var(--neon-blue);
-            border-color: var(--neon-blue);
-            background: rgba(0, 242, 255, 0.05);
-        }
-
-        #inspector {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 30px;
-            background: rgba(0,0,0,0.9);
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 2px;
-            font-size: 11px;
-            pointer-events: none;
-            z-index: 200;
-            color: var(--neon-blue);
-        }
-
-        #user-id-display {
+        #connection-status {
             position: fixed;
             top: 20px;
             right: 20px;
             font-size: 10px;
-            color: #00f2ff;
+            padding: 6px 15px;
+            border-radius: 20px;
             background: rgba(0,0,0,0.8);
-            padding: 5px 12px;
-            border: 1px solid rgba(0, 242, 255, 0.3);
+            border: 1px solid #333;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .admin-trigger {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 500;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid #ff0055;
-            color: #ff0055;
-            padding: 8px 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 12px;
-            font-weight: 900;
-            border-radius: 4px;
-            cursor: pointer;
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #555; }
+        .status-dot.online { background: #00f2ff; box-shadow: 0 0 8px #00f2ff; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
         }
 
-        .admin-trigger:hover {
-            background: #ff0055;
-            color: white;
+        #brush-circle {
+            position: absolute;
+            pointer-events: none;
+            border: 1px solid rgba(0, 242, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
         }
     </style>
 </head>
@@ -167,207 +127,222 @@
 
     <div id="game-container">
         <canvas id="canvas"></canvas>
-        <div id="brush-circle" class="absolute pointer-events-none border border-cyan-400 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-40"></div>
+        <div id="brush-circle"></div>
     </div>
 
-    <div id="user-id-display">CONNECTING_TO_GRID...</div>
+    <div id="connection-status">
+        <div id="dot" class="status-dot"></div>
+        <span id="status-text">CONNECTING...</span>
+    </div>
 
-    <button class="admin-trigger" onclick="window.open('https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2F641yf1drx6f91.jpg', '_blank')">ADMIN</button>
-
-    <div class="hud-panel" id="palette-win" style="top: 20px; left: 20px; width: 340px;">
+    <div class="hud-panel" style="top: 20px; left: 20px;">
         <div class="panel-header">
-            <span>UNIVERSE_CORE_v2</span>
-            <div id="status-light" class="w-2 h-2 rounded-full bg-red-600"></div>
-        </div>
-        <div class="flex bg-black/40 border-b border-white/5" id="tabs">
-            <div class="category-tab active" data-cat="earth">EARTH</div>
-            <div class="category-tab" data-cat="liquid">LIQUID</div>
-            <div class="category-tab" data-cat="life">LIFE</div>
-            <div class="category-tab" data-cat="tech">BUILD</div>
-            <div class="category-tab" data-cat="energy">CHAOS</div>
+            <span>ELEMENT_CORE</span>
+            <span id="user-label" class="opacity-40 text-[9px]">ID: ----</span>
         </div>
         <div class="element-grid" id="element-list"></div>
-        <div class="p-4 border-t border-white/5 space-y-3 bg-black/40">
-            <div class="flex justify-between text-[9px] font-bold text-gray-500">
-                <span>BRUSH_RADIUS</span>
-                <span id="brush-size-val" class="text-cyan-400">8px</span>
+        <div class="p-4 border-t border-white/10 space-y-3">
+            <div class="flex justify-between text-[9px] uppercase font-bold text-gray-400">
+                <span>Brush Size</span>
+                <span id="bsize-num" class="text-cyan-400">8</span>
             </div>
-            <input type="range" id="brush-size" min="1" max="40" value="8" class="w-full accent-cyan-500 bg-gray-900 h-1 rounded-lg appearance-none cursor-pointer">
-            <button onclick="clearSim()" class="w-full py-2 bg-red-950/20 border border-red-900/40 text-red-500 text-[9px] hover:bg-red-600 hover:text-white transition-all font-bold uppercase tracking-widest">Reset Simulation</button>
+            <input type="range" id="brush-size" min="1" max="30" value="8" class="w-full accent-cyan-500">
+            <button id="reset-btn" class="w-full py-2 bg-red-900/20 border border-red-500/30 text-red-400 text-[10px] hover:bg-red-500 hover:text-white transition-all font-bold">WIPE SIMULATION</button>
         </div>
     </div>
-
-    <div id="inspector">SCANNING...</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, query, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Simulation Constants
         const WIDTH = 200;
         const HEIGHT = 150;
-        const ELEMENTS = {
-            EMPTY: { id: 0, color: '#000000', name: 'Air', cat: 'earth', icon: '◌' },
-            BEDROCK: { id: 1, color: '#111111', name: 'Bedrock', cat: 'earth', state: 'solid', immovable: true, icon: '⬛' },
-            SAND: { id: 2, color: '#e3b448', name: 'Sand', cat: 'earth', state: 'powder', icon: '▒' },
-            DIRT: { id: 3, color: '#5d4037', name: 'Dirt', cat: 'earth', state: 'powder', icon: '🧱' },
-            STONE: { id: 5, color: '#757575', name: 'Stone', cat: 'earth', state: 'solid', icon: '🪨' },
-            WATER: { id: 10, color: '#2196f3', name: 'Water', cat: 'liquid', state: 'liquid', icon: '💧' },
-            OIL: { id: 11, color: '#3e2723', name: 'Oil', cat: 'liquid', state: 'liquid', icon: '🛢️' },
-            LAVA: { id: 13, color: '#ff5722', name: 'Lava', cat: 'liquid', state: 'liquid', icon: '🔥' },
-            PLANT: { id: 20, color: '#4caf50', name: 'Plant', cat: 'life', state: 'solid', icon: '🌿' },
-            WOOD: { id: 23, color: '#795548', name: 'Wood', cat: 'life', state: 'solid', icon: '🪵' },
-            METAL: { id: 30, color: '#90a4ae', name: 'Steel', cat: 'tech', state: 'solid', icon: '⛓️' },
-            WIRE: { id: 31, color: '#ff9800', name: 'Wire', cat: 'tech', state: 'solid', icon: '⚡' },
-            FIRE: { id: 24, color: '#f44336', name: 'Fire', cat: 'energy', state: 'gas', icon: '♨️' },
-            TNT: { id: 40, color: '#b71c1c', name: 'TNT', cat: 'energy', state: 'solid', icon: '🧨' },
-            ERASER: { id: 53, color: '#000000', name: 'Eraser', cat: 'energy', icon: '✖️' }
-        };
+        
+        // Define grid globally for access from UI buttons
+        window.grid = new Int32Array(WIDTH * HEIGHT);
+        
+        const ELEMENTS = [
+            { id: 0, name: 'AIR', color: '#000000', icon: '💨' },
+            { id: 2, name: 'SAND', color: '#e3b448', icon: '⏳', type: 'powder' },
+            { id: 10, name: 'WATER', color: '#2196f3', icon: '💧', type: 'liquid' },
+            { id: 13, name: 'LAVA', color: '#ff5722', icon: '🔥', type: 'liquid' },
+            { id: 1, name: 'WALL', color: '#444444', icon: '🧱', type: 'solid' },
+            { id: 20, name: 'PLANT', color: '#4caf50', icon: '🌿', type: 'solid' },
+            { id: 24, name: 'FIRE', color: '#ffca28', icon: '♨️', type: 'gas' },
+            { id: 31, name: 'WIRE', color: '#7e57c2', icon: '⚡', type: 'solid' }
+        ];
 
-        let grid = new Int32Array(WIDTH * HEIGHT);
-        let selectedElement = 2; 
+        let selectedElement = 2;
         let brushSize = 8;
-        let isMouseDown = false;
-        let currentUser = null;
+        let isDrawing = false;
+        let user = null;
 
+        // UI Setup
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d', { alpha: false });
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
 
+        const elList = document.getElementById('element-list');
+        ELEMENTS.forEach(el => {
+            const btn = document.createElement('div');
+            btn.className = `el-btn ${el.id === selectedElement ? 'active' : ''}`;
+            btn.innerHTML = `${el.icon}<span>${el.name}</span>`;
+            btn.onclick = () => {
+                selectedElement = el.id;
+                document.querySelectorAll('.el-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            };
+            elList.appendChild(btn);
+        });
+
+        // Fix ReferenceError by binding reset button correctly
+        document.getElementById('reset-btn').onclick = () => {
+            window.grid.fill(0);
+        };
+
+        // Firebase Core Logic
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'multiplayer-sand-v1';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sand-ultra-fixed';
 
-        async function initAuth() {
+        async function startMultiplayer() {
             try {
+                // 1. Auth Handshake
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
-            } catch (err) {
-                console.error("Auth Error", err);
+
+                onAuthStateChanged(auth, (u) => {
+                    if (u) {
+                        user = u;
+                        document.getElementById('dot').classList.add('online');
+                        document.getElementById('status-text').innerText = 'LIVE SYNC';
+                        document.getElementById('user-label').innerText = `ID: ${u.uid.slice(0,6)}`;
+                        
+                        // 2. Setup Listener AFTER auth is confirmed
+                        setupListeners();
+                    }
+                });
+            } catch (e) {
+                document.getElementById('status-text').innerText = 'SYNC ERROR';
+                console.error(e);
             }
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('user-id-display').innerText = `USER: ${user.uid}`;
-                document.getElementById('status-light').className = "w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f2ff]";
-                startSync();
-            }
-        });
-
-        function startSync() {
-            if (!currentUser) return;
-            // Listen for strokes from ALL users in the same app session
-            const strokesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'strokes');
-            onSnapshot(strokesCollection, (snapshot) => {
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") {
+        function setupListeners() {
+            const path = collection(db, 'artifacts', appId, 'public', 'data', 'strokes');
+            // We only care about new strokes added while we are playing
+            onSnapshot(path, (snap) => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
                         const data = change.doc.data();
-                        // Only draw if it's from a friend (different userId)
-                        if (data.userId !== currentUser.uid) {
+                        // If it's from someone else, paint it!
+                        if (data.userId !== user.uid) {
                             applyPaint(data.x, data.y, data.type, data.size, false);
                         }
                     }
                 });
-            }, (err) => console.error("Sync error:", err));
+            }, (err) => {
+                console.error("Firestore error:", err);
+            });
         }
 
-        function buildUI() {
-            const list = document.getElementById('element-list');
-            const tabs = document.getElementById('tabs');
-            
-            function renderCategory(cat) {
-                list.innerHTML = '';
-                Object.values(ELEMENTS).forEach(el => {
-                    if(el.cat !== cat && cat !== 'all') return;
-                    const btn = document.createElement('div');
-                    btn.className = `el-btn ${selectedElement === el.id ? 'active' : ''}`;
-                    btn.style.background = el.id === 0 ? 'transparent' : el.color;
-                    btn.innerHTML = el.icon;
-                    btn.onclick = () => {
-                        selectedElement = el.id;
-                        document.querySelectorAll('.el-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                    };
-                    list.appendChild(btn);
-                });
-            }
-
-            tabs.onclick = (e) => {
-                if(e.target.dataset.cat) {
-                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                    e.target.classList.add('active');
-                    renderCategory(e.target.dataset.cat);
-                }
-            };
-            renderCategory('earth');
-        }
-
-        function applyPaint(x, y, type, size, shouldSync = true) {
-            const actualType = type === 53 ? 0 : type;
+        function applyPaint(x, y, type, size, sync = true) {
+            const radiusSq = size * size;
             for (let i = -size; i <= size; i++) {
                 for (let j = -size; j <= size; j++) {
-                    if (i*i + j*j > size*size) continue;
+                    if (i*i + j*j > radiusSq) continue;
                     const nx = Math.floor(x + i);
                     const ny = Math.floor(y + j);
                     if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-                        if (grid[ny * WIDTH + nx] !== 1) grid[ny * WIDTH + nx] = actualType;
+                        const idx = ny * WIDTH + nx;
+                        if (window.grid[idx] !== 1) window.grid[idx] = type;
                     }
                 }
             }
-            
-            if (shouldSync && currentUser) {
-                // Throttling: only sync a fraction of mouse move points to avoid Firestore usage limits
-                if (Math.random() > 0.85) {
-                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'strokes'), {
-                        x, y, type, size, userId: currentUser.uid, ts: serverTimestamp()
-                    }).catch(() => {});
-                }
+
+            // Sync with friend
+            if (sync && user && Math.random() > 0.8) { // Moderate throttling to prevent lag
+                addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'strokes'), {
+                    x, y, type, size, userId: user.uid, ts: serverTimestamp()
+                }).catch(e => console.warn("Sync missed"));
             }
         }
 
+        // Interaction
+        function handleInput(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const x = (clientX - rect.left) * (WIDTH / rect.width);
+            const y = (clientY - rect.top) * (HEIGHT / rect.height);
+            
+            const cursor = document.getElementById('brush-circle');
+            cursor.style.left = clientX + 'px';
+            cursor.style.top = clientY + 'px';
+            cursor.style.width = (brushSize * (rect.width/WIDTH) * 2) + 'px';
+            cursor.style.height = (brushSize * (rect.width/WIDTH) * 2) + 'px';
+
+            if (isDrawing) applyPaint(x, y, selectedElement, brushSize, true);
+        }
+
+        window.addEventListener('mousedown', (e) => { if(!e.target.closest('.hud-panel')) isDrawing = true; });
+        window.addEventListener('mouseup', () => isDrawing = false);
+        window.addEventListener('mousemove', handleInput);
+        window.addEventListener('touchstart', (e) => { if(!e.target.closest('.hud-panel')) isDrawing = true; handleInput(e); });
+        window.addEventListener('touchend', () => isDrawing = false);
+        window.addEventListener('touchmove', (e) => { if(!e.target.closest('.hud-panel')) { e.preventDefault(); handleInput(e); } }, {passive: false});
+        
+        document.getElementById('brush-size').oninput = (e) => {
+            brushSize = parseInt(e.target.value);
+            document.getElementById('bsize-num').innerText = brushSize;
+        };
+
+        // Engine
         function update() {
             for (let y = HEIGHT - 1; y >= 0; y--) {
                 for (let x = 0; x < WIDTH; x++) {
                     const idx = y * WIDTH + x;
-                    const p = grid[idx];
-                    if (p === 0 || p === 1 || p === 5 || p === 30 || p === 31 || p === 23) continue;
+                    const p = window.grid[idx];
+                    if (p === 0 || p === 1 || p === 31 || p === 20) continue;
 
-                    const el = Object.values(ELEMENTS).find(e => e.id === p);
+                    const el = ELEMENTS.find(e => e.id === p);
                     if (!el) continue;
 
-                    if (el.state === 'powder') {
+                    if (el.type === 'powder') {
                         if (y < HEIGHT - 1) {
-                            if (grid[(y + 1) * WIDTH + x] === 0) {
-                                grid[idx] = 0; grid[(y + 1) * WIDTH + x] = p;
-                            } else if (x > 0 && grid[(y + 1) * WIDTH + (x - 1)] === 0) {
-                                grid[idx] = 0; grid[(y + 1) * WIDTH + (x - 1)] = p;
-                            } else if (x < WIDTH - 1 && grid[(y + 1) * WIDTH + (x + 1)] === 0) {
-                                grid[idx] = 0; grid[(y + 1) * WIDTH + (x + 1)] = p;
+                            if (window.grid[(y+1)*WIDTH + x] === 0) {
+                                window.grid[idx] = 0; window.grid[(y+1)*WIDTH + x] = p;
+                            } else {
+                                const dir = Math.random() < 0.5 ? -1 : 1;
+                                if (x+dir >= 0 && x+dir < WIDTH && window.grid[(y+1)*WIDTH + (x+dir)] === 0) {
+                                    window.grid[idx] = 0; window.grid[(y+1)*WIDTH + (x+dir)] = p;
+                                }
                             }
                         }
-                    } else if (el.state === 'liquid') {
-                        if (y < HEIGHT - 1 && grid[(y + 1) * WIDTH + x] === 0) {
-                            grid[idx] = 0; grid[(y + 1) * WIDTH + x] = p;
+                    } else if (el.type === 'liquid') {
+                        if (y < HEIGHT - 1 && window.grid[(y+1)*WIDTH + x] === 0) {
+                            window.grid[idx] = 0; window.grid[(y+1)*WIDTH + x] = p;
                         } else {
                             const dir = Math.random() < 0.5 ? -1 : 1;
-                            if (x + dir >= 0 && x + dir < WIDTH && grid[y * WIDTH + (x + dir)] === 0) {
-                                grid[idx] = 0; grid[y * WIDTH + (x + dir)] = p;
+                            if (x+dir >= 0 && x+dir < WIDTH && window.grid[y*WIDTH + (x+dir)] === 0) {
+                                window.grid[idx] = 0; window.grid[y*WIDTH + (x+dir)] = p;
                             }
                         }
-                    } else if (p === 24) { // Fire
-                        if (Math.random() > 0.9) grid[idx] = 0;
-                        const nx = x + (Math.floor(Math.random()*3)-1);
+                    } else if (el.type === 'gas') {
+                        if (Math.random() > 0.9) window.grid[idx] = 0;
                         const ny = y - 1;
-                        if (ny >= 0 && nx >= 0 && nx < WIDTH && grid[ny*WIDTH+nx] === 0) {
-                            grid[idx] = 0; grid[ny*WIDTH+nx] = 24;
+                        const nx = x + (Math.floor(Math.random()*3)-1);
+                        if (ny >= 0 && nx >= 0 && nx < WIDTH && window.grid[ny*WIDTH+nx] === 0) {
+                            window.grid[idx] = 0; window.grid[ny*WIDTH+nx] = p;
                         }
                     }
                 }
@@ -376,57 +351,23 @@
 
         const imgData = ctx.createImageData(WIDTH, HEIGHT);
         function draw() {
-            for (let i = 0; i < grid.length; i++) {
-                const elId = grid[i];
-                const el = Object.values(ELEMENTS).find(e => e.id === elId) || ELEMENTS.EMPTY;
+            for (let i = 0; i < window.grid.length; i++) {
+                const el = ELEMENTS.find(e => e.id === window.grid[i]) || ELEMENTS[0];
                 const idx = i * 4;
-                const rgb = hexToRgb(el.color);
-                imgData.data[idx] = rgb.r;
-                imgData.data[idx+1] = rgb.g;
-                imgData.data[idx+2] = rgb.b;
+                const r = parseInt(el.color.slice(1,3), 16);
+                const g = parseInt(el.color.slice(3,5), 16);
+                const b = parseInt(el.color.slice(5,7), 16);
+                imgData.data[idx] = r;
+                imgData.data[idx+1] = g;
+                imgData.data[idx+2] = b;
                 imgData.data[idx+3] = 255;
             }
             ctx.putImageData(imgData, 0, 0);
         }
 
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i.exec(hex);
-            return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : { r: 0, g: 0, b: 0 };
-        }
-
-        function handlePointer(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const x = (clientX - rect.left) * (WIDTH / rect.width);
-            const y = (clientY - rect.top) * (HEIGHT / rect.height);
-            
-            const brushCircle = document.getElementById('brush-circle');
-            brushCircle.style.left = clientX + 'px';
-            brushCircle.style.top = clientY + 'px';
-            brushCircle.style.width = (brushSize * (rect.width/WIDTH) * 2) + 'px';
-            brushCircle.style.height = (brushSize * (rect.width/WIDTH) * 2) + 'px';
-            
-            if (isMouseDown) applyPaint(x, y, selectedElement, brushSize, true);
-        }
-
-        window.addEventListener('mousedown', (e) => { if(!e.target.closest('.hud-panel') && !e.target.closest('.admin-trigger')) isMouseDown = true; });
-        window.addEventListener('mouseup', () => isMouseDown = false);
-        window.addEventListener('mousemove', handlePointer);
-        window.addEventListener('touchstart', (e) => { if(!e.target.closest('.hud-panel') && !e.target.closest('.admin-trigger')) isMouseDown = true; handlePointer(e); });
-        window.addEventListener('touchend', () => isMouseDown = false);
-        window.addEventListener('touchmove', (e) => { if(!e.target.closest('.hud-panel')) e.preventDefault(); handlePointer(e); }, {passive: false});
-
-        document.getElementById('brush-size').oninput = (e) => {
-            brushSize = parseInt(e.target.value);
-            document.getElementById('brush-size-val').innerText = brushSize + 'px';
-        };
-
-        window.clearSim = () => { grid.fill(0); };
         function loop() { update(); draw(); requestAnimationFrame(loop); }
         
-        initAuth();
-        buildUI();
+        startMultiplayer();
         loop();
     </script>
 </body>
