@@ -1,238 +1,439 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/genizy/google-class/nova-craft/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nova Craft - Multiplayer</title>
+import React, { useState, useEffect, useRef } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { 
+  getFirestore, 
+  doc, 
+  onSnapshot, 
+  updateDoc, 
+  setDoc, 
+  getDoc 
+} from 'firebase/firestore';
+import { LucideCamera, LucideUser, LucideCrown, LucidePlay, LucideRefreshCw, LucideCoins } from 'lucide-react';
+
+// --- Firebase Configuration ---
+const firebaseConfig = {
+  apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
+  authDomain: "chatroon-4ded8.firebaseapp.com",
+  databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
+  projectId: "chatroon-4ded8",
+  storageBucket: "chatroon-4ded8.firebasestorage.app",
+  messagingSenderId: "779421378038",
+  appId: "1:779421378038:web:2e4b804b316b23882f93d7"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Use a clean appId and ensure the path is exactly 6 segments: 
+// artifacts -> {appId} -> public -> data -> gameSession -> {docId}
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'blackjack-live-casino-v1';
+const SESSION_DOC_ID = 'current_game';
+
+// --- Constants ---
+const SECRET_DEALER_PHRASE = "activate-casino";
+const SUITS = ['♠', '♥', '♦', '♣'];
+const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null); // 'player' or 'dealer'
+  const [gameState, setGameState] = useState({
+    dealerHand: [],
+    playerHand: [],
+    status: 'waiting',
+    dealerActive: false,
+    lastAction: 'Initializing...',
+    deck: []
+  });
+  const [stream, setStream] = useState(null);
+  const videoRef = useRef(null);
+
+  // 1. Authentication
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        await signInAnonymously(auth);
+      } catch (err) {
+        console.error("Firebase Auth Error:", err);
+      }
+    };
+    initAuth();
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (u) setUser(u);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Game State Sync
+  useEffect(() => {
+    if (!user) return;
+
+    // RULE 1 FIX: Ensure exactly 6 segments in the path
+    const gameDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'gameSession', SESSION_DOC_ID);
     
-    <base href="https://cdn.jsdelivr.net/gh/genizy/google-class/nova-craft/">
-    <script type="module" crossorigin src="https://cdn.jsdelivr.net/gh/genizy/google-class/nova-craft/assets/index-CQ1EvTOM.js"></script>
-    <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/genizy/google-class/nova-craft/assets/index-CzvCHSYC.css">
-
-    <style>
-      /* Multiplayer HUD */
-      #mp-hud {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 10000;
-        font-family: sans-serif;
-        pointer-events: none;
+    const initGame = async () => {
+      try {
+        const snap = await getDoc(gameDocRef);
+        if (!snap.exists()) {
+          await setDoc(gameDocRef, {
+            dealerHand: [],
+            playerHand: [],
+            status: 'waiting',
+            deck: createDeck(),
+            dealerActive: false,
+            lastAction: 'Table opened'
+          });
+        }
+      } catch (e) {
+        console.error("Initialization error:", e);
       }
+    };
+    initGame();
 
-      #player-badge {
-        background: rgba(0, 0, 0, 0.7);
-        color: #4CAF50;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-        border: 1px solid #4CAF50;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+    const unsubscribe = onSnapshot(gameDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        // Ensure data shapes are correct before setting state
+        setGameState(prev => ({
+          ...prev,
+          ...data,
+          dealerHand: Array.isArray(data.dealerHand) ? data.dealerHand : [],
+          playerHand: Array.isArray(data.playerHand) ? data.playerHand : []
+        }));
       }
+    }, (err) => {
+      console.error("Firestore sync error:", err);
+    });
 
-      .dot { width: 8px; height: 8px; background: #4CAF50; border-radius: 50%; }
+    return () => unsubscribe();
+  }, [user]);
 
-      /* Mini Game Star */
-      #nova-star {
-        position: fixed;
-        width: 40px;
-        height: 40px;
-        background: radial-gradient(circle, #fff, #ff00ff);
-        border-radius: 50%;
-        box-shadow: 0 0 20px #ff00ff;
-        cursor: pointer;
-        z-index: 9999;
-        display: none;
-        animation: pulse 1s infinite;
+  // 3. Camera Handling
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setStream(mediaStream);
+      if (videoRef.current) videoRef.current.srcObject = mediaStream;
+      
+      const gameDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'gameSession', SESSION_DOC_ID);
+      await updateDoc(gameDocRef, { dealerActive: true });
+    } catch (err) {
+      console.error("Camera access denied:", err);
+    }
+  };
+
+  // --- Game Logic Functions ---
+  function createDeck() {
+    let deck = [];
+    for (let suit of SUITS) {
+      for (let value of VALUES) {
+        deck.push({ suit, value });
       }
+    }
+    return deck.sort(() => Math.random() - 0.5);
+  }
 
-      @keyframes pulse {
-        0% { transform: scale(1); box-shadow: 0 0 20px #ff00ff; }
-        50% { transform: scale(1.2); box-shadow: 0 0 40px #ff00ff; }
-        100% { transform: scale(1); box-shadow: 0 0 20px #ff00ff; }
-      }
+  const calculateScore = (hand) => {
+    if (!hand || !Array.isArray(hand)) return 0;
+    let score = 0;
+    let aces = 0;
+    hand.forEach(card => {
+      if (!card || !card.value) return;
+      if (['J', 'Q', 'K'].includes(card.value)) score += 10;
+      else if (card.value === 'A') {
+        aces += 1;
+        score += 11;
+      } else score += parseInt(card.value);
+    });
+    while (score > 21 && aces > 0) {
+      score -= 10;
+      aces -= 1;
+    }
+    return score;
+  };
 
-      .supernova {
-        position: fixed;
-        width: 10px;
-        height: 10px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: 0 0 100px 50px white;
-        z-index: 10001;
-        pointer-events: none;
-        animation: explode 0.5s ease-out forwards;
-      }
+  const updateGame = async (updates) => {
+    if (!user) return;
+    const gameDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'gameSession', SESSION_DOC_ID);
+    await updateDoc(gameDocRef, updates);
+  };
 
-      @keyframes explode {
-        0% { transform: scale(1); opacity: 1; }
-        100% { transform: scale(50); opacity: 0; }
-      }
+  // --- Actions ---
+  const handleDeal = async () => {
+    const newDeck = createDeck();
+    const pHand = [newDeck.pop(), newDeck.pop()];
+    const dHand = [newDeck.pop()]; 
+    await updateGame({
+      playerHand: pHand,
+      dealerHand: dHand,
+      deck: newDeck,
+      status: 'playing',
+      lastAction: 'Dealer dealt the cards'
+    });
+  };
 
-      /* Global Notification */
-      #global-notify {
-        position: fixed;
-        top: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
-        color: #e090ff;
-        padding: 8px 20px;
-        border-radius: 5px;
-        font-size: 14px;
-        z-index: 10002;
-        border: 1px solid #e090ff;
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
+  const handleHit = async () => {
+    if (gameState.status !== 'playing') return;
+    const deck = [...(gameState.deck || [])];
+    if (deck.length === 0) return;
+    const card = deck.pop();
+    const newHand = [...(gameState.playerHand || []), card];
+    const score = calculateScore(newHand);
     
-    <div id="mp-hud">
-      <div id="player-badge">
-        <div class="dot"></div>
-        <span id="player-info">Connecting...</span>
+    let status = 'playing';
+    if (score > 21) status = 'dealer_won';
+
+    await updateGame({
+      playerHand: newHand,
+      deck,
+      status,
+      lastAction: score > 21 ? 'Player busted!' : 'Player takes a card'
+    });
+  };
+
+  const handleStand = async () => {
+    await updateGame({ status: 'dealer_turn', lastAction: 'Player stands. Dealer\'s turn.' });
+  };
+
+  const dealerDraw = async () => {
+    let deck = [...(gameState.deck || [])];
+    let dHand = [...(gameState.dealerHand || [])];
+    
+    while (calculateScore(dHand) < 17 && deck.length > 0) {
+      dHand.push(deck.pop());
+    }
+
+    const dScore = calculateScore(dHand);
+    const pScore = calculateScore(gameState.playerHand);
+    let status = 'push';
+    if (dScore > 21 || pScore > dScore) status = 'player_won';
+    else if (dScore > pScore) status = 'dealer_won';
+
+    await updateGame({
+      dealerHand: dHand,
+      deck,
+      status,
+      lastAction: `Dealer ended with ${dScore}. Round finished.`
+    });
+  };
+
+  // --- UI Components ---
+  if (!role) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-sans text-white">
+        <div className="max-w-md w-full bg-slate-900 rounded-2xl p-8 border border-slate-800 shadow-2xl">
+          <div className="flex justify-center mb-6">
+            <div className="p-4 bg-yellow-500/10 rounded-full">
+              <LucideCoins className="w-12 h-12 text-yellow-500" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-center mb-2">Rainbet Live</h1>
+          <p className="text-slate-400 text-center mb-8">Choose your role to begin</p>
+          
+          <div className="space-y-4">
+            <button 
+              onClick={() => setRole('player')}
+              className="w-full flex items-center justify-between p-4 bg-blue-600 hover:bg-blue-500 transition rounded-xl font-semibold"
+            >
+              <div className="flex items-center gap-3">
+                <LucideUser size={20} /> Join as Player
+              </div>
+              <span className="text-xs opacity-60">Ready to bet</span>
+            </button>
+            
+            <button 
+              onClick={() => {
+                const p = prompt("Enter secret Dealer phrase:");
+                if (p === SECRET_DEALER_PHRASE) setRole('dealer');
+              }}
+              className="w-full flex items-center justify-between p-4 bg-slate-800 hover:bg-slate-700 transition rounded-xl font-semibold border border-slate-700"
+            >
+              <div className="flex items-center gap-3">
+                <LucideCrown size={20} className="text-yellow-500" /> Enter as Dealer
+              </div>
+              <span className="text-xs opacity-60">Staff only</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row overflow-hidden">
+      {/* Sidebar: Live Stream */}
+      <div className="w-full md:w-80 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
+        <div className="p-4 border-b border-slate-800 flex justify-between items-center">
+          <h2 className="font-bold flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            LIVE TABLE
+          </h2>
+          <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400 uppercase tracking-widest">{role}</span>
+        </div>
+
+        {/* Video Area */}
+        <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
+          {role === 'dealer' ? (
+            <video 
+              ref={videoRef} 
+              autoPlay 
+              muted 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            gameState?.dealerActive ? (
+              <div className="w-full h-full bg-slate-800 flex items-center justify-center text-center p-4">
+                <div>
+                  <LucideCamera className="w-8 h-8 mx-auto mb-2 text-blue-400 animate-pulse" />
+                  <p className="text-xs text-slate-400">DEALER STREAM ACTIVE</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center p-8">
+                <LucideCamera className="w-10 h-10 mx-auto mb-2 text-slate-700 opacity-20" />
+                <p className="text-[10px] text-slate-600 uppercase">Camera Offline</p>
+              </div>
+            )
+          )}
+          
+          {role === 'dealer' && !stream && (
+            <button 
+              onClick={startCamera}
+              className="absolute inset-0 m-auto w-fit h-fit px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 flex items-center gap-2"
+            >
+              <LucidePlay size={16} /> START CAMERA
+            </button>
+          )}
+        </div>
+
+        {/* Action Log */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <div className="text-[10px] text-slate-500 uppercase font-bold mb-2 tracking-wider">Game Logs</div>
+          <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-800 text-xs">
+            <p className="text-blue-400 mb-1 font-mono">[{new Date().toLocaleTimeString()}]</p>
+            <p>{gameState?.lastAction || 'Waiting for interaction...'}</p>
+          </div>
+        </div>
+
+        <div className="p-4 bg-slate-950 border-t border-slate-800">
+          <div className="flex justify-between items-center text-sm mb-2">
+            <span className="text-slate-500">Table Min</span>
+            <span className="font-mono text-yellow-500">$10</span>
+          </div>
+          <div className="flex justify-between items-center text-sm font-bold">
+            <span className="text-slate-500">Player ID</span>
+            <span className="font-mono text-white truncate max-w-[100px]">{user?.uid.slice(0, 8)}...</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Game Table */}
+      <div className="flex-1 bg-emerald-950/10 relative flex flex-col p-4 md:p-8 overflow-y-auto">
+        <div className="flex-1 flex flex-col justify-between max-w-5xl mx-auto w-full border-2 border-white/5 rounded-[40px] bg-gradient-to-b from-white/5 to-transparent p-6 relative">
+          
+          {/* Dealer Section */}
+          <div className="text-center">
+            <div className="flex flex-wrap justify-center gap-3 mb-4 min-h-[144px]">
+              {(gameState?.dealerHand || []).map((card, i) => (
+                <Card key={`dealer-${i}`} suit={card.suit} value={card.value} />
+              ))}
+              {(!gameState?.dealerHand || gameState.dealerHand.length === 0) && (
+                <div className="w-16 h-24 md:w-24 md:h-36 border-2 border-dashed border-white/10 rounded-xl" />
+              )}
+            </div>
+            <div className="inline-block px-4 py-1 bg-black/60 rounded-full text-xs font-bold text-slate-400 border border-white/10">
+              DEALER: {calculateScore(gameState?.dealerHand)}
+            </div>
+          </div>
+
+          {/* Result Message Overlay */}
+          <div className="flex items-center justify-center my-4">
+            {gameState?.status && (gameState.status.includes('won') || gameState.status === 'push') ? (
+              <div className="bg-black/90 backdrop-blur-xl p-8 rounded-3xl border border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in text-center z-50">
+                <h3 className="text-3xl md:text-5xl font-black mb-4 uppercase italic tracking-tighter">
+                  {gameState.status === 'player_won' && <span className="text-green-500">Winner!</span>}
+                  {gameState.status === 'dealer_won' && <span className="text-red-500">House Wins</span>}
+                  {gameState.status === 'push' && <span className="text-yellow-500">Push</span>}
+                </h3>
+                {role === 'dealer' && (
+                  <button 
+                    onClick={handleDeal}
+                    className="mt-2 px-10 py-3 bg-white text-black font-black rounded-xl hover:bg-slate-200 transition uppercase text-sm"
+                  >
+                    New Round
+                  </button>
+                )}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Player Section */}
+          <div className="text-center">
+            <div className="inline-block px-4 py-1 bg-black/60 rounded-full text-xs font-bold text-slate-400 border border-white/10 mb-4">
+              PLAYER: {calculateScore(gameState?.playerHand)}
+            </div>
+            <div className="flex flex-wrap justify-center gap-3 min-h-[144px]">
+              {(gameState?.playerHand || []).map((card, i) => (
+                <Card key={`player-${i}`} suit={card.suit} value={card.value} />
+              ))}
+              {(!gameState?.playerHand || gameState.playerHand.length === 0) && (
+                <div className="w-16 h-24 md:w-24 md:h-36 border-2 border-dashed border-white/10 rounded-xl" />
+              )}
+            </div>
+          </div>
+
+          {/* Control Bar */}
+          <div className="flex justify-center gap-4 h-14 mt-6">
+            {role === 'dealer' ? (
+              <>
+                {(gameState?.status === 'waiting' || gameState?.status.includes('won') || gameState?.status === 'push') && (
+                  <button onClick={handleDeal} className="px-12 bg-yellow-500 text-black font-black rounded-xl hover:scale-105 transition shadow-lg uppercase text-sm">
+                    Deal Cards
+                  </button>
+                )}
+                {gameState?.status === 'dealer_turn' && (
+                  <button onClick={dealerDraw} className="px-12 bg-white text-black font-black rounded-xl hover:scale-105 transition shadow-lg uppercase text-sm">
+                    Reveal Dealer
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                {gameState?.status === 'playing' && (
+                  <>
+                    <button onClick={handleHit} className="flex-1 max-w-[140px] bg-green-600 text-white font-black rounded-xl hover:bg-green-500 transition border-b-4 border-green-800 active:border-b-0 active:mt-1 uppercase">
+                      Hit
+                    </button>
+                    <button onClick={handleStand} className="flex-1 max-w-[140px] bg-slate-700 text-white font-black rounded-xl hover:bg-slate-600 transition border-b-4 border-slate-900 active:border-b-0 active:mt-1 uppercase">
+                      Stand
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
+  );
+}
 
-    <div id="global-notify"></div>
-    <div id="nova-star"></div>
-
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-      import { getDatabase, ref, push, onChildAdded, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-      import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
-        authDomain: "chatroon-4ded8.firebaseapp.com",
-        databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
-        projectId: "chatroon-4ded8",
-        storageBucket: "chatroon-4ded8.firebasestorage.app",
-        messagingSenderId: "779421378038",
-        appId: "1:779421378038:web:2e4b804b316b23882f93d7"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getDatabase(app);
-
-      const playerInfo = document.getElementById('player-info');
-      const notify = document.getElementById('global-notify');
-      const star = document.getElementById('nova-star');
-
-      function showNotification(text) {
-        notify.innerText = text;
-        notify.style.display = 'block';
-        setTimeout(() => notify.style.display = 'none', 3000);
-      }
-
-      signInAnonymously(auth).then(({ user }) => {
-        const userId = user.uid;
-        const shortId = userId.substring(0, 4);
-        
-        // 1. Presence System
-        const presenceRef = ref(db, `novacraft_v2/presence/${userId}`);
-        const connectedRef = ref(db, '.info/connected');
-        onValue(connectedRef, (snap) => {
-          if (snap.val() === true) {
-            set(presenceRef, true);
-            onDisconnect(presenceRef).remove();
-          }
-        });
-
-        onValue(ref(db, 'novacraft_v2/presence'), (snap) => {
-          const count = snap.size || 0;
-          playerInfo.innerText = `Player_${shortId} | ${count} Online`;
-        });
-
-        // 2. Collaborative Action Sync
-        // We listen for mouse clicks on the body. If the user is interacting with the 
-        // internal game elements, we broadcast that coordinate and action.
-        const actionsRef = ref(db, 'novacraft_v2/actions');
-
-        window.addEventListener('mousedown', (e) => {
-          // We only sync if the click targets the game canvas or left sidebar
-          // This allows users to "see" where others are clicking/placing
-          push(actionsRef, {
-            uid: shortId,
-            x: e.clientX,
-            y: e.clientY,
-            type: 'interaction',
-            timestamp: Date.now()
-          });
-        });
-
-        // Visual feedback for other players' actions
-        onChildAdded(actionsRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data.uid === shortId) return; // Skip own clicks
-
-          // Create a temporary ghost cursor to show where others are building
-          const ghost = document.createElement('div');
-          ghost.style.position = 'fixed';
-          ghost.style.left = data.x + 'px';
-          ghost.style.top = data.y + 'px';
-          ghost.style.width = '10px';
-          ghost.style.height = '10px';
-          ghost.style.borderRadius = '50%';
-          ghost.style.border = '2px solid rgba(0, 229, 255, 0.5)';
-          ghost.style.pointerEvents = 'none';
-          ghost.style.zIndex = '9999';
-          ghost.style.transform = 'translate(-50%, -50%)';
-          document.body.appendChild(ghost);
-
-          ghost.animate([
-            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-            { transform: 'translate(-50%, -50%) scale(3)', opacity: 0 }
-          ], { duration: 1000, easing: 'ease-out' });
-
-          setTimeout(() => ghost.remove(), 1000);
-        });
-
-        // 3. Mini-game Logic
-        setInterval(() => {
-          if (Math.random() > 0.8 && star.style.display === 'none') {
-            star.style.display = 'block';
-            star.style.left = (Math.random() * 80 + 10) + '%';
-            star.style.top = (Math.random() * 80 + 10) + '%';
-            setTimeout(() => star.style.display = 'none', 4000);
-          }
-        }, 10000);
-
-        star.onclick = (e) => {
-          star.style.display = 'none';
-          
-          const ex = document.createElement('div');
-          ex.className = 'supernova';
-          ex.style.left = e.clientX + 'px';
-          ex.style.top = e.clientY + 'px';
-          document.body.appendChild(ex);
-          setTimeout(() => ex.remove(), 500);
-
-          push(actionsRef, {
-            uid: shortId,
-            type: 'star_catch',
-            timestamp: Date.now()
-          });
-          
-          showNotification(`You captured the Nova Star!`);
-        };
-
-        // Listen for star catches by others
-        onChildAdded(actionsRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data.type === 'star_catch' && data.uid !== shortId) {
-            showNotification(`Player_${data.uid} captured a Nova Star!`);
-          }
-        });
-
-      });
-    </script>
-  </body>
-</html>
+function Card({ suit, value }) {
+  const isRed = suit === '♥' || suit === '♦';
+  return (
+    <div className={`
+      w-16 h-24 md:w-24 md:h-36 bg-white rounded-lg shadow-2xl flex flex-col p-2 relative 
+      animate-in slide-in-from-bottom-4 duration-300
+      ${isRed ? 'text-red-600' : 'text-slate-900'}
+    `}>
+      <div className="text-sm md:text-xl font-black leading-none">{value}</div>
+      <div className="text-xs md:text-sm font-bold">{suit}</div>
+      <div className="flex-1 flex items-center justify-center text-2xl md:text-4xl">
+        {suit}
+      </div>
+      <div className="text-sm md:text-xl font-black leading-none self-end rotate-180">{value}</div>
+    </div>
+  );
+}
