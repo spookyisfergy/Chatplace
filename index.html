@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainbet Live Blackjack</title>
+    <title>GambleTits - Live Social Casino</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -14,15 +14,25 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
-        body { background-color: #020617; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700;900&display=swap');
+        
+        body { background-color: #050505; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .logo-font { font-family: 'Bungee', cursive; }
         .green-felt { background: radial-gradient(circle at center, #065f46 0%, #022c22 100%); }
-        .card-shadow { box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .dealer-cam { background: #000; border: 2px solid #1e293b; border-radius: 12px; overflow: hidden; position: relative; }
-        @keyframes deal-card {
-            0% { transform: translateY(-100vh) rotate(45deg); opacity: 0; }
-            100% { transform: translateY(0) rotate(0deg); opacity: 1; }
-        }
-        .animate-deal { animation: deal-card 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .glass { background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); }
+        .card-shadow { box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+        
+        /* Animations */
+        @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slide { animation: slide-up 0.3s ease-out forwards; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        .crash-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: dash 5s linear forwards; }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
     </style>
 </head>
 <body>
@@ -34,7 +44,6 @@
         const firebaseConfig = {
             apiKey: "AIzaSyALwQlZIMapFrJdc6yS57SGQfB3-cSfkBA",
             authDomain: "chatroon-4ded8.firebaseapp.com",
-            databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
             projectId: "chatroon-4ded8",
             storageBucket: "chatroon-4ded8.firebasestorage.app",
             messagingSenderId: "779421378038",
@@ -46,50 +55,35 @@
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             auth = firebase.auth();
-            db.settings({ experimentalForceLongPolling: true });
-        } catch (err) { console.error("Init error:", err); }
+        } catch (err) { console.error(err); }
 
         const SUITS = ['♠', '♥', '♦', '♣'];
         const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-        
-        const APP_ID = 'blackjack-live-pro';
-        const SESSION_ID = 'main-table';
-
-        const Card = ({ suit, value, index }) => {
-            const isRed = suit === '♥' || suit === '♦';
-            return (
-                <div 
-                    className={`w-16 h-24 md:w-20 md:h-28 bg-white rounded-lg flex flex-col p-2 relative card-shadow animate-deal ${isRed ? 'text-red-600' : 'text-slate-900'}`}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                    <div className="text-xs md:text-lg font-bold leading-none">{value}</div>
-                    <div className="text-[10px] md:text-sm">{suit}</div>
-                    <div className="flex-1 flex items-center justify-center text-xl md:text-3xl">{suit}</div>
-                    <div className="text-xs md:text-lg font-bold leading-none self-end rotate-180">{value}</div>
-                </div>
-            );
-        };
+        const APP_ID = 'gamble-tits-v2'; // New ID for fresh start
+        const SESSION_ID = 'main-floor';
 
         const App = () => {
             const [user, setUser] = useState(null);
+            const [username, setUsername] = useState('');
             const [role, setRole] = useState(null);
             const [gameState, setGameState] = useState(null);
+            const [activeTab, setActiveTab] = useState('blackjack');
+            const [chatMsg, setChatMsg] = useState('');
             const [stream, setStream] = useState(null);
-            const [error, setError] = useState(null);
+            const [targetUserId, setTargetUserId] = useState(null); // For Host to target someone
+            
             const videoRef = useRef(null);
             const canvasRef = useRef(null);
+            const chatEndRef = useRef(null);
 
             const tableRef = db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions').doc(SESSION_ID);
 
             useEffect(() => {
-                if (!auth) return;
                 const initAuth = async () => {
-                    try {
-                        const cred = await auth.signInAnonymously();
-                        setUser(cred.user);
-                    } catch (e) {
-                        setError("Authentication failed.");
-                    }
+                    const cred = await auth.signInAnonymously();
+                    setUser(cred.user);
+                    const savedName = localStorage.getItem('gt_username') || `User${Math.floor(Math.random()*9999)}`;
+                    setUsername(savedName);
                 };
                 initAuth();
             }, []);
@@ -99,245 +93,298 @@
                 const unsubscribe = tableRef.onSnapshot(doc => {
                     if (doc.exists) {
                         setGameState(doc.data());
-                        setError(null);
                     } else if (role === 'dealer') {
-                        initializeTable();
+                        resetSystem();
                     }
-                }, err => {
-                    setError("Permission Denied. Update rules to allow access.");
                 });
                 return () => unsubscribe();
             }, [user, role]);
 
-            // Sync video snapshots to Firestore every 2 seconds if dealer is active
+            useEffect(() => {
+                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [gameState?.chat]);
+
+            // Host Camera Logic (Faster Sync)
             useEffect(() => {
                 let interval;
                 if (role === 'dealer' && stream) {
                     interval = setInterval(() => {
                         if (videoRef.current && canvasRef.current) {
                             const canvas = canvasRef.current;
-                            const video = videoRef.current;
-                            canvas.width = 160; 
-                            canvas.height = 120;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                            const snapshot = canvas.toDataURL('image/jpeg', 0.5);
-                            sync({ dealerSnapshot: snapshot });
+                            canvas.width = 160; canvas.height = 120;
+                            canvas.getContext('2d').drawImage(videoRef.current, 0, 0, 160, 120);
+                            sync({ hostFrame: canvas.toDataURL('image/webp', 0.4) });
                         }
-                    }, 2000);
+                    }, 400); 
                 }
                 return () => clearInterval(interval);
             }, [role, stream]);
 
-            const initializeTable = () => {
+            const resetSystem = () => {
                 tableRef.set({
-                    dealerHand: [],
-                    playerHand: [],
-                    status: 'waiting',
-                    deck: generateDeck(),
-                    lastAction: 'Table opened',
-                    dealerActive: false,
-                    dealerSnapshot: null
+                    blackjack: { dealerHand: [], playerHand: [], status: 'waiting', deck: [] },
+                    roulette: { number: null, color: null, isSpinning: false, lastResults: [] },
+                    crash: { multiplier: 1.0, status: 'waiting', history: [] },
+                    chat: [{ user: 'System', text: 'Welcome to GambleTits! Fresh Start initialized.', time: Date.now() }],
+                    users: {},
+                    hostActive: false,
+                    hostFrame: null,
+                    targetUser: null
                 });
-            };
-
-            const generateDeck = () => {
-                let d = [];
-                SUITS.forEach(s => VALUES.forEach(v => d.push({suit: s, value: v})));
-                return d.sort(() => Math.random() - 0.5);
             };
 
             const sync = (updates) => {
                 if (!user) return;
-                tableRef.update(updates).catch(e => console.error("Sync error:", e));
+                tableRef.update(updates).catch(() => {});
             };
 
-            const startDeal = () => {
-                const deck = generateDeck();
-                sync({
-                    playerHand: [deck.pop(), deck.pop()],
-                    dealerHand: [deck.pop()],
-                    deck: deck,
-                    status: 'playing',
-                    lastAction: 'New round started'
-                });
-            };
+            const sendMessage = (e) => {
+                e.preventDefault();
+                if (!chatMsg.trim()) return;
 
-            // DEALER CHEAT / CONTROL FUNCTIONS
-            const forceOutcome = (outcome) => {
-                if (outcome === 'dealer_wins') {
-                    sync({
-                        dealerHand: [{suit: '♠', value: 'A'}, {suit: '♠', value: 'K'}],
-                        playerHand: [{suit: '♥', value: '10'}, {suit: '♦', value: '2'}, {suit: '♣', value: 'K'}], // Player busts
-                        status: 'dealer_won',
-                        lastAction: 'Dealer forced victory'
-                    });
+                const msg = chatMsg.trim();
+                let newChat = [...(gameState?.chat || [])].slice(-30);
+
+                // Command Handling
+                if (msg.startsWith('/send')) {
+                    const parts = msg.split(' ');
+                    if (parts.length === 3) {
+                        const amount = parseInt(parts[1]);
+                        const recipient = parts[2];
+                        newChat.push({ user: 'System', text: `Sent $${amount} to ${recipient}`, type: 'alert', time: Date.now() });
+                    }
                 } else {
-                    sync({
-                        playerHand: [{suit: '♠', value: 'A'}, {suit: '♠', value: 'K'}],
-                        dealerHand: [{suit: '♥', value: '10'}, {suit: '♦', value: '2'}, {suit: '♣', value: 'K'}], // Dealer busts
-                        status: 'player_won',
-                        lastAction: 'Dealer allowed player to win'
-                    });
+                    newChat.push({ user: username, text: msg, time: Date.now(), uid: user.uid });
                 }
-            };
 
-            const calculateScore = (hand) => {
-                if (!hand) return 0;
-                let s = 0, a = 0;
-                hand.forEach(c => {
-                    if (['J','Q','K'].includes(c.value)) s += 10;
-                    else if (c.value === 'A') { s += 11; a++; }
-                    else s += parseInt(c.value);
-                });
-                while(s > 21 && a > 0) { s -= 10; a--; }
-                return s;
-            };
-
-            const playerAction = (type) => {
-                if (type === 'hit') {
-                    const deck = [...gameState.deck];
-                    const newHand = [...gameState.playerHand, deck.pop()];
-                    const score = calculateScore(newHand);
-                    sync({ 
-                        playerHand: newHand, 
-                        deck, 
-                        status: score > 21 ? 'dealer_won' : 'playing',
-                        lastAction: score > 21 ? 'Player busted!' : 'Player hits'
-                    });
-                } else {
-                    sync({ status: 'dealer_turn', lastAction: 'Player stands' });
-                }
-            };
-
-            const dealerPlay = () => {
-                let deck = [...gameState.deck];
-                let hand = [...gameState.dealerHand];
-                while (calculateScore(hand) < 17) hand.push(deck.pop());
-                const finalScore = calculateScore(hand);
-                const pScore = calculateScore(gameState.playerHand);
-                let result = (finalScore > 21 || pScore > finalScore) ? 'player_won' : (finalScore > pScore ? 'dealer_won' : 'push');
-                sync({ dealerHand: hand, deck, status: result, lastAction: `Dealer finishes with ${finalScore}` });
+                sync({ chat: newChat });
+                setChatMsg('');
             };
 
             const toggleCamera = async () => {
-                try {
-                    if (stream) {
-                        stream.getTracks().forEach(t => t.stop());
-                        setStream(null);
-                        sync({ dealerActive: false, dealerSnapshot: null });
-                    } else {
-                        const s = await navigator.mediaDevices.getUserMedia({ video: true });
-                        setStream(s);
-                        if (videoRef.current) videoRef.current.srcObject = s;
-                        sync({ dealerActive: true });
-                    }
-                } catch (e) { alert("Camera access failed. Ensure HTTPS."); }
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                    setStream(null);
+                    sync({ hostActive: false, hostFrame: null });
+                } else {
+                    const s = await navigator.mediaDevices.getUserMedia({ video: true });
+                    setStream(s);
+                    if (videoRef.current) videoRef.current.srcObject = s;
+                    sync({ hostActive: true });
+                }
             };
 
-            if (error) return (
-                <div className="h-screen flex items-center justify-center bg-slate-950 p-6 text-center">
-                    <div className="max-w-md bg-red-900/10 border border-red-500/50 p-8 rounded-2xl">
-                        <h2 className="text-xl font-bold mb-2 text-red-400">Database Access Issue</h2>
-                        <p className="text-slate-400 text-xs mb-6 leading-relaxed">{error}</p>
-                        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-red-600 rounded-lg text-white font-bold text-[10px] uppercase">Retry Connection</button>
-                    </div>
+            const Card = ({ suit, value, index }) => (
+                <div className={`w-14 h-20 md:w-24 md:h-32 bg-white rounded-xl flex flex-col p-2 card-shadow animate-deal ${suit === '♥' || suit === '♦' ? 'text-red-600' : 'text-slate-900'}`} style={{animationDelay: `${index*0.1}s`}}>
+                    <span className="font-black text-lg leading-none">{value}</span>
+                    <span className="text-xs">{suit}</span>
+                    <div className="flex-1 flex items-center justify-center text-3xl">{suit}</div>
                 </div>
             );
 
+            // Host targeting logic
+            const targetUser = (uid) => {
+                sync({ targetUser: uid });
+            };
+
             if (!role) return (
-                <div className="h-screen flex items-center justify-center bg-slate-950">
-                    <div className="bg-slate-900 p-10 rounded-3xl border border-slate-800 shadow-2xl text-center max-w-sm w-full">
-                        <h1 className="text-3xl font-black italic mb-8 tracking-tighter">RAINBET <span className="text-yellow-500">LIVE</span></h1>
-                        <button onClick={() => setRole('player')} className="w-full py-4 bg-blue-600 rounded-xl font-bold mb-4 hover:scale-105 transition-all">JOIN AS PLAYER</button>
-                        <button onClick={() => { if(prompt("Dealer Code?") === "1234") setRole('dealer') }} className="w-full py-4 bg-slate-800 rounded-xl font-bold border border-slate-700 text-slate-400 text-xs transition-all hover:bg-slate-700">DEALER LOGIN</button>
+                <div className="h-screen flex items-center justify-center bg-black px-6">
+                    <div className="max-w-md w-full glass p-10 rounded-[3rem] text-center border-blue-500/20 shadow-[0_0_50px_rgba(59,130,246,0.1)]">
+                        <div className="text-6xl mb-4">🍒</div>
+                        <h1 className="logo-font text-4xl mb-2 tracking-tighter italic">GAMBLE<span className="text-pink-500">TITS</span></h1>
+                        <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] mb-10">Live Social Entertainment</p>
+                        
+                        <input 
+                            type="text" 
+                            value={username} 
+                            onChange={(e) => { setUsername(e.target.value); localStorage.setItem('gt_username', e.target.value); }}
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 mb-4 text-center focus:outline-none focus:border-pink-500 transition-all"
+                            placeholder="Enter Username"
+                        />
+                        
+                        <button onClick={() => setRole('player')} className="w-full py-5 bg-gradient-to-r from-blue-600 to-pink-600 rounded-2xl font-black italic uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-500/20">Enter Casino</button>
+                        <button onClick={() => { if(prompt("Host Code?") === "6969") setRole('dealer') }} className="mt-6 text-[10px] font-bold text-slate-600 hover:text-white uppercase tracking-widest">Dealer Portal</button>
                     </div>
                 </div>
             );
 
             return (
-                <div className="h-screen flex flex-col md:flex-row bg-slate-950">
-                    {/* Hidden canvas for capturing frames */}
+                <div className="h-screen flex bg-[#050505]">
                     <canvas ref={canvasRef} className="hidden"></canvas>
-
-                    <div className="w-full md:w-80 bg-slate-900 border-r border-slate-800 flex flex-col p-4 shrink-0">
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
-                                <div className={`w-2 h-2 rounded-full ${gameState?.dealerActive ? 'bg-red-500 animate-pulse' : 'bg-slate-600'}`} /> LIVE FEED
-                            </div>
+                    
+                    {/* Left Sidebar: Nav + Users */}
+                    <div className="w-20 md:w-64 border-r border-white/5 flex flex-col glass z-50">
+                        <div className="p-6">
+                            <h2 className="logo-font text-xl text-pink-500 italic">GT</h2>
                         </div>
-                        <div className="dealer-cam aspect-video relative flex items-center justify-center overflow-hidden bg-black">
-                            {role === 'dealer' ? (
-                                <video ref={videoRef} autoPlay muted className="w-full h-full object-cover scale-x-[-1]" />
-                            ) : (
-                                gameState?.dealerSnapshot ? (
-                                    <img src={gameState.dealerSnapshot} className="w-full h-full object-cover" alt="Dealer Stream" />
-                                ) : (
-                                    <div className="text-slate-800 text-[10px] uppercase">Offline</div>
-                                )
-                            )}
-                            
-                            {role === 'dealer' && (
-                                <button onClick={toggleCamera} className="absolute bottom-2 right-2 px-3 py-1 bg-green-600 rounded text-[9px] font-bold z-20">
-                                    {stream ? 'OFF' : 'START CAM'}
+                        
+                        <nav className="flex-1 px-3 space-y-2">
+                            {['blackjack', 'roulette', 'crash', 'social'].map(tab => (
+                                <button key={tab} onClick={() => setActiveTab(tab)} className={`w-full flex items-center gap-4 p-4 rounded-2xl font-bold uppercase text-[10px] tracking-widest transition-all ${activeTab === tab ? 'bg-white/10 text-white shadow-inner' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}>
+                                    <span>{tab === 'blackjack' ? '🂡' : tab === 'roulette' ? '🎡' : tab === 'crash' ? '📈' : '📸'}</span>
+                                    <span className="hidden md:inline">{tab}</span>
                                 </button>
-                            )}
-                        </div>
+                            ))}
+                        </nav>
 
-                        {/* Dealer Control Panel */}
-                        {role === 'dealer' && (
-                            <div className="mt-4 border-t border-slate-800 pt-4">
-                                <div className="text-[10px] font-bold text-yellow-500 mb-2 tracking-widest uppercase">Force Outcome</div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <button onClick={() => forceOutcome('dealer_wins')} className="bg-red-900/30 border border-red-500/30 text-red-500 p-2 rounded text-[9px] font-bold hover:bg-red-500/20 transition-all uppercase">Dealer Wins</button>
-                                    <button onClick={() => forceOutcome('player_wins')} className="bg-green-900/30 border border-green-500/30 text-green-500 p-2 rounded text-[9px] font-bold hover:bg-green-500/20 transition-all uppercase">Player Wins</button>
-                                </div>
+                        {/* Host Mini-Monitor */}
+                        <div className="p-4 mt-auto">
+                            <div className="rounded-2xl overflow-hidden aspect-video bg-black border border-white/10 relative group">
+                                {role === 'dealer' ? <video ref={videoRef} autoPlay muted className="w-full h-full object-cover scale-x-[-1]" /> : 
+                                 gameState?.hostFrame ? <img src={gameState.hostFrame} className="w-full h-full object-cover" /> : 
+                                 <div className="h-full flex items-center justify-center text-[8px] text-slate-700 uppercase font-black">Host Offline</div>}
+                                
+                                {role === 'dealer' && (
+                                    <button onClick={toggleCamera} className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-[9px] font-bold">
+                                        {stream ? 'END LIVE' : 'GO LIVE'}
+                                    </button>
+                                )}
                             </div>
-                        )}
-
-                        <div className="mt-4 flex-1 bg-black/40 rounded-xl p-4 font-mono text-[10px] text-blue-400 overflow-y-auto border border-white/5">
-                            {`> ${gameState?.lastAction || 'Establishing sync...'}`}
                         </div>
                     </div>
 
-                    <div className="flex-1 green-felt relative flex flex-col items-center justify-between py-12">
-                        <div className="text-center relative z-10">
-                            <div className="flex gap-2 justify-center mb-4 min-h-[112px]">
-                                {gameState?.dealerHand?.map((c, i) => <Card key={i} {...c} index={i} />)}
+                    {/* Main Arena */}
+                    <div className="flex-1 flex flex-col relative">
+                        
+                        {/* Host Target Overlay (If targeted by host) */}
+                        {gameState?.targetUser === user?.uid && activeTab !== 'social' && (
+                            <div className="absolute top-4 right-4 w-72 aspect-video glass rounded-3xl border-2 border-pink-500 shadow-2xl z-50 overflow-hidden animate-slide">
+                                <div className="absolute top-2 left-2 px-2 py-0.5 bg-pink-500 text-[8px] font-black rounded uppercase">Host is watching you</div>
+                                {gameState?.hostFrame && <img src={gameState.hostFrame} className="w-full h-full object-cover" />}
                             </div>
-                            <div className="text-[10px] font-bold tracking-[0.3em] opacity-40">Dealer: {calculateScore(gameState?.dealerHand)}</div>
+                        )}
+
+                        <div className="h-16 border-b border-white/5 flex items-center justify-between px-8 glass">
+                            <div className="flex items-center gap-4">
+                                <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black text-green-500 border border-green-500/20 tracking-tighter italic">LIVE NETWORK</div>
+                                <div className="text-[10px] font-bold text-slate-500 uppercase">Balance: <span className="text-white">$150,000</span></div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase opacity-40">{username}</span>
+                            </div>
                         </div>
 
-                        <div className="relative z-20">
-                            {gameState?.status.includes('won') || gameState?.status === 'push' ? (
-                                <div className="bg-slate-900/90 backdrop-blur-xl p-10 rounded-[3rem] border border-white/10 shadow-2xl text-center">
-                                    <div className="text-4xl font-black italic uppercase mb-6 tracking-tighter">
-                                        {gameState.status === 'player_won' ? <span className="text-green-400">Player Wins!</span> : 
-                                         gameState.status === 'dealer_won' ? <span className="text-red-400">House Wins</span> : "Push"}
+                        <div className="flex-1 overflow-hidden p-6">
+                            {activeTab === 'blackjack' && (
+                                <div className="h-full green-felt rounded-[3rem] border border-white/10 relative flex flex-col items-center justify-between py-12">
+                                    <div className="text-center">
+                                        <div className="flex gap-2 justify-center mb-4">
+                                            {gameState?.blackjack?.dealerHand?.map((c, i) => <Card key={i} {...c} index={i} />)}
+                                        </div>
+                                        <div className="text-[10px] font-black uppercase opacity-30 tracking-[0.4em]">Dealer Area</div>
                                     </div>
-                                    {role === 'dealer' && <button onClick={startDeal} className="px-8 py-2 bg-white text-black rounded-full font-black text-xs uppercase hover:bg-slate-200 active:scale-95 transition-all">New Round</button>}
-                                </div>
-                            ) : role === 'dealer' ? (
-                                <div className="flex gap-4">
-                                    {gameState?.status === 'waiting' && <button onClick={startDeal} className="px-12 py-4 bg-yellow-500 text-black font-black rounded-2xl uppercase shadow-[0_6px_0_#ca8a04]">Deal Cards</button>}
-                                    {gameState?.status === 'dealer_turn' && <button onClick={dealerPlay} className="px-12 py-4 bg-white text-black font-black rounded-2xl uppercase shadow-[0_6px_0_#cbd5e1]">Auto-Play</button>}
-                                </div>
-                            ) : (
-                                gameState?.status === 'playing' && (
-                                    <div className="flex gap-6 scale-125">
-                                        <button onClick={() => playerAction('hit')} className="px-8 py-3 bg-green-600 rounded-xl font-black uppercase shadow-[0_4px_0_#15803d]">Hit</button>
-                                        <button onClick={() => playerAction('stand')} className="px-8 py-3 bg-slate-800 rounded-xl font-black uppercase shadow-[0_4px_0_#1e293b]">Stand</button>
+                                    
+                                    <div className="relative z-20">
+                                        {role === 'dealer' ? (
+                                            <div className="flex gap-4">
+                                                <button onClick={() => {
+                                                    const deck = []; SUITS.forEach(s => VALUES.forEach(v => deck.push({suit:s, value:v})));
+                                                    const d = deck.sort(() => Math.random()-0.5);
+                                                    sync({ 'blackjack.status': 'playing', 'blackjack.playerHand': [d.pop(), d.pop()], 'blackjack.dealerHand': [d.pop()], 'blackjack.deck': d });
+                                                }} className="px-10 py-4 bg-white text-black font-black rounded-2xl uppercase text-xs shadow-xl">Deal Cards</button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-4">
+                                                {gameState?.blackjack?.status === 'playing' && (
+                                                    <div className="flex gap-4 scale-125">
+                                                        <button className="px-8 py-3 bg-blue-600 rounded-xl font-black uppercase text-[10px] shadow-[0_4px_0_#1d4ed8]">Hit</button>
+                                                        <button className="px-8 py-3 bg-slate-900 rounded-xl font-black uppercase text-[10px] shadow-[0_4px_0_#1e293b]">Stand</button>
+                                                    </div>
+                                                )}
+                                                <div className="text-[10px] font-black uppercase opacity-20 tracking-widest mt-4">Place your bets</div>
+                                            </div>
+                                        )}
                                     </div>
-                                )
+
+                                    <div className="text-center">
+                                        <div className="text-[10px] font-black uppercase opacity-30 tracking-[0.4em] mb-4">Player Hand</div>
+                                        <div className="flex gap-2 justify-center">
+                                            {gameState?.blackjack?.playerHand?.map((c, i) => <Card key={i} {...c} index={i} />)}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'roulette' && (
+                                <div className="h-full flex items-center justify-center">
+                                    <div className="w-80 h-80 rounded-full border-8 border-yellow-900 relative flex items-center justify-center shadow-2xl">
+                                        <div className="absolute inset-0 rounded-full border-[16px] border-slate-900" />
+                                        <div className="text-4xl font-black italic text-yellow-500 animate-spin" style={{animationDuration: '3s'}}>32</div>
+                                        <div className="absolute -top-10 text-[10px] font-black bg-pink-600 px-4 py-1 rounded-full uppercase italic">Spinning Now</div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'crash' && (
+                                <div className="h-full flex flex-col p-10 bg-slate-900/40 rounded-[3rem] border border-white/5">
+                                    <div className="flex-1 relative flex items-center justify-center">
+                                        <svg className="w-full h-64 overflow-visible">
+                                            <path d="M0 256 Q 300 256 600 0" fill="none" stroke="#ec4899" strokeWidth="8" className="crash-line" />
+                                        </svg>
+                                        <div className="absolute text-8xl font-black italic text-pink-500 tracking-tighter">4.25x</div>
+                                    </div>
+                                    <div className="h-20 flex gap-4">
+                                        <input type="number" placeholder="Bet Amount" className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 font-bold" />
+                                        <button className="px-12 bg-pink-600 rounded-2xl font-black uppercase italic">Cash Out</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'social' && (
+                                <div className="h-full flex flex-col">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                                        <div className="aspect-video bg-white/5 rounded-3xl border border-white/10 flex flex-col items-center justify-center relative group">
+                                            <div className="text-2xl mb-2">📸</div>
+                                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Enable Cam</div>
+                                            <button className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-100 transition-all rounded-3xl font-black text-xs uppercase italic">Join Party</button>
+                                        </div>
+                                        <div className="aspect-video bg-pink-600/10 rounded-3xl border border-pink-500/20 flex items-center justify-center">
+                                            <div className="text-[10px] font-black text-pink-500 uppercase tracking-widest">Lobby Open</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 glass rounded-3xl p-6 flex flex-col border-pink-500/10">
+                                        <h3 className="text-xs font-black uppercase text-pink-500 mb-4 tracking-[0.3em]">Social Lounge</h3>
+                                        <div className="flex-1 text-slate-600 text-[10px] italic">No one is currently broadcasting...</div>
+                                    </div>
+                                </div>
                             )}
                         </div>
+                    </div>
 
-                        <div className="text-center relative z-10">
-                            <div className="text-[10px] font-bold tracking-[0.3em] opacity-40 mb-4">Player: {calculateScore(gameState?.playerHand)}</div>
-                            <div className="flex gap-2 justify-center min-h-[112px]">
-                                {gameState?.playerHand?.map((c, i) => <Card key={i} {...c} index={i} />)}
-                            </div>
+                    {/* Right Side: Chat & Users */}
+                    <div className="w-80 border-l border-white/5 flex flex-col glass shrink-0">
+                        <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/2">
+                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">Live Lobby Chat</span>
+                            <span className="text-[8px] bg-white/10 px-2 py-0.5 rounded text-white">42 Online</span>
                         </div>
+                        
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {gameState?.chat?.map((msg, i) => (
+                                <div key={i} className="animate-slide">
+                                    <div className="flex justify-between items-end mb-1">
+                                        <span className={`text-[9px] font-black uppercase tracking-tighter ${msg.uid === user?.uid ? 'text-pink-500' : 'text-blue-500'}`}>{msg.user}</span>
+                                        {role === 'dealer' && msg.uid && (
+                                            <button onClick={() => targetUser(msg.uid)} className="text-[8px] font-black text-white/20 hover:text-pink-500 uppercase">Target</button>
+                                        )}
+                                    </div>
+                                    <div className={`text-[11px] p-3 rounded-2xl border ${msg.type === 'alert' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500 italic' : 'bg-white/5 border-white/5 text-slate-300'}`}>
+                                        {msg.text}
+                                    </div>
+                                </div>
+                            ))}
+                            <div ref={chatEndRef} />
+                        </div>
+
+                        <form onSubmit={sendMessage} className="p-4 border-t border-white/5 bg-black/40">
+                            <input 
+                                type="text" 
+                                value={chatMsg}
+                                onChange={(e) => setChatMsg(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-pink-500 transition-all placeholder:text-slate-700"
+                                placeholder="Type a message or /send..."
+                            />
+                        </form>
                     </div>
                 </div>
             );
