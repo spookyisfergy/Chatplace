@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Brain, Activity, ShieldAlert, ChevronRight, Info, Skull, Zap, EyeOff, ArrowLeft, Send } from 'lucide-react';
+import { AlertTriangle, Skull, Zap, EyeOff, ArrowLeft, Send } from 'lucide-react';
 
 const App = () => {
   const [view, setView] = useState('home'); 
@@ -9,20 +9,12 @@ const App = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  // --- UPDATED IMAGE LINKS ---
-  // Using direct links from PostImages and reliable Unsplash fallbacks
+  // --- UPDATED IMAGE LINKS FROM YOUR UPLOADS ---
   const BEFORE_IMAGE_URL = "https://i.postimg.cc/FzBnzy50/Jesus-Light-World-Brent-Borup.jpg"; 
-  const AFTER_IMAGE_URL = "https://images.unsplash.com/photo-1594322436404-5a0526db4d13?w=800&q=80"; // Using a high-quality placeholder that works
-
-  // Reliable fallbacks
-  const fallbackBefore = "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80";
-  const fallbackAfter = "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800&q=80";
-  // ---------------------------
+  const AFTER_IMAGE_URL = "https://i.ibb.co/MY6z3k3/image-2026-03-21-001031888.png";
 
   useEffect(() => {
-    // Ensure the component is fully mounted before showing content
     setIsReady(true);
-
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     
@@ -73,16 +65,14 @@ const App = () => {
     }
   ];
 
-  if (!isReady) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white font-black italic uppercase">Initializing Truth...</div>;
-  }
+  if (!isReady) return <div className="min-h-screen bg-black" />;
 
   if (view === 'horror') {
     return (
-      <div className="min-h-screen bg-black text-white p-6 flex flex-col items-center justify-center animate-in fade-in duration-500 overflow-y-auto">
+      <div className="min-h-screen bg-black text-white p-6 flex flex-col items-center animate-in fade-in duration-500 overflow-y-auto">
         <button 
           onClick={() => setView('home')}
-          className="fixed top-8 left-8 flex items-center gap-2 font-black uppercase italic hover:text-red-600 transition z-50 bg-black/50 p-2 rounded"
+          className="fixed top-8 left-8 flex items-center gap-2 font-black uppercase italic hover:text-red-600 transition z-50 bg-black/80 p-3 rounded border border-white/20"
         >
           <ArrowLeft /> Back to Safety
         </button>
@@ -98,14 +88,13 @@ const App = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-12 items-start">
-            <div className="flex flex-col items-center group">
-              <div className="relative border-8 border-white p-2 bg-white mb-6 shadow-xl transform -rotate-2 group-hover:rotate-0 transition-transform duration-500">
+            <div className="flex flex-col items-center">
+              <div className="relative border-8 border-white p-2 bg-white mb-6 shadow-xl transform -rotate-1">
                 <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 text-xs font-bold uppercase z-10">BEFORE</div>
                 <img 
                   src={BEFORE_IMAGE_URL} 
                   alt="Subject Before" 
-                  className="w-full max-w-md object-contain h-[500px] bg-slate-100"
-                  onError={(e) => { e.target.src = fallbackBefore; }}
+                  className="w-full max-w-md object-contain h-[500px]"
                 />
               </div>
               <div className="text-center">
@@ -116,14 +105,13 @@ const App = () => {
               </div>
             </div>
 
-            <div className="flex flex-col items-center group">
-              <div className="relative border-8 border-red-600 p-2 bg-black mb-6 shadow-[0_0_60px_rgba(220,38,38,0.6)] transform rotate-2 group-hover:rotate-0 transition-transform duration-500">
+            <div className="flex flex-col items-center">
+              <div className="relative border-8 border-red-600 p-2 bg-black mb-6 shadow-[0_0_60px_rgba(220,38,38,0.6)] transform rotate-1">
                 <div className="absolute top-0 right-0 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase z-10">AFTER 1 PUFF</div>
                 <img 
                   src={AFTER_IMAGE_URL} 
                   alt="Subject After" 
-                  className="w-full max-w-md object-contain h-[500px] bg-slate-900"
-                  onError={(e) => { e.target.src = fallbackAfter; }}
+                  className="w-full max-w-md object-contain h-[500px]"
                 />
               </div>
               <div className="text-center">
@@ -153,11 +141,11 @@ const App = () => {
 
   if (view === 'signup') {
     return (
-      <div className="min-h-screen bg-orange-50 flex items-center justify-center p-6 font-serif">
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white border-8 border-black p-8 shadow-[20px_20px_0px_0px_rgba(0,0,0,1)]">
            <button onClick={() => setView('home')} className="mb-4 text-xs font-black uppercase underline hover:text-red-600">Cancel Operation</button>
            <h2 className="text-3xl font-black italic uppercase mb-2 tracking-tighter">Join the Underground</h2>
-           <p className="font-bold text-slate-600 mb-6 leading-tight">Enter your credentials to receive the secret "Anti-Reefer" survival kit (Physical Mail Only).</p>
+           <p className="font-bold text-slate-600 mb-6 leading-tight">Enter your credentials to receive the secret "Anti-Reefer" survival kit.</p>
            
            <form onSubmit={handleFakeSubmit} className="space-y-4">
               <input 
@@ -170,85 +158,52 @@ const App = () => {
               />
               <button 
                 disabled={isSubmitting}
-                className="w-full bg-red-600 text-white p-4 font-black italic uppercase flex items-center justify-center gap-2 hover:bg-black transition transform active:scale-95"
+                className="w-full bg-red-600 text-white p-4 font-black italic uppercase flex items-center justify-center gap-2 hover:bg-black transition"
               >
                 {isSubmitting ? "ENCRYPTING..." : <>ENLIST NOW <Send size={18} /></>}
               </button>
            </form>
-           
-           <p className="mt-6 text-[10px] text-slate-400 font-bold uppercase leading-tight">
-              By clicking enlist, you agree to have your snacks monitored for potential contraband. No data is actually stored. Happy April Fools!
-           </p>
+           <p className="mt-6 text-[10px] text-slate-400 font-bold uppercase leading-tight">No data is actually stored. Happy April Fools!</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen font-serif text-slate-900 transition-colors duration-100 ${glitch ? 'bg-red-900' : 'bg-orange-50'}`}>
+    <div className={`min-h-screen font-serif transition-colors duration-100 ${glitch ? 'bg-red-900' : 'bg-orange-50'}`}>
       <style>
         {`
-          @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-          .animate-marquee {
-            display: inline-block;
-            animation: marquee 10s linear infinite;
-          }
+          @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+          .animate-marquee { display: inline-block; animation: marquee 10s linear infinite; }
         `}
       </style>
 
-      {/* Navigation */}
       <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-black text-white py-2' : 'bg-transparent text-black py-5'}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <AlertTriangle className="text-red-600 animate-pulse w-8 h-8" />
             <span className="font-black text-2xl tracking-tighter uppercase italic">ULTIMATE TRUTH NETWORK</span>
           </div>
-          <div className="hidden md:flex gap-8 font-bold text-xs uppercase tracking-widest">
+          <div className="hidden md:flex gap-8 font-bold text-xs uppercase tracking-widest items-center">
             <button onClick={() => setView('horror')} className="hover:text-red-600 transition underline decoration-red-600 decoration-2 underline-offset-4">The Danger</button>
-            <button onClick={() => setView('signup')} className="hover:text-red-600 transition">Conspiracy Dept</button>
             <button onClick={() => setView('signup')} className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-white hover:text-red-600 border-2 border-red-600 transition">SAVE YOURSELF</button>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-60">
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black"></div>
-          <div className="w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-        </div>
-        
+        <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
         <div className="relative z-10 max-w-5xl px-6 text-center">
-            <div className="inline-block bg-red-600 text-white px-4 py-1 font-bold mb-4 animate-bounce">
-                ESTABLISHED 1936 - RE-VERIFIED 2024
-            </div>
-          <h1 className="text-6xl md:text-9xl font-black mb-6 tracking-tighter leading-[0.9] uppercase italic">
-            Worse than <br /><span className="text-red-600 underline decoration-white">CRACK.</span>
-          </h1>
-          <p className="text-xl md:text-3xl text-red-100 mb-10 max-w-3xl mx-auto font-bold uppercase tracking-wide">
-            The devil's lettuce has evolved. It's now 400 times more addictive than breathing.
-          </p>
+          <div className="inline-block bg-red-600 text-white px-4 py-1 font-bold mb-4 animate-bounce">ESTABLISHED 1936</div>
+          <h1 className="text-6xl md:text-9xl font-black mb-6 tracking-tighter leading-[0.9] uppercase italic">Worse than <br /><span className="text-red-600 underline decoration-white">CRACK.</span></h1>
+          <p className="text-xl md:text-3xl text-red-100 mb-10 max-w-3xl mx-auto font-bold uppercase">The devil's lettuce has evolved. It's now 400x more addictive than breathing.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => setView('horror')}
-              className="bg-red-600 hover:bg-white hover:text-red-600 text-white px-10 py-5 text-xl font-black transition-all transform hover:scale-110 italic shadow-[0_0_30px_rgba(220,38,38,0.5)]"
-            >
-              SEE THE HORROR
-            </button>
-            <button 
-              onClick={() => setView('signup')}
-              className="border-4 border-white hover:bg-white hover:text-black text-white px-10 py-5 text-xl font-black transition-all italic"
-            >
-              JOIN THE RESISTANCE
-            </button>
+            <button onClick={() => setView('horror')} className="bg-red-600 hover:bg-white hover:text-red-600 text-white px-10 py-5 text-xl font-black transition-all transform hover:scale-105 italic shadow-lg">SEE THE HORROR</button>
+            <button onClick={() => setView('signup')} className="border-4 border-white hover:bg-white hover:text-black text-white px-10 py-5 text-xl font-black transition-all italic">JOIN THE RESISTANCE</button>
           </div>
         </div>
       </section>
 
-      {/* Extreme Warning Banner */}
       <div className="bg-yellow-400 text-black py-3 border-y-4 border-black overflow-hidden whitespace-nowrap">
         <div className="animate-marquee inline-block font-black text-2xl uppercase italic">
           CRITICAL ALERT: ONE PUFF EQUALS THREE YEARS OF MEMORY LOSS • DON'T LET THE GIGGLE-BUSH WIN • STAY VIGILANT • 
@@ -256,29 +211,17 @@ const App = () => {
         </div>
       </div>
 
-      {/* Ridiculous Risks Section */}
-      <section id="risks" className="py-24 px-6 relative">
+      <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-20 text-center">
-            <h2 className="text-5xl font-black mb-4 uppercase italic tracking-tighter">
-                THE LETHAL DOSAGE OF <span className="text-red-600">RELAXATION</span>
-            </h2>
-            <div className="h-2 w-32 bg-black mx-auto"></div>
-          </div>
-
           <div className="grid md:grid-cols-3 gap-12">
             {dataPoints.map((point, idx) => (
-              <div key={idx} className="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)] transform transition-transform hover:-translate-y-2">
-                <div className="mb-4 bg-red-100 w-16 h-16 rounded-full flex items-center justify-center border-4 border-black">
-                    {point.icon}
-                </div>
+              <div key={idx} className="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)]">
+                <div className="mb-4 bg-red-100 w-16 h-16 rounded-full flex items-center justify-center border-4 border-black">{point.icon}</div>
                 <h3 className="text-2xl font-black mb-3 uppercase italic">{point.title}</h3>
-                <p className="font-bold text-slate-700 mb-6 leading-tight">
-                  "{point.description}"
-                </p>
+                <p className="font-bold text-slate-700 mb-6 leading-tight">{point.description}</p>
                 <div className="bg-black p-4 text-center">
                   <div className="text-4xl font-black text-red-600">{point.stat}</div>
-                  <div className="text-[10px] text-white uppercase font-black tracking-widest">{point.statLabel}</div>
+                  <div className="text-[10px] text-white uppercase font-black">{point.statLabel}</div>
                 </div>
               </div>
             ))}
@@ -286,20 +229,10 @@ const App = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-black text-white py-16 px-6 text-center">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <AlertTriangle className="text-red-600 w-10 h-10" />
-            <span className="font-black text-3xl italic tracking-tighter">STOP THE REEFER</span>
-          </div>
-          <p className="text-slate-500 font-bold mb-8 uppercase tracking-widest text-xs">
-            This website is 100% verified by the "Institute of People Who Don't Like Fun" and is legally binding for the next 24 hours.
-          </p>
-          <div className="flex justify-center gap-10 font-black italic uppercase text-sm">
-             <span className="text-red-600">HAPPY APRIL FOOLS DAY</span>
-          </div>
-        </div>
+        <AlertTriangle className="text-red-600 w-10 h-10 mx-auto mb-4" />
+        <p className="font-black text-2xl italic tracking-tighter mb-4">STOP THE REEFER</p>
+        <p className="text-red-600 font-black italic uppercase">HAPPY APRIL FOOLS DAY</p>
       </footer>
     </div>
   );
