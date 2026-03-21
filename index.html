@@ -9,8 +9,9 @@ import {
   doc, 
   setDoc,
   deleteDoc,
-  getDoc,
-  updateDoc
+  updateDoc,
+  query,
+  orderBy
 } from 'firebase/firestore';
 import { 
   getAuth, 
@@ -35,7 +36,6 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'ajnabee-chat-app';
 
-// WebRTC STUN Servers for P2P connection
 const servers = {
   iceServers: [
     { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
@@ -49,13 +49,11 @@ export default function App() {
   const [isMatching, setIsMatching] = useState(false);
   const [callId, setCallId] = useState(null);
   
-  // Media States
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
 
-  // Chat States
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   
@@ -65,51 +63,70 @@ export default function App() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
+      if (!u) {
         await signInAnonymously(auth);
-      } catch (error) { console.error(error); }
-    };
-    initAuth();
-    return onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
+      } else {
+        setUser(u);
+        setLoading(false);
+      }
     });
+    return () => unsubscribeAuth();
   }, []);
 
-  // Cleanup effect
   useEffect(() => {
     return () => {
       localStream?.getTracks().forEach(t => t.stop());
+      pc.current?.close();
     };
   }, [localStream]);
 
-  const startMetrics = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    setLocalStream(stream);
-    if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-    stream.getTracks().forEach((track) => pc.current.addTrack(track, stream));
+  // Handle message listener when a call is active
+  useEffect(() => {
+    if (!callId) {
+      setMessages([]);
+      return;
+    }
 
-    pc.current.ontrack = (event) => {
-      const rStream = new MediaStream();
-      event.streams[0].getTracks().forEach((track) => rStream.addTrack(track));
-      setRemoteStream(rStream);
-      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = rStream;
-    };
+    const msgsRef = collection(db, 'artifacts', appId, 'public', 'data', 'calls', callId, 'messages');
+    // Using simple query to avoid index requirements (Rule 2)
+    const unsubscribe = onSnapshot(msgsRef, (snapshot) => {
+      const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const sorted = docs.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
+      setMessages(sorted);
+      setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    });
+
+    return () => unsubscribe();
+  }, [callId]);
+
+  const startMetrics = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setLocalStream(stream);
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+      stream.getTracks().forEach((track) => pc.current.addTrack(track, stream));
+
+      pc.current.ontrack = (event) => {
+        const rStream = new MediaStream();
+        event.streams[0].getTracks().forEach((track) => rStream.addTrack(track));
+        setRemoteStream(rStream);
+        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = rStream;
+      };
+    } catch (err) {
+      console.error("Media access error:", err);
+    }
   };
 
   const findMatch = async () => {
     setIsMatching(true);
     await startMetrics();
 
-    // Strategy: Look for an "available" call doc, or create one
     const lobbyRef = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
-    // Simplified logic for "perfect" matching in memory
     const unsubscribe = onSnapshot(lobbyRef, async (snapshot) => {
       const availableCall = snapshot.docs.find(d => d.data().status === 'waiting' && d.data().hostId !== user.uid);
 
       if (availableCall && !callId) {
-        // Join as Answerer
         const callDoc = doc(db, 'artifacts', appId, 'public', 'data', 'calls', availableCall.id);
         setCallId(availableCall.id);
         
@@ -124,7 +141,6 @@ export default function App() {
           status: 'active'
         });
 
-        // Listen for candidates
         onSnapshot(collection(callDoc, 'candidates'), (snap) => {
           snap.docChanges().forEach((change) => {
             if (change.type === 'added') {
@@ -134,7 +150,6 @@ export default function App() {
         });
         unsubscribe();
       } else if (!availableCall && !callId) {
-        // Create as Host
         const newCallRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'calls'));
         setCallId(newCallRef.id);
 
@@ -164,30 +179,49 @@ export default function App() {
 
   const endCall = async () => {
     if (callId) {
-      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calls', callId));
+      try {
+        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calls', callId));
+      } catch (e) { console.error(e); }
     }
-    window.location.reload(); // Hard reset for clean WebRTC state
+    window.location.reload();
   };
 
   const toggleVideo = () => {
-    localStream.getVideoTracks()[0].enabled = !videoEnabled;
-    setVideoEnabled(!videoEnabled);
+    if (localStream) {
+      localStream.getVideoTracks()[0].enabled = !videoEnabled;
+      setVideoEnabled(!videoEnabled);
+    }
   };
 
   const toggleAudio = () => {
-    localStream.getAudioTracks()[0].enabled = !audioEnabled;
-    setAudioEnabled(!audioEnabled);
+    if (localStream) {
+      localStream.getAudioTracks()[0].enabled = !audioEnabled;
+      setAudioEnabled(!audioEnabled);
+    }
   };
 
-  if (loading) return <div className="h-screen bg-black flex items-center justify-center"><Loader2 className="animate-spin text-blue-500" /></div>;
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !callId) return;
+    const text = newMessage;
+    setNewMessage('');
+    try {
+      await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'calls', callId, 'messages'), {
+        text: text,
+        uid: user.uid,
+        createdAt: serverTimestamp()
+      });
+    } catch (err) { console.error(err); }
+  };
+
+  if (loading) return <div className="h-screen bg-black flex items-center justify-center"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>;
 
   return (
     <div className="h-screen bg-zinc-950 text-white flex flex-col font-sans overflow-hidden">
-      {/* Navbar */}
-      <header className="p-4 border-b border-white/10 flex justify-between items-center bg-zinc-900/50 backdrop-blur-lg">
+      <header className="p-4 border-b border-white/10 flex justify-between items-center bg-zinc-900/50 backdrop-blur-lg shrink-0">
         <div className="flex items-center gap-2">
           <Ghost className="text-blue-500 w-8 h-8" />
-          <h1 className="text-2xl font-black italic tracking-tighter">AJNABEE <span className="text-blue-500">LIVE</span></h1>
+          <h1 className="text-2xl font-black italic tracking-tighter uppercase">Ajnabee Live</h1>
         </div>
         {isMatching && (
           <button onClick={endCall} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full flex items-center gap-2 text-sm font-bold transition-all">
@@ -196,27 +230,24 @@ export default function App() {
         )}
       </header>
 
-      {/* Main Container */}
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden bg-black">
-        {/* Video Sections */}
         <div className="flex-1 relative flex flex-col md:flex-row bg-zinc-900 gap-1 p-1">
-          {/* Remote Video (The Stranger) */}
           <div className="flex-1 bg-zinc-800 relative rounded-lg overflow-hidden border border-white/5 shadow-2xl">
             {remoteStream ? (
               <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-500">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-500 p-6 text-center">
                 {!isMatching ? (
                   <button 
                     onClick={findMatch}
-                    className="group relative flex items-center gap-3 bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-2xl text-xl font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-blue-900/40"
+                    className="group flex items-center gap-3 bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-2xl text-xl font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-blue-900/40"
                   >
                     <Video /> Start Video Chat
                   </button>
                 ) : (
                   <div className="flex flex-col items-center gap-4">
                     <RefreshCw className="animate-spin w-10 h-10 text-blue-500" />
-                    <p className="animate-pulse">Looking for someone special...</p>
+                    <p className="animate-pulse font-medium">Searching for a stranger...</p>
                   </div>
                 )}
               </div>
@@ -226,14 +257,11 @@ export default function App() {
             </div>
           </div>
 
-          {/* Local Video (You) */}
           <div className="w-full md:w-1/3 bg-zinc-800 relative rounded-lg overflow-hidden border border-white/5 shadow-2xl aspect-video md:aspect-auto">
             <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror-mode" />
             <div className="absolute bottom-4 left-4 bg-blue-600/60 px-3 py-1 rounded-md backdrop-blur-md text-xs font-bold border border-white/10 uppercase tracking-widest">
               You
             </div>
-            
-            {/* Controls */}
             {localStream && (
               <div className="absolute bottom-4 right-4 flex gap-2">
                 <button onClick={toggleAudio} className={`p-2 rounded-full backdrop-blur-md border border-white/10 ${audioEnabled ? 'bg-white/10' : 'bg-red-600'}`}>
@@ -247,13 +275,12 @@ export default function App() {
           </div>
         </div>
 
-        {/* Chat Section */}
         <div className="w-full md:w-80 bg-zinc-950 border-l border-white/10 flex flex-col shrink-0">
-          <div className="p-3 border-b border-white/5 text-xs font-bold text-zinc-500 uppercase">Live Messages</div>
+          <div className="p-3 border-b border-white/5 text-[10px] font-black text-zinc-500 uppercase tracking-tighter">Messages</div>
           <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
             {messages.map((m, i) => (
-              <div key={i} className={`flex flex-col ${m.uid === user.uid ? 'items-end' : 'items-start'}`}>
-                <div className={`px-3 py-2 rounded-xl text-sm max-w-[90%] break-words ${m.uid === user.uid ? 'bg-blue-600' : 'bg-zinc-800'}`}>
+              <div key={i} className={`flex flex-col ${m.uid === user?.uid ? 'items-end' : 'items-start'}`}>
+                <div className={`px-3 py-2 rounded-2xl text-sm max-w-[90%] break-words ${m.uid === user?.uid ? 'bg-blue-600' : 'bg-zinc-800'}`}>
                   {m.text}
                 </div>
               </div>
@@ -261,24 +288,15 @@ export default function App() {
             <div ref={scrollRef} />
           </div>
           
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            if (!newMessage.trim() || !callId) return;
-            addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'calls', callId, 'messages'), {
-              text: newMessage,
-              uid: user.uid,
-              createdAt: serverTimestamp()
-            });
-            setNewMessage('');
-          }} className="p-4 bg-zinc-900 border-t border-white/10 flex gap-2">
+          <form onSubmit={handleSendMessage} className="p-4 bg-zinc-900 border-t border-white/10 flex gap-2">
             <input 
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder={isMatching ? "Say hello..." : "Join a call to chat"}
+              placeholder={isMatching ? "Say hello..." : "Start chat to message"}
               disabled={!isMatching}
-              className="flex-1 bg-black border border-white/10 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 disabled:opacity-50"
+              className="flex-1 bg-black border border-white/10 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 disabled:opacity-30"
             />
-            <button type="submit" disabled={!isMatching} className="p-2 bg-blue-600 rounded-full hover:bg-blue-500 disabled:opacity-50">
+            <button type="submit" disabled={!isMatching || !newMessage.trim()} className="p-2 bg-blue-600 rounded-full hover:bg-blue-500 disabled:opacity-30 transition-opacity">
               <Send size={18} />
             </button>
           </form>
