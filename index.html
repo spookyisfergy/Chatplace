@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Mega Multiplayer Sandbox</title>
+    <title>Mega Multiplayer Sandbox XL</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <style>
@@ -20,63 +20,86 @@
         }
         #game-container {
             display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100vh;
-            padding-top: 20px;
+            padding-top: 10px;
         }
-        .header { margin-bottom: 10px; text-align: center; }
-        .header h1 { font-size: 14px; margin: 0 0 5px 0; color: var(--accent); }
+        .header { margin-bottom: 5px; text-align: center; }
+        .header h1 { font-size: 14px; margin: 0 0 5px 0; color: var(--accent); text-shadow: 2px 2px #000; }
         
         canvas {
             border: 4px solid #333;
             image-rendering: pixelated;
             background: #050505;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(230, 126, 34, 0.2);
             cursor: crosshair;
-            width: 512px; height: 512px;
-            max-width: 95vw; max-height: 60vh;
+            /* Large display size, but internal resolution is 200x200 */
+            width: 600px; height: 600px;
+            max-width: 95vw; max-height: 50vh;
         }
         
         .ui-panel {
             background: var(--panel);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: flex; flex-direction: column; gap: 10px;
-            width: 90%; max-width: 600px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 10px;
+            display: flex; flex-direction: column; gap: 8px;
+            width: 95%; max-width: 800px;
+            box-sizing: border-box;
+            border: 2px solid #444;
         }
 
         .element-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
 
         button {
-            background: #444; color: #fff; border: none;
-            padding: 10px 5px; font-size: 8px; cursor: pointer;
-            border-bottom: 3px solid #222;
+            background: #3d3d3d; color: #fff; border: none;
+            padding: 10px 4px; font-size: 8px; cursor: pointer;
+            border-bottom: 4px solid #1a1a1a;
             transition: all 0.1s;
             text-transform: uppercase;
         }
-        button:hover { background: #555; }
+        button:hover { background: #4d4d4d; }
         button.active { 
             background: var(--accent); 
-            border-bottom: 3px solid #a05a1a;
+            border-bottom: 4px solid #a05a1a;
             transform: translateY(2px);
         }
         
-        .meta-controls {
+        .controls-row {
             display: flex; justify-content: space-between; align-items: center;
             border-top: 1px solid #444; padding-top: 10px;
+            gap: 15px;
         }
 
-        #status { font-size: 7px; color: #aaa; }
-        .btn-special { background: #34495e; }
-        .btn-online { background: #27ae60; }
-        .btn-online.active { background: #c0392b; }
+        .slider-container {
+            display: flex; align-items: center; gap: 10px; font-size: 9px;
+        }
+
+        input[type=range] {
+            cursor: pointer;
+            accent-color: var(--accent);
+            width: 100px;
+        }
+
+        #status { font-size: 8px; color: #00ff00; letter-spacing: 1px; }
+        .btn-special { background: #c0392b; border-bottom-color: #7b241c; }
+        .btn-online { background: #27ae60; border-bottom-color: #1e8449; }
+        .btn-online.active { background: #2980b9; border-bottom-color: #1a5276; }
+
+        /* Custom Scrollbar */
+        .element-grid::-webkit-scrollbar { width: 6px; }
+        .element-grid::-webkit-scrollbar-track { background: #1a1a1a; }
+        .element-grid::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
 
         @media (max-width: 600px) {
-            .header h1 { font-size: 10px; }
-            button { font-size: 6px; padding: 8px 2px; }
+            .header h1 { font-size: 11px; }
+            button { font-size: 7px; }
+            canvas { height: 40vh; }
         }
     </style>
 </head>
@@ -84,8 +107,8 @@
 
 <div id="game-container">
     <div class="header">
-        <h1>ELEMENTAL REALMS</h1>
-        <div id="status">INITIALIZING...</div>
+        <h1>REALM BEYOND v3</h1>
+        <div id="status">INIT...</div>
     </div>
 
     <canvas id="sandCanvas"></canvas>
@@ -95,12 +118,16 @@
             <!-- Elements dynamically generated -->
         </div>
         
-        <div class="meta-controls">
-            <div style="display: flex; gap: 5px;">
-                <button onclick="clearGrid()" class="btn-special">Reset World</button>
-                <button onclick="toggleOnline()" id="sync-btn" class="btn-online">Go Online</button>
+        <div class="controls-row">
+            <div class="slider-container">
+                <span>Brush</span>
+                <input type="range" id="brushSlider" min="1" max="12" value="3" oninput="updateBrush(this.value)">
+                <span id="brush-val">3</span>
             </div>
-            <div id="brush-info" style="font-size: 8px;">Brush: 2px</div>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="clearGrid()" class="btn-special">Clear All</button>
+                <button onclick="toggleOnline()" id="sync-btn" class="btn-online">Go Live</button>
+            </div>
         </div>
     </div>
 </div>
@@ -110,10 +137,10 @@
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- Simulation Constants ---
-    const WIDTH = 128; 
-    const HEIGHT = 128;
-    const EMPTY = 0, SAND = 1, WATER = 2, WALL = 3, FIRE = 4, WOOD = 5, GUNPOWDER = 6, ACID = 7, STEAM = 8;
+    // --- Simulation Constants (BIGGER WORLD) ---
+    const WIDTH = 200; 
+    const HEIGHT = 200;
+    const EMPTY = 0, SAND = 1, WATER = 2, WALL = 3, FIRE = 4, WOOD = 5, GUNPOWDER = 6, ACID = 7, STEAM = 8, LAVA = 9, OBSIDIAN = 10, METHANE = 11;
 
     const ELEMENTS = {
         [EMPTY]: { name: 'Eraser', color: '#000000' },
@@ -124,13 +151,16 @@
         [FIRE]: { name: 'Fire', color: '#e67e22' },
         [GUNPOWDER]: { name: 'Powder', color: '#555555' },
         [ACID]: { name: 'Acid', color: '#2ecc71' },
-        [STEAM]: { name: 'Steam', color: '#bdc3c7' }
+        [STEAM]: { name: 'Steam', color: '#bdc3c7' },
+        [LAVA]: { name: 'Lava', color: '#ff4d00' },
+        [OBSIDIAN]: { name: 'Obsidian', color: '#2c003e' },
+        [METHANE]: { name: 'Methane', color: '#aaffff' }
     };
 
     // --- State Management ---
     let grid = Array(HEIGHT).fill().map(() => new Uint8Array(WIDTH));
     let currentElement = SAND;
-    let brushSize = 2;
+    let brushSize = 3;
     let isOnline = false;
     let lastPush = 0;
     let user = null;
@@ -141,7 +171,7 @@
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
 
-    // --- Firebase Init ---
+    // --- Firebase Setup ---
     const firebaseConfig = {
         apiKey: "AIzaSyC8qE-Un_cYYMQ_raNkFgsCYQtj3G94oYI",
         authDomain: "boxelgame-aa8c3.firebaseapp.com",
@@ -154,82 +184,69 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const appId = 'mega-sandbox-v2'; // unique path ID
+    const appId = 'mega-sandbox-xl'; 
 
-    // --- Auth & Sync ---
     const initAuth = async () => {
-        try {
-            await signInAnonymously(auth);
-        } catch (e) {
-            console.error("Auth Error:", e);
-            document.getElementById('status').innerText = "Auth Error: Enable Anon Login";
-        }
+        try { await signInAnonymously(auth); } catch (e) { console.error(e); }
     };
     initAuth();
 
     onAuthStateChanged(auth, (u) => {
         user = u;
-        if(u) {
-            document.getElementById('status').innerText = "SYSTEM READY (OFFLINE)";
-        }
+        if(u) document.getElementById('status').innerText = "LOCAL MODE";
     });
 
-    window.toggleOnline = async () => {
-        if (!user) {
-            document.getElementById('status').innerText = "WAITING FOR AUTH...";
-            return;
-        }
+    window.updateBrush = (val) => {
+        brushSize = parseInt(val);
+        document.getElementById('brush-val').innerText = val;
+    };
 
+    window.toggleOnline = async () => {
+        if (!user) return;
         const btn = document.getElementById('sync-btn');
         const status = document.getElementById('status');
         
         if (!isOnline) {
             isOnline = true;
-            btn.innerText = "Disconnect";
+            btn.innerText = "Leave Live";
             btn.classList.add('active');
-            status.innerText = "CONNECTING...";
+            status.innerText = "SYNCING REALM...";
             
-            const worldDocRef = doc(db, 'artifacts', appId, 'public', 'world_v2');
-            
+            const worldDocRef = doc(db, 'artifacts', appId, 'public', 'world_v3');
             try {
                 const initialSnap = await getDoc(worldDocRef);
-                if (initialSnap.exists()) {
-                    updateLocalGrid(initialSnap.data().gridData);
-                }
-            } catch(e) { console.warn("New world started."); }
+                if (initialSnap.exists()) updateLocalGrid(initialSnap.data().gridData);
+            } catch(e) {}
 
             unsubscribeSync = onSnapshot(worldDocRef, (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
-                    // Don't overwrite our own drawing while we are actively drawing
-                    if (data.updatedBy !== user.uid && Date.now() - lastPush > 1200) {
+                    // Live sync condition: only update if data is fresh and not from us
+                    if (data.updatedBy !== user.uid && Date.now() - lastPush > 800) {
                         updateLocalGrid(data.gridData);
-                        status.innerText = "REALM SYNCED";
+                        status.innerText = "LIVE (SYNCED)";
                     }
                 }
             }, (err) => {
-                console.error("Sync Error:", err);
-                status.innerText = "SYNC ERROR: CHECK RULES";
+                status.innerText = "FIREBASE PERMISSION ERROR";
                 isOnline = false;
-                btn.innerText = "Go Online";
+                btn.innerText = "Go Live";
                 btn.classList.remove('active');
             });
         } else {
             isOnline = false;
             if (unsubscribeSync) unsubscribeSync();
-            btn.innerText = "Go Online";
+            btn.innerText = "Go Live";
             btn.classList.remove('active');
-            status.innerText = "OFFLINE MODE";
+            status.innerText = "LOCAL MODE";
         }
     };
 
     function updateLocalGrid(jsonStr) {
         try {
             const flat = JSON.parse(jsonStr);
-            for(let y=0; y<HEIGHT; y++) {
-                grid[y].set(flat.slice(y*WIDTH, (y+1)*WIDTH));
-            }
-        } catch(e) { console.error("Parse failed", e); }
+            for(let y=0; y<HEIGHT; y++) grid[y].set(flat.slice(y*WIDTH, (y+1)*WIDTH));
+        } catch(e) {}
     }
 
     async function pushToCloud() {
@@ -237,89 +254,108 @@
         lastPush = Date.now();
         const flat = new Uint8Array(WIDTH * HEIGHT);
         for(let y=0; y<HEIGHT; y++) flat.set(grid[y], y*WIDTH);
-        
         try {
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'world_v2'), {
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'world_v3'), {
                 gridData: JSON.stringify(Array.from(flat)),
                 updatedBy: user.uid,
                 ts: Date.now()
             });
-        } catch(e) { console.error("Save error:", e); }
+            document.getElementById('status').innerText = "LIVE (UPDATING...)";
+        } catch(e) {}
     }
 
-    // --- Game Engine ---
+    // --- Game Engine Physics ---
     function updatePhysics() {
         const xDir = Math.random() > 0.5 ? 1 : -1;
-        for (let y = HEIGHT - 1; y >= 0; y--) {
+        // Interleaving update directions to reduce bias
+        const yStart = Math.random() > 0.5 ? HEIGHT - 1 : 0;
+        const yEnd = yStart === 0 ? HEIGHT : -1;
+        const yStep = yStart === 0 ? 1 : -1;
+
+        for (let y = yStart; y !== yEnd; y += yStep) {
             for (let x = 0; x < WIDTH; x++) {
                 const type = grid[y][x];
-                if (type === EMPTY || type === WALL) continue;
+                if (type === EMPTY || type === WALL || type === OBSIDIAN || type === WOOD) continue;
 
+                // Solids
                 if (type === SAND || type === GUNPOWDER) {
                     if (y < HEIGHT - 1) {
-                        if (grid[y+1][x] === EMPTY || grid[y+1][x] === WATER || grid[y+1][x] === ACID) {
-                            const temp = grid[y+1][x];
-                            grid[y+1][x] = type; grid[y][x] = temp;
+                        const below = grid[y+1][x];
+                        if (below === EMPTY || below === WATER || below === ACID || below === METHANE) {
+                            grid[y+1][x] = type; grid[y][x] = below;
                         } else if (x + xDir >= 0 && x + xDir < WIDTH && grid[y+1][x+xDir] === EMPTY) {
                             grid[y+1][x+xDir] = type; grid[y][x] = EMPTY;
                         }
                     }
                 }
-                else if (type === WATER || type === ACID) {
-                    if (y < HEIGHT - 1 && (grid[y+1][x] === EMPTY || (type === ACID && grid[y+1][x] === WATER))) {
+                // Liquids
+                else if (type === WATER || type === ACID || type === LAVA) {
+                    let flowChance = type === LAVA ? 0.3 : 1.0;
+                    if (Math.random() > flowChance) continue;
+
+                    if (y < HEIGHT - 1 && (grid[y+1][x] === EMPTY || grid[y+1][x] === METHANE || (type === ACID && grid[y+1][x] === WATER))) {
                         const temp = grid[y+1][x];
                         grid[y+1][x] = type; grid[y][x] = temp;
                     } else {
                         const side = Math.random() > 0.5 ? 1 : -1;
-                        if (x + side >= 0 && x + side < WIDTH && grid[y][side+x] === EMPTY) {
+                        if (x + side >= 0 && x + side < WIDTH && (grid[y][side+x] === EMPTY || grid[y][side+x] === METHANE)) {
                             grid[y][side+x] = type; grid[y][x] = EMPTY;
                         }
+                    }
+
+                    // Interactions
+                    if (type === LAVA) {
+                        [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
+                            const nx = x+dx, ny = y+dy;
+                            if (nx>=0 && nx<WIDTH && ny>=0 && ny<HEIGHT) {
+                                if (grid[ny][nx] === WATER) { grid[ny][nx] = STEAM; grid[y][x] = OBSIDIAN; }
+                                if (grid[ny][nx] === WOOD || grid[ny][nx] === GUNPOWDER) grid[ny][nx] = FIRE;
+                                if (grid[ny][nx] === METHANE) grid[ny][nx] = FIRE;
+                            }
+                        });
                     }
                     if (type === ACID) {
                         [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
                             const nx = x+dx, ny = y+dy;
                             if (nx>=0 && nx<WIDTH && ny>=0 && ny<HEIGHT) {
-                                if ((grid[ny][nx] === WOOD || grid[ny][nx] === SAND) && Math.random() < 0.04) {
+                                if ((grid[ny][nx] === WOOD || grid[ny][nx] === SAND || grid[ny][nx] === WALL) && Math.random() < 0.05) {
                                     grid[ny][nx] = EMPTY;
-                                    grid[y][x] = Math.random() < 0.2 ? STEAM : EMPTY;
+                                    grid[y][x] = Math.random() < 0.3 ? STEAM : EMPTY;
                                 }
                             }
                         });
                     }
                 }
-                else if (type === FIRE) {
-                    if (Math.random() < 0.08) grid[y][x] = Math.random() < 0.2 ? STEAM : EMPTY;
-                    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
-                        const nx = x+dx, ny = y+dy;
-                        if (nx>=0 && nx<WIDTH && ny>=0 && ny<HEIGHT) {
-                            const target = grid[ny][nx];
-                            if (target === WOOD && Math.random() < 0.1) grid[ny][nx] = FIRE;
-                            if (target === GUNPOWDER) {
-                                grid[ny][nx] = FIRE;
-                                for(let i=-2; i<=2; i++) {
-                                    for(let j=-2; j<=2; j++) {
-                                        let ex = nx+i, ey = ny+j;
-                                        if (ex>=0 && ex<WIDTH && ey>=0 && ey<HEIGHT && grid[ey][ex] !== WALL && Math.random() < 0.4) grid[ey][ex] = FIRE;
-                                    }
-                                }
-                            }
-                            if (target === WATER) { grid[ny][nx] = STEAM; grid[y][x] = EMPTY; }
-                        }
-                    });
-                    if (y > 0 && grid[y-1][x] === EMPTY && Math.random() < 0.15) {
-                        grid[y-1][x] = FIRE; grid[y][x] = EMPTY;
-                    }
-                }
-                else if (type === STEAM) {
-                    if (y > 0 && grid[y-1][x] === EMPTY) {
-                        grid[y-1][x] = STEAM; grid[y][x] = EMPTY;
-                    } else if (Math.random() < 0.015) {
-                        grid[y][x] = Math.random() < 0.1 ? WATER : EMPTY;
+                // Gases
+                else if (type === FIRE || type === STEAM || type === METHANE) {
+                    if (type === FIRE && Math.random() < 0.15) grid[y][x] = EMPTY;
+                    if (type === STEAM && Math.random() < 0.01) grid[y][x] = WATER;
+
+                    if (y > 0 && (grid[y-1][x] === EMPTY || (type === FIRE && grid[y-1][x] === METHANE))) {
+                        const below = grid[y-1][x];
+                        grid[y-1][x] = type; grid[y][x] = below === METHANE ? FIRE : EMPTY;
                     } else {
                         const side = Math.random() > 0.5 ? 1 : -1;
                         if (x+side >= 0 && x+side < WIDTH && grid[y][x+side] === EMPTY) {
-                            grid[y][x+side] = STEAM; grid[y][x] = EMPTY;
+                            grid[y][x+side] = type; grid[y][x] = EMPTY;
                         }
+                    }
+
+                    if (type === FIRE) {
+                        [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
+                            const nx = x+dx, ny = y+dy;
+                            if (nx>=0 && nx<WIDTH && ny>=0 && ny<HEIGHT) {
+                                const target = grid[ny][nx];
+                                if ((target === WOOD || target === METHANE) && Math.random() < 0.3) grid[ny][nx] = FIRE;
+                                if (target === GUNPOWDER) {
+                                    grid[ny][nx] = FIRE;
+                                    for(let i=-3; i<=3; i++) for(let j=-3; j<=3; j++) {
+                                        let ex=nx+i, ey=ny+j;
+                                        if (ex>=0 && ex<WIDTH && ey>=0 && ey<HEIGHT && grid[ey][ex] !== WALL && Math.random()<0.5) grid[ey][ex] = FIRE;
+                                    }
+                                }
+                            }
+                        });
                     }
                 }
             }
@@ -349,7 +385,7 @@
         const btn = document.createElement('button');
         btn.innerText = info.name;
         btn.id = `btn-${id}`;
-        btn.style.borderLeft = `4px solid ${info.color}`;
+        btn.style.borderLeft = `6px solid ${info.color}`;
         if (id == SAND) btn.className = 'active';
         btn.onclick = () => {
             currentElement = parseInt(id);
@@ -364,7 +400,7 @@
         if (isOnline) pushToCloud();
     };
 
-    // --- Input Handling ---
+    // --- Interaction ---
     let isDrawing = false;
     const handleInput = (e) => {
         if (!isDrawing) return;
@@ -376,28 +412,21 @@
         
         for(let i = -brushSize; i <= brushSize; i++) {
             for(let j = -brushSize; j <= brushSize; j++) {
+                if(i*i + j*j > brushSize*brushSize) continue;
                 const nx = x + i, ny = y + j;
                 if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-                    if (currentElement === EMPTY || grid[ny][nx] === EMPTY || grid[ny][nx] === WATER) {
-                        grid[ny][nx] = currentElement;
-                    }
+                    grid[ny][nx] = currentElement;
                 }
             }
         }
     };
 
     canvas.addEventListener('mousedown', () => isDrawing = true);
-    window.addEventListener('mouseup', () => {
-        if (isDrawing && isOnline) pushToCloud();
-        isDrawing = false;
-    });
+    window.addEventListener('mouseup', () => { if (isDrawing && isOnline) pushToCloud(); isDrawing = false; });
     canvas.addEventListener('mousemove', handleInput);
     canvas.addEventListener('touchstart', (e) => { isDrawing = true; handleInput(e); e.preventDefault(); }, {passive: false});
     canvas.addEventListener('touchmove', (e) => { handleInput(e); e.preventDefault(); }, {passive: false});
-    canvas.addEventListener('touchend', () => {
-        if (isDrawing && isOnline) pushToCloud();
-        isDrawing = false;
-    });
+    canvas.addEventListener('touchend', () => { if (isDrawing && isOnline) pushToCloud(); isDrawing = false; });
 
     function loop() {
         updatePhysics();
