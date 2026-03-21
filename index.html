@@ -1,238 +1,166 @@
-import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Skull, Zap, EyeOff, ArrowLeft, Send } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTIMATE TRUTH NETWORK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Libre+Baskerville', serif; cursor: crosshair; }
+        .font-black { font-family: 'Archivo Black', sans-serif; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { display: inline-block; animation: marquee 15s linear infinite; }
+        .glitch-bg { animation: glitch 0.2s infinite; }
+        @keyframes glitch {
+            0% { background-color: #fdf2f0; }
+            50% { background-color: #fee2e2; }
+            100% { background-color: #fdf2f0; }
+        }
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="bg-[#fffcf5] text-slate-900 transition-colors duration-300">
 
-const App = () => {
-  const [view, setView] = useState('home'); 
-  const [scrolled, setScrolled] = useState(false);
-  const [glitch, setGlitch] = useState(false);
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // --- IMAGE ASSETS ---
-  // Using the links from your successful uploads to ensure they display
-  const BEFORE_IMAGE_URL = "https://i.postimg.cc/FzBnzy50/Jesus-Light-World-Brent-Borup.jpg"; 
-  const AFTER_IMAGE_URL = "https://i.ibb.co/MY6z3k3/image-2026-03-21-001031888.png";
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    
-    const interval = setInterval(() => {
-      if (view === 'home') {
-        setGlitch(true);
-        setTimeout(() => setGlitch(false), 150);
-      }
-    }, 4000);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(interval);
-    };
-  }, [view]);
-
-  const handleFakeSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setEmail('');
-      setView('home');
-    }, 1500);
-  };
-
-  const dataPoints = [
-    {
-      title: "The Potency Paradox",
-      description: "One single 'joint' in 2024 contains more raw chaos than an entire warehouse of 1980s contraband.",
-      icon: <Skull className="w-8 h-8 text-red-600" />,
-      stat: "1000x",
-      statLabel: "Stronger than 1920s 'Jazz Cabbage'"
-    },
-    {
-      title: "Molecular Supremacy",
-      description: "Comparison studies suggest that 1 gram of modern 'Green' is significantly more dangerous than industrial chemicals.",
-      icon: <Zap className="w-8 h-8 text-red-600" />,
-      stat: "> CRACK",
-      statLabel: "Relative Danger Quotient"
-    },
-    {
-      title: "The Third Eye Closure",
-      description: "Smoking leads to 'Permanent Relaxation Syndrome' where the brain decides it is too chilled out to function.",
-      icon: <EyeOff className="w-8 h-8 text-red-600" />,
-      stat: "0%",
-      statLabel: "Remaining Motivation Levels"
-    }
-  ];
-
-  return (
-    <div className="antialiased select-none w-full min-h-screen">
-      {view === 'horror' && (
-        <div className="min-h-screen bg-black text-white p-6 flex flex-col items-center animate-in fade-in duration-500 overflow-y-auto">
-          <button 
-            onClick={() => setView('home')}
-            className="fixed top-8 left-8 flex items-center gap-2 font-black uppercase italic hover:text-red-600 transition z-50 bg-black/80 p-3 rounded border border-white/20"
-          >
-            <ArrowLeft /> Back to Safety
-          </button>
-          
-          <div className="max-w-6xl w-full py-20">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-7xl font-black italic uppercase mb-4 text-red-600 tracking-tighter">
-                CLASSIFIED: THE DEGRADATION
-              </h2>
-              <div className="bg-red-600 text-black inline-block px-4 py-1 font-bold uppercase tracking-widest">
-                Subject 401-B : "The Lettuce Effect"
-              </div>
+    <!-- NAVIGATION -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-transparent py-5">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="text-red-600 animate-pulse text-3xl">⚠</div>
+                <span class="font-black text-xl md:text-2xl tracking-tighter uppercase italic">ULTIMATE TRUTH NETWORK</span>
             </div>
-
-            <div className="grid md:grid-cols-2 gap-12 items-start">
-              <div className="flex flex-col items-center">
-                <div className="relative border-8 border-white p-2 bg-white mb-6 shadow-xl transform -rotate-1">
-                  <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 text-xs font-bold uppercase z-10">BEFORE</div>
-                  <img 
-                    src={BEFORE_IMAGE_URL} 
-                    alt="Subject Before" 
-                    className="w-full max-w-md object-contain h-[500px]"
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl font-black italic uppercase text-white mb-2">Purity & Light</p>
-                  <p className="text-slate-400 font-bold max-w-xs uppercase text-xs tracking-widest">
-                    Zero THC detected. High levels of moral fiber and productivity.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center">
-                <div className="relative border-8 border-red-600 p-2 bg-black mb-6 shadow-[0_0_60px_rgba(220,38,38,0.6)] transform rotate-1">
-                  <div className="absolute top-0 right-0 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase z-10">AFTER 1 PUFF</div>
-                  <img 
-                    src={AFTER_IMAGE_URL} 
-                    alt="Subject After" 
-                    className="w-full max-w-md object-contain h-[500px]"
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl font-black italic uppercase text-red-600 mb-2">Total Collapse</p>
-                  <p className="text-slate-400 font-bold max-w-xs uppercase text-xs tracking-widest">
-                    Extreme munchie-induced confusion. Eyes permanently set to "High-Beam".
-                  </p>
-                </div>
-              </div>
+            <div class="hidden md:flex gap-8 font-bold text-xs uppercase tracking-widest items-center">
+                <button onclick="showView('horror')" class="hover:text-red-600 transition underline decoration-red-600 decoration-2 underline-offset-4">The Danger</button>
+                <button onclick="showView('signup')" class="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-black transition border-2 border-red-600">SAVE YOURSELF</button>
             </div>
-
-            <div className="mt-20 border-4 border-dashed border-red-900 p-8 text-center bg-red-950/20">
-              <p className="text-red-500 font-black italic uppercase text-xl mb-4 animate-pulse">
-                [ WARNING: MOLECULAR STRUCTURE IS IRREVERSIBLE ]
-              </p>
-              <button 
-                onClick={() => setView('signup')}
-                className="bg-red-600 text-white px-12 py-4 font-black italic uppercase hover:bg-white hover:text-red-600 transition"
-              >
-                ENLIST TO STOP THE MADNESS
-              </button>
-            </div>
-          </div>
         </div>
-      )}
+    </nav>
 
-      {view === 'signup' && (
-        <div className="min-h-screen bg-orange-50 flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-white border-8 border-black p-8 shadow-[20px_20px_0px_0px_rgba(0,0,0,1)]">
-             <button onClick={() => setView('home')} className="mb-4 text-xs font-black uppercase underline hover:text-red-600">Cancel Operation</button>
-             <h2 className="text-3xl font-black italic uppercase mb-2 tracking-tighter">Join the Underground</h2>
-             <p className="font-bold text-slate-600 mb-6 leading-tight">Enter your credentials to receive the secret "Anti-Reefer" survival kit.</p>
-             
-             <form onSubmit={handleFakeSubmit} className="space-y-4">
-                <input 
-                  type="email" 
-                  required
-                  placeholder="YOUR EMAIL" 
-                  className="w-full p-4 border-4 border-black font-black uppercase outline-none focus:bg-yellow-50"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <button 
-                  disabled={isSubmitting}
-                  className="w-full bg-red-600 text-white p-4 font-black italic uppercase flex items-center justify-center gap-2 hover:bg-black transition"
-                >
-                  {isSubmitting ? "ENCRYPTING..." : <>ENLIST NOW <Send size={18} /></>}
-                </button>
-             </form>
-             <p className="mt-6 text-[10px] text-slate-400 font-bold uppercase leading-tight">No data is actually stored. Happy April Fools!</p>
-          </div>
+    <!-- HOME VIEW -->
+    <div id="home-view">
+        <section class="relative h-screen flex items-center justify-center bg-black text-white overflow-hidden">
+            <div class="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+            <div class="relative z-10 max-w-5xl px-6 text-center">
+                <div class="inline-block bg-red-600 text-white px-4 py-1 font-bold mb-4 animate-bounce">ESTABLISHED 1936</div>
+                <h1 class="text-6xl md:text-9xl font-black mb-6 tracking-tighter leading-[0.9] uppercase italic">Worse than <br /><span class="text-red-600 underline decoration-white">CRACK.</span></h1>
+                <p class="text-xl md:text-3xl text-red-100 mb-10 max-w-3xl mx-auto font-bold uppercase">The devil's lettuce has evolved. It's now 400x more addictive than breathing.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="showView('horror')" class="bg-red-600 hover:bg-white hover:text-red-600 text-white px-10 py-5 text-xl font-black transition-all transform hover:scale-105 italic shadow-lg">SEE THE HORROR</button>
+                    <button onclick="showView('signup')" class="border-4 border-white hover:bg-white hover:text-black text-white px-10 py-5 text-xl font-black transition-all italic">JOIN THE RESISTANCE</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="bg-yellow-400 text-black py-4 border-y-4 border-black overflow-hidden whitespace-nowrap">
+            <div class="animate-marquee inline-block font-black text-2xl uppercase italic">
+                CRITICAL ALERT: ONE PUFF EQUALS THREE YEARS OF MEMORY LOSS • DON'T LET THE GIGGLE-BUSH WIN • STAY VIGILANT • 
+                CRITICAL ALERT: ONE PUFF EQUALS THREE YEARS OF MEMORY LOSS • DON'T LET THE GIGGLE-BUSH WIN • STAY VIGILANT • 
+            </div>
         </div>
-      )}
 
-      {view === 'home' && (
-        <div className={`min-h-screen font-serif transition-colors duration-100 ${glitch ? 'bg-red-900' : 'bg-orange-50'}`}>
-          <style>
-            {`
-              @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-              .animate-marquee { display: inline-block; animation: marquee 10s linear infinite; }
-            `}
-          </style>
-
-          <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-black text-white py-2' : 'bg-transparent text-black py-5'}`}>
-            <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="text-red-600 animate-pulse w-8 h-8" />
-                <span className="font-black text-2xl tracking-tighter uppercase italic">ULTIMATE TRUTH NETWORK</span>
-              </div>
-              <div className="hidden md:flex gap-8 font-bold text-xs uppercase tracking-widest items-center">
-                <button onClick={() => setView('horror')} className="hover:text-red-600 transition underline decoration-red-600 decoration-2 underline-offset-4">The Danger</button>
-                <button onClick={() => setView('signup')} className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-white hover:text-red-600 border-2 border-red-600 transition">SAVE YOURSELF</button>
-              </div>
+        <section class="py-24 px-6">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-12 text-center">
+                <div class="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)]">
+                    <div class="text-4xl mb-4">💀</div>
+                    <h3 class="text-2xl font-black mb-3 uppercase italic">Potency Paradox</h3>
+                    <p class="font-bold text-slate-700 mb-6 leading-tight">Modern greens are 1000x stronger than 1920s jazz-cabbage.</p>
+                    <div class="bg-black text-red-600 p-4 font-black text-3xl">1000x</div>
+                </div>
+                <div class="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)]">
+                    <div class="text-4xl mb-4">⚡</div>
+                    <h3 class="text-2xl font-black mb-3 uppercase italic">Brain Drain</h3>
+                    <p class="font-bold text-slate-700 mb-6 leading-tight">One gram is scientifically more dangerous than industrial bleach.</p>
+                    <div class="bg-black text-red-600 p-4 font-black text-3xl">> CRACK</div>
+                </div>
+                <div class="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)]">
+                    <div class="text-4xl mb-4">👁</div>
+                    <h3 class="text-2xl font-black mb-3 uppercase italic">The Third Eye</h3>
+                    <p class="font-bold text-slate-700 mb-6 leading-tight">Your brain essentially decides it's too chilled out to survive.</p>
+                    <div class="bg-black text-red-600 p-4 font-black text-3xl">0% IQ</div>
+                </div>
             </div>
-          </nav>
+        </section>
 
-          <section className="relative h-screen flex items-center justify-center bg-black text-white overflow-hidden">
-            <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-            <div className="relative z-10 max-w-5xl px-6 text-center">
-              <div className="inline-block bg-red-600 text-white px-4 py-1 font-bold mb-4 animate-bounce">ESTABLISHED 1936</div>
-              <h1 className="text-6xl md:text-9xl font-black mb-6 tracking-tighter leading-[0.9] uppercase italic">Worse than <br /><span className="text-red-600 underline decoration-white">CRACK.</span></h1>
-              <p className="text-xl md:text-3xl text-red-100 mb-10 max-w-3xl mx-auto font-bold uppercase">The devil's lettuce has evolved. It's now 400x more addictive than breathing.</p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onClick={() => setView('horror')} className="bg-red-600 hover:bg-white hover:text-red-600 text-white px-10 py-5 text-xl font-black transition-all transform hover:scale-105 italic shadow-lg">SEE THE HORROR</button>
-                <button onClick={() => setView('signup')} className="border-4 border-white hover:bg-white hover:text-black text-white px-10 py-5 text-xl font-black transition-all italic">JOIN THE RESISTANCE</button>
-              </div>
-            </div>
-          </section>
-
-          <div className="bg-yellow-400 text-black py-3 border-y-4 border-black overflow-hidden whitespace-nowrap">
-            <div className="animate-marquee inline-block font-black text-2xl uppercase italic">
-              CRITICAL ALERT: ONE PUFF EQUALS THREE YEARS OF MEMORY LOSS • DON'T LET THE GIGGLE-BUSH WIN • STAY VIGILANT • 
-              CRITICAL ALERT: ONE PUFF EQUALS THREE YEARS OF MEMORY LOSS • DON'T LET THE GIGGLE-BUSH WIN • STAY VIGILANT • 
-            </div>
-          </div>
-
-          <section className="py-24 px-6">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid md:grid-cols-3 gap-12">
-                {dataPoints.map((point, idx) => (
-                  <div key={idx} className="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)]">
-                    <div className="mb-4 bg-red-100 w-16 h-16 rounded-full flex items-center justify-center border-4 border-black">{point.icon}</div>
-                    <h3 className="text-2xl font-black mb-3 uppercase italic">{point.title}</h3>
-                    <p className="font-bold text-slate-700 mb-6 leading-tight">{point.description}</p>
-                    <div className="bg-black p-4 text-center">
-                      <div className="text-4xl font-black text-red-600">{point.stat}</div>
-                      <div className="text-[10px] text-white uppercase font-black">{point.statLabel}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <footer className="bg-black text-white py-16 px-6 text-center">
-            <AlertTriangle className="text-red-600 w-10 h-10 mx-auto mb-4" />
-            <p className="font-black text-2xl italic tracking-tighter mb-4">STOP THE REEFER</p>
-            <p className="text-red-600 font-black italic uppercase">HAPPY APRIL FOOLS DAY</p>
-          </footer>
-        </div>
-      )}
+        <footer class="bg-black text-white py-16 px-6 text-center">
+            <p class="font-black text-2xl italic tracking-tighter mb-4 uppercase">STOP THE REEFER</p>
+            <p class="text-red-600 font-black italic uppercase tracking-widest text-sm">HAPPY APRIL FOOLS DAY</p>
+        </footer>
     </div>
-  );
-};
 
-export default App;
+    <!-- HORROR VIEW -->
+    <div id="horror-view" class="hidden-view min-h-screen bg-black text-white p-6 flex flex-col items-center overflow-y-auto">
+        <button onclick="showView('home')" class="fixed top-8 left-8 flex items-center gap-2 font-black uppercase italic hover:text-red-600 transition z-50 bg-black/80 p-3 rounded border border-white/20 text-white">
+            ← Back to Safety
+        </button>
+        
+        <div class="max-w-6xl w-full py-20">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-8xl font-black italic uppercase mb-4 text-red-600 tracking-tighter">CLASSIFIED</h2>
+                <div class="bg-red-600 text-black inline-block px-4 py-1 font-bold uppercase tracking-widest">Subject 401-B : "The Lettuce Effect"</div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="flex flex-col items-center">
+                    <div class="relative border-8 border-white p-2 bg-white mb-6 shadow-xl transform -rotate-1">
+                        <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 text-xs font-bold uppercase">BEFORE</div>
+                        <img src="https://i.postimg.cc/FzBnzy50/Jesus-Light-World-Brent-Borup.jpg" class="w-full max-w-md object-contain h-[500px]" alt="Before">
+                    </div>
+                    <p class="text-3xl font-black uppercase italic">Purity & Light</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="relative border-8 border-red-600 p-2 bg-black mb-6 shadow-[0_0_60px_rgba(220,38,38,0.6)] transform rotate-1">
+                        <div class="absolute top-0 right-0 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase">AFTER</div>
+                        <img src="https://i.ibb.co/MY6z3k3/image-2026-03-21-001031888.png" class="w-full max-w-md object-contain h-[500px]" alt="After">
+                    </div>
+                    <p class="text-3xl font-black uppercase italic text-red-600">Total Collapse</p>
+                </div>
+            </div>
+
+            <div class="mt-20 border-4 border-dashed border-red-900 p-8 text-center bg-red-950/20">
+                <p class="text-red-500 font-black uppercase text-xl mb-4 animate-pulse">[ WARNING: MOLECULAR STRUCTURE IS IRREVERSIBLE ]</p>
+                <button onclick="showView('signup')" class="bg-red-600 text-white px-12 py-4 font-black uppercase hover:bg-white hover:text-red-600 transition">ENLIST TO STOP THE MADNESS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIGNUP VIEW -->
+    <div id="signup-view" class="hidden-view min-h-screen bg-orange-50 flex items-center justify-center p-6">
+        <div class="max-w-md w-full bg-white border-8 border-black p-8 shadow-[20px_20px_0px_0px_rgba(0,0,0,1)]">
+            <button onclick="showView('home')" class="mb-4 text-xs font-black uppercase underline hover:text-red-600">Cancel</button>
+            <h2 class="text-3xl font-black italic uppercase mb-2 tracking-tighter">Join the Underground</h2>
+            <p class="font-bold text-slate-600 mb-6 leading-tight uppercase text-xs">Credentials required for survival kit.</p>
+            <input type="email" placeholder="YOUR EMAIL" class="w-full p-4 border-4 border-black font-black uppercase outline-none focus:bg-yellow-50 mb-4">
+            <button onclick="alert('Operation Compromised! (Happy April Fools)')" class="w-full bg-red-600 text-white p-4 font-black italic uppercase hover:bg-black transition">ENLIST NOW</button>
+        </div>
+    </div>
+
+    <script>
+        function showView(viewId) {
+            document.getElementById('home-view').classList.add('hidden-view');
+            document.getElementById('horror-view').classList.add('hidden-view');
+            document.getElementById('signup-view').classList.add('hidden-view');
+            document.getElementById(viewId + '-view').classList.remove('hidden-view');
+            window.scrollTo(0, 0);
+            
+            if(viewId === 'horror') {
+                document.body.style.backgroundColor = '#000';
+            } else if (viewId === 'signup') {
+                document.body.style.backgroundColor = '#fff7ed';
+            } else {
+                document.body.style.backgroundColor = '#fffcf5';
+            }
+        }
+
+        window.onscroll = function() {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-black', 'text-white', 'py-2');
+                nav.classList.remove('py-5', 'bg-transparent', 'text-black');
+            } else {
+                nav.classList.remove('bg-black', 'text-white', 'py-2');
+                nav.classList.add('py-5', 'bg-transparent', 'text-black');
+            }
+        };
+    </script>
+</body>
+</html>
