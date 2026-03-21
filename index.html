@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
 import { 
   getFirestore, 
   doc, 
@@ -12,22 +12,11 @@ import {
 import { LucideCamera, LucideUser, LucideCrown, LucidePlay, LucideRefreshCw, LucideCoins } from 'lucide-react';
 
 // --- Firebase Configuration ---
-const firebaseConfig = {
-  apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
-  authDomain: "chatroon-4ded8.firebaseapp.com",
-  databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
-  projectId: "chatroon-4ded8",
-  storageBucket: "chatroon-4ded8.firebasestorage.app",
-  messagingSenderId: "779421378038",
-  appId: "1:779421378038:web:2e4b804b316b23882f93d7"
-};
-
+const firebaseConfig = JSON.parse(__firebase_config);
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Use a clean appId and ensure the path is exactly 6 segments: 
-// artifacts -> {appId} -> public -> data -> gameSession -> {docId}
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'blackjack-live-casino-v1';
 const SESSION_DOC_ID = 'current_game';
 
@@ -50,18 +39,22 @@ export default function App() {
   const [stream, setStream] = useState(null);
   const videoRef = useRef(null);
 
-  // 1. Authentication
+  // 1. Authentication (Rule 3)
   useEffect(() => {
     const initAuth = async () => {
       try {
-        await signInAnonymously(auth);
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
       } catch (err) {
         console.error("Firebase Auth Error:", err);
       }
     };
     initAuth();
     const unsubscribe = onAuthStateChanged(auth, (u) => {
-      if (u) setUser(u);
+      setUser(u);
     });
     return () => unsubscribe();
   }, []);
@@ -70,11 +63,12 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
 
-    // RULE 1 FIX: Ensure exactly 6 segments in the path
+    // RULE 1: Ensure exactly 6 segments in the path
     const gameDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'gameSession', SESSION_DOC_ID);
     
     const initGame = async () => {
       try {
+        // We attempt to get from server to avoid "client is offline" issues during init
         const snap = await getDoc(gameDocRef);
         if (!snap.exists()) {
           await setDoc(gameDocRef, {
@@ -87,25 +81,28 @@ export default function App() {
           });
         }
       } catch (e) {
-        console.error("Initialization error:", e);
+        // If it fails because of offline, we rely on the onSnapshot to catch up later
+        console.warn("Initialization fetch warning (likely offline or permissions):", e);
       }
     };
     initGame();
 
-    const unsubscribe = onSnapshot(gameDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        // Ensure data shapes are correct before setting state
-        setGameState(prev => ({
-          ...prev,
-          ...data,
-          dealerHand: Array.isArray(data.dealerHand) ? data.dealerHand : [],
-          playerHand: Array.isArray(data.playerHand) ? data.playerHand : []
-        }));
+    const unsubscribe = onSnapshot(gameDocRef, 
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setGameState(prev => ({
+            ...prev,
+            ...data,
+            dealerHand: Array.isArray(data.dealerHand) ? data.dealerHand : [],
+            playerHand: Array.isArray(data.playerHand) ? data.playerHand : []
+          }));
+        }
+      }, 
+      (err) => {
+        console.error("Firestore sync error:", err);
       }
-    }, (err) => {
-      console.error("Firestore sync error:", err);
-    });
+    );
 
     return () => unsubscribe();
   }, [user]);
@@ -157,7 +154,11 @@ export default function App() {
   const updateGame = async (updates) => {
     if (!user) return;
     const gameDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'gameSession', SESSION_DOC_ID);
-    await updateDoc(gameDocRef, updates);
+    try {
+      await updateDoc(gameDocRef, updates);
+    } catch (err) {
+      console.error("Update failed:", err);
+    }
   };
 
   // --- Actions ---
