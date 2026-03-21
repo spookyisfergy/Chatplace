@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SANDBOXELS ULTRA - PRO EDITION</title>
+    <title>SANDBOXELS ULTRA - MULTIPLAYER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;700&display=swap');
         
         :root {
             --neon-blue: #00f2ff;
-            --neon-purple: #bc13fe;
             --panel-bg: rgba(8, 8, 12, 0.98);
         }
 
@@ -57,7 +56,6 @@
             display: flex;
             flex-direction: column;
             min-width: 300px;
-            min-height: 400px;
         }
 
         .panel-header {
@@ -71,7 +69,6 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            flex-shrink: 0;
         }
 
         .element-grid {
@@ -81,6 +78,7 @@
             padding: 12px;
             flex-grow: 1;
             overflow-y: auto;
+            max-height: 350px;
         }
 
         .el-btn {
@@ -96,45 +94,8 @@
             font-size: 18px;
         }
 
-        .el-btn:hover {
-            border-color: var(--neon-blue);
-            transform: scale(1.1);
-            z-index: 10;
-        }
-
-        .el-btn.active {
-            border-color: #fff;
-            box-shadow: 0 0 15px var(--neon-blue);
-            transform: scale(1.05);
-        }
-
-        .el-btn::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 115%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #000;
-            color: var(--neon-blue);
-            padding: 4px 8px;
-            font-size: 8px;
-            font-weight: bold;
-            border: 1px solid var(--neon-blue);
-            border-radius: 2px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.1s;
-        }
-
-        .el-btn:hover::after { opacity: 1; }
-
-        .category-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            background: rgba(0,0,0,0.4);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
+        .el-btn:hover { border-color: var(--neon-blue); transform: scale(1.1); z-index: 10; }
+        .el-btn.active { border-color: #fff; box-shadow: 0 0 15px var(--neon-blue); transform: scale(1.05); }
 
         .category-tab {
             padding: 8px 4px;
@@ -144,9 +105,7 @@
             border-bottom: 2px solid transparent;
             font-weight: 700;
             color: #666;
-            transition: all 0.2s;
             flex: 1;
-            min-width: 60px;
         }
 
         .category-tab.active {
@@ -166,22 +125,20 @@
             border-radius: 2px;
             font-size: 11px;
             pointer-events: none;
-            letter-spacing: 2px;
             z-index: 200;
             color: var(--neon-blue);
-            text-shadow: 0 0 5px var(--neon-blue);
         }
 
         #user-id-display {
             position: fixed;
             top: 20px;
             right: 20px;
-            font-size: 9px;
-            color: #444;
+            font-size: 10px;
+            color: #00f2ff;
             background: rgba(0,0,0,0.8);
             padding: 5px 12px;
-            border-radius: 20px;
-            border: 1px solid #222;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            z-index: 1000;
         }
 
         .admin-trigger {
@@ -196,35 +153,14 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 12px;
             font-weight: 900;
-            letter-spacing: 3px;
             border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
         }
 
         .admin-trigger:hover {
             background: #ff0055;
             color: white;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
-            transform: translateY(-2px);
         }
-
-        .resizer {
-            width: 15px;
-            height: 15px;
-            background: transparent;
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            cursor: nwse-resize;
-            background: linear-gradient(135deg, transparent 50%, rgba(0, 242, 255, 0.3) 50%);
-            border-bottom-right-radius: 12px;
-        }
-
-        .element-grid::-webkit-scrollbar { width: 4px; }
-        .element-grid::-webkit-scrollbar-track { background: transparent; }
-        .element-grid::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -234,100 +170,65 @@
         <div id="brush-circle" class="absolute pointer-events-none border border-cyan-400 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-40"></div>
     </div>
 
-    <div id="user-id-display">AUTH_PENDING...</div>
+    <div id="user-id-display">CONNECTING_TO_GRID...</div>
 
     <button class="admin-trigger" onclick="window.open('https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2F641yf1drx6f91.jpg', '_blank')">ADMIN</button>
 
-    <div class="hud-panel" id="palette-win" style="top: 20px; left: 20px; width: 340px; height: 600px;">
+    <div class="hud-panel" id="palette-win" style="top: 20px; left: 20px; width: 340px;">
         <div class="panel-header">
             <span>UNIVERSE_CORE_v2</span>
-            <div id="status-light" class="w-1.5 h-1.5 rounded-full bg-red-600"></div>
+            <div id="status-light" class="w-2 h-2 rounded-full bg-red-600"></div>
         </div>
-        <div class="category-tabs" id="tabs">
+        <div class="flex bg-black/40 border-b border-white/5" id="tabs">
             <div class="category-tab active" data-cat="earth">EARTH</div>
             <div class="category-tab" data-cat="liquid">LIQUID</div>
             <div class="category-tab" data-cat="life">LIFE</div>
             <div class="category-tab" data-cat="tech">BUILD</div>
             <div class="category-tab" data-cat="energy">CHAOS</div>
-            <div class="category-tab" data-cat="special">GOD</div>
         </div>
         <div class="element-grid" id="element-list"></div>
-        <div class="p-4 border-t border-white/5 space-y-3 bg-black/40 flex-shrink-0">
+        <div class="p-4 border-t border-white/5 space-y-3 bg-black/40">
             <div class="flex justify-between text-[9px] font-bold text-gray-500">
                 <span>BRUSH_RADIUS</span>
                 <span id="brush-size-val" class="text-cyan-400">8px</span>
             </div>
-            <input type="range" id="brush-size" min="1" max="60" value="8" class="w-full accent-cyan-500 bg-gray-900 h-1 rounded-lg appearance-none cursor-pointer">
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="clearSim()" class="py-2 bg-red-950/20 border border-red-900/40 text-red-500 text-[9px] hover:bg-red-600 hover:text-white transition-all font-bold uppercase tracking-widest">Reset</button>
-                <button onclick="saveWorld()" class="py-2 bg-blue-950/20 border border-blue-900/40 text-blue-400 text-[9px] hover:bg-blue-600 hover:text-white transition-all font-bold uppercase tracking-widest">Snapshot</button>
-            </div>
+            <input type="range" id="brush-size" min="1" max="40" value="8" class="w-full accent-cyan-500 bg-gray-900 h-1 rounded-lg appearance-none cursor-pointer">
+            <button onclick="clearSim()" class="w-full py-2 bg-red-950/20 border border-red-900/40 text-red-500 text-[9px] hover:bg-red-600 hover:text-white transition-all font-bold uppercase tracking-widest">Reset Simulation</button>
         </div>
-        <div class="resizer" id="panel-resizer"></div>
     </div>
 
-    <div id="inspector">INITIALIZING...</div>
+    <div id="inspector">SCANNING...</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, query, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        const WIDTH = 320;
-        const HEIGHT = 240;
-
+        const WIDTH = 200;
+        const HEIGHT = 150;
         const ELEMENTS = {
             EMPTY: { id: 0, color: '#000000', name: 'Air', cat: 'earth', icon: '◌' },
             BEDROCK: { id: 1, color: '#111111', name: 'Bedrock', cat: 'earth', state: 'solid', immovable: true, icon: '⬛' },
-            SAND: { id: 2, color: '#e3b448', name: 'Sand', cat: 'earth', state: 'powder', density: 10, icon: '▒' },
-            DIRT: { id: 3, color: '#5d4037', name: 'Dirt', cat: 'earth', state: 'powder', density: 9, icon: '🧱' },
+            SAND: { id: 2, color: '#e3b448', name: 'Sand', cat: 'earth', state: 'powder', icon: '▒' },
+            DIRT: { id: 3, color: '#5d4037', name: 'Dirt', cat: 'earth', state: 'powder', icon: '🧱' },
             STONE: { id: 5, color: '#757575', name: 'Stone', cat: 'earth', state: 'solid', icon: '🪨' },
-            GRAVEL: { id: 6, color: '#444444', name: 'Gravel', cat: 'earth', state: 'powder', density: 12, icon: '🔘' },
-            SALT: { id: 7, color: '#f5f5f5', name: 'Salt', cat: 'earth', state: 'powder', density: 8, icon: '🧂' },
-            ICE: { id: 9, color: '#a5f3fc', name: 'Ice', cat: 'earth', state: 'solid', icon: '🧊' },
-            
-            WATER: { id: 10, color: '#2196f3', name: 'Water', cat: 'liquid', state: 'liquid', density: 5, icon: '💧' },
-            OIL: { id: 11, color: '#3e2723', name: 'Oil', cat: 'liquid', state: 'liquid', density: 4, icon: '🛢️' },
-            ACID: { id: 12, color: '#cddc39', name: 'Acid', cat: 'liquid', state: 'liquid', density: 6, icon: '🧪' },
-            LAVA: { id: 13, color: '#ff5722', name: 'Lava', cat: 'liquid', state: 'liquid', density: 15, temp: 1000, icon: '🔥' },
-            MERCURY: { id: 14, color: '#b0bec5', name: 'Mercury', cat: 'liquid', state: 'liquid', density: 50, icon: '🌡️' },
-            METHANE: { id: 15, color: '#80cbc4', name: 'Methane', cat: 'liquid', state: 'gas', density: 1, icon: '☁️' },
-            LSD: { id: 16, color: '#ff00ff', name: 'LSD', cat: 'liquid', state: 'liquid', density: 5, icon: '🌈' },
-            
+            WATER: { id: 10, color: '#2196f3', name: 'Water', cat: 'liquid', state: 'liquid', icon: '💧' },
+            OIL: { id: 11, color: '#3e2723', name: 'Oil', cat: 'liquid', state: 'liquid', icon: '🛢️' },
+            LAVA: { id: 13, color: '#ff5722', name: 'Lava', cat: 'liquid', state: 'liquid', icon: '🔥' },
             PLANT: { id: 20, color: '#4caf50', name: 'Plant', cat: 'life', state: 'solid', icon: '🌿' },
-            SEED: { id: 21, color: '#8bc34a', name: 'Seed', cat: 'life', state: 'powder', icon: '🌱' },
             WOOD: { id: 23, color: '#795548', name: 'Wood', cat: 'life', state: 'solid', icon: '🪵' },
-            MUSHROOM: { id: 27, color: '#ce93d8', name: 'Fungus', cat: 'life', state: 'solid', icon: '🍄' },
-            HUMAN: { id: 60, color: '#ffcc80', name: 'Human', cat: 'life', state: 'living', density: 10, icon: '🧍' },
-            ZOMBIE: { id: 61, color: '#33691e', name: 'Zombie', cat: 'life', state: 'living', icon: '🧟' },
-            
-            METAL: { id: 30, color: '#90a4ae', name: 'Steel', cat: 'tech', state: 'solid', conduct: true, icon: '⛓️' },
-            WIRE: { id: 31, color: '#ff9800', name: 'Wire', cat: 'tech', state: 'solid', conduct: true, icon: '⚡' },
-            BATTERY: { id: 36, color: '#d81b60', name: 'Battery', cat: 'tech', state: 'solid', source: true, icon: '🔋' },
-            LED: { id: 37, color: '#444444', name: 'LED', cat: 'tech', state: 'solid', icon: '💡' },
-            FAN: { id: 38, color: '#607d8b', name: 'Fan', cat: 'tech', state: 'solid', icon: '🌀' },
-            
-            FIRE: { id: 24, color: '#f44336', name: 'Fire', cat: 'energy', state: 'gas', temp: 500, icon: '♨️' },
-            STEAM: { id: 25, color: '#cfd8dc', name: 'Steam', cat: 'energy', state: 'gas', icon: '💨' },
+            METAL: { id: 30, color: '#90a4ae', name: 'Steel', cat: 'tech', state: 'solid', icon: '⛓️' },
+            WIRE: { id: 31, color: '#ff9800', name: 'Wire', cat: 'tech', state: 'solid', icon: '⚡' },
+            FIRE: { id: 24, color: '#f44336', name: 'Fire', cat: 'energy', state: 'gas', icon: '♨️' },
             TNT: { id: 40, color: '#b71c1c', name: 'TNT', cat: 'energy', state: 'solid', icon: '🧨' },
-            C4: { id: 42, color: '#455a64', name: 'C4', cat: 'energy', state: 'solid', icon: '💣' },
-            SPARK: { id: 32, color: '#00bcd4', name: 'Spark', cat: 'energy', state: 'energy', icon: '✨' },
-            
-            VOID: { id: 50, color: '#1a0033', name: 'Void', cat: 'special', state: 'special', icon: '🕳️' },
-            WALL: { id: 52, color: '#ffffff', name: 'Indestructible', cat: 'special', state: 'solid', immovable: true, icon: '💎' },
-            ERASER: { id: 53, color: '#000000', name: 'Eraser', cat: 'special', icon: '✖️' },
-            CLOUD: { id: 54, color: '#eceff1', name: 'Cloud', cat: 'special', state: 'gas', icon: '☁️' },
+            ERASER: { id: 53, color: '#000000', name: 'Eraser', cat: 'energy', icon: '✖️' }
         };
 
         let grid = new Int32Array(WIDTH * HEIGHT);
-        let gridExtra = new Int8Array(WIDTH * HEIGHT);
-        let gridTrip = new Uint8Array(WIDTH * HEIGHT);
-        
         let selectedElement = 2; 
         let brushSize = 8;
         let isMouseDown = false;
-        let user = null;
-        let frameCount = 0;
+        let currentUser = null;
 
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d', { alpha: false });
@@ -338,38 +239,44 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sandboxels-ultra-pro';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'multiplayer-sand-v1';
 
-        async function init() {
+        async function initAuth() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
-            } catch(e) {}
-
-            onAuthStateChanged(auth, (u) => {
-                user = u;
-                if (user) {
-                    document.getElementById('user-id-display').innerText = `ID: ${user.uid}`;
-                    document.getElementById('status-light').className = "w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f2ff]";
-                    setupMultiplayer();
-                }
-            });
-
-            buildBedrock();
-            buildUI();
-            setupPanelInteraction();
-            loop();
+            } catch (err) {
+                console.error("Auth Error", err);
+            }
         }
 
-        function buildBedrock() {
-            for(let y = HEIGHT - 8; y < HEIGHT; y++) {
-                for(let x = 0; x < WIDTH; x++) {
-                    grid[y * WIDTH + x] = ELEMENTS.BEDROCK.id;
-                }
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('user-id-display').innerText = `USER: ${user.uid}`;
+                document.getElementById('status-light').className = "w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f2ff]";
+                startSync();
             }
+        });
+
+        function startSync() {
+            if (!currentUser) return;
+            // Listen for strokes from ALL users in the same app session
+            const strokesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'strokes');
+            onSnapshot(strokesCollection, (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        // Only draw if it's from a friend (different userId)
+                        if (data.userId !== currentUser.uid) {
+                            applyPaint(data.x, data.y, data.type, data.size, false);
+                        }
+                    }
+                });
+            }, (err) => console.error("Sync error:", err));
         }
 
         function buildUI() {
@@ -379,14 +286,12 @@
             function renderCategory(cat) {
                 list.innerHTML = '';
                 Object.values(ELEMENTS).forEach(el => {
-                    if(el.cat !== cat) return;
+                    if(el.cat !== cat && cat !== 'all') return;
                     const btn = document.createElement('div');
                     btn.className = `el-btn ${selectedElement === el.id ? 'active' : ''}`;
                     btn.style.background = el.id === 0 ? 'transparent' : el.color;
-                    btn.dataset.tooltip = el.name.toUpperCase();
                     btn.innerHTML = el.icon;
-                    btn.onclick = (e) => {
-                        e.stopPropagation();
+                    btn.onclick = () => {
                         selectedElement = el.id;
                         document.querySelectorAll('.el-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
@@ -405,200 +310,65 @@
             renderCategory('earth');
         }
 
-        function setupPanelInteraction() {
-            const panel = document.getElementById('palette-win');
-            const header = panel.querySelector('.panel-header');
-            const resizer = document.getElementById('panel-resizer');
-
-            header.onmousedown = (e) => {
-                let shiftX = e.clientX - panel.getBoundingClientRect().left;
-                let shiftY = e.clientY - panel.getBoundingClientRect().top;
-                function onMouseMove(e) {
-                    panel.style.left = e.pageX - shiftX + 'px';
-                    panel.style.top = e.pageY - shiftY + 'px';
+        function applyPaint(x, y, type, size, shouldSync = true) {
+            const actualType = type === 53 ? 0 : type;
+            for (let i = -size; i <= size; i++) {
+                for (let j = -size; j <= size; j++) {
+                    if (i*i + j*j > size*size) continue;
+                    const nx = Math.floor(x + i);
+                    const ny = Math.floor(y + j);
+                    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+                        if (grid[ny * WIDTH + nx] !== 1) grid[ny * WIDTH + nx] = actualType;
+                    }
                 }
-                document.addEventListener('mousemove', onMouseMove);
-                document.onmouseup = () => {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.onmouseup = null;
-                };
-            };
-
-            resizer.onmousedown = (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                const startWidth = panel.offsetWidth, startHeight = panel.offsetHeight;
-                const startX = e.clientX, startY = e.clientY;
-                function doResize(e) {
-                    panel.style.width = (startWidth + e.clientX - startX) + 'px';
-                    panel.style.height = (startHeight + e.clientY - startY) + 'px';
-                }
-                function stopResize() {
-                    document.removeEventListener('mousemove', doResize);
-                    document.removeEventListener('mouseup', stopResize);
-                }
-                document.addEventListener('mousemove', doResize);
-                document.addEventListener('mouseup', stopResize);
-            };
-        }
-
-        function getPixel(x, y) {
-            if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return -1;
-            return grid[y * WIDTH + x];
-        }
-
-        function setPixel(x, y, val) {
-            if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
-            if (grid[y * WIDTH + x] === ELEMENTS.BEDROCK.id || grid[y * WIDTH + x] === ELEMENTS.WALL.id) return;
-            grid[y * WIDTH + x] = val;
-            gridExtra[y * WIDTH + x] = 0;
-            gridTrip[y * WIDTH + x] = 0;
-        }
-
-        function update() {
-            frameCount++;
-            for (let y = HEIGHT - 1; y >= 0; y--) {
-                const xOffset = Math.floor(Math.random() * WIDTH);
-                for (let i = 0; i < WIDTH; i++) {
-                    const x = (i + xOffset) % WIDTH;
-                    const idx = y * WIDTH + x;
-                    const p = grid[idx];
-                    if (p === 0) continue;
-
-                    const el = Object.values(ELEMENTS).find(e => e.id === p);
-                    if (!el || el.immovable) continue;
-
-                    let trippy = gridTrip[idx] > 0;
-
-                    if (el.state === 'powder') {
-                        let dy = 1;
-                        if (trippy && Math.random() > 0.8) dy = -1;
-                        const below = getPixel(x, y + dy);
-                        if (below === 0) {
-                            grid[idx] = 0; grid[(y + dy) * WIDTH + x] = p;
-                            gridTrip[(y + dy) * WIDTH + x] = gridTrip[idx];
-                            gridTrip[idx] = 0;
-                        } else {
-                            const belowEl = Object.values(ELEMENTS).find(e => e.id === below);
-                            if (belowEl && belowEl.state === 'liquid' && (belowEl.density || 5) < (el.density || 10)) {
-                                grid[idx] = below; grid[(y+dy)*WIDTH+x] = p;
-                                gridTrip[(y+dy)*WIDTH+x] = gridTrip[idx];
-                                gridTrip[idx] = 0;
-                            } else {
-                                const dir = Math.random() < 0.5 ? -1 : 1;
-                                if (getPixel(x + dir, y + dy) === 0) {
-                                    grid[idx] = 0; grid[(y + dy) * WIDTH + (x + dir)] = p;
-                                    gridTrip[(y+dy)*WIDTH+(x+dir)] = gridTrip[idx];
-                                    gridTrip[idx] = 0;
-                                }
-                            }
-                        }
-                    } else if (el.state === 'liquid') {
-                        let dy = 1;
-                        if (trippy && Math.random() > 0.9) dy = 0;
-                        if (getPixel(x, y + dy) === 0) {
-                            grid[idx] = 0; grid[(y + dy) * WIDTH + x] = p;
-                            gridTrip[(y+dy)*WIDTH+x] = gridTrip[idx];
-                            gridTrip[idx] = 0;
-                        } else {
-                            const dir = Math.random() < 0.5 ? -1 : 1;
-                            if (getPixel(x + dir, y + dy) === 0) {
-                                grid[idx] = 0; grid[(y + dy) * WIDTH + (x + dir)] = p;
-                                gridTrip[(y+dy)*WIDTH+(x+dir)] = gridTrip[idx];
-                                gridTrip[idx] = 0;
-                            } else if (getPixel(x + dir, y) === 0) {
-                                grid[idx] = 0; grid[y * WIDTH + (x + dir)] = p;
-                                gridTrip[y*WIDTH+(x+dir)] = gridTrip[idx];
-                                gridTrip[idx] = 0;
-                            }
-                        }
-                    } else if (el.state === 'gas' || p === ELEMENTS.CLOUD.id) {
-                        const dx = Math.floor(Math.random() * 3) - 1;
-                        const dy = Math.random() < 0.8 ? -1 : 0;
-                        if (getPixel(x + dx, y + dy) === 0) {
-                            grid[idx] = 0; grid[(y + dy) * WIDTH + (x + dx)] = p;
-                        }
-                        if (p === ELEMENTS.CLOUD.id && Math.random() > 0.99) {
-                            if (getPixel(x, y + 1) === 0) grid[(y+1)*WIDTH+x] = ELEMENTS.WATER.id;
-                        }
-                    } else if (el.state === 'living') {
-                        const dir = Math.random() < 0.5 ? -1 : 1;
-                        const below = getPixel(x, y + 1);
-                        if (below === 0) {
-                            grid[idx] = 0; grid[(y + 1) * WIDTH + x] = p;
-                            gridTrip[(y+1)*WIDTH+x] = gridTrip[idx];
-                            gridTrip[idx] = 0;
-                        } else if (getPixel(x + dir, y) === 0) {
-                            if (Math.random() > (trippy ? 0.3 : 0.7)) {
-                                grid[idx] = 0; grid[y * WIDTH + (x + dir)] = p;
-                                gridTrip[y*WIDTH+(x+dir)] = gridTrip[idx];
-                                gridTrip[idx] = 0;
-                            }
-                        }
-                        if (p === ELEMENTS.ZOMBIE.id) {
-                            const neighbors = [[x+1,y],[x-1,y],[x,y+1],[x,y-1]];
-                            neighbors.forEach(([nx, ny]) => {
-                                if (getPixel(nx, ny) === ELEMENTS.HUMAN.id) grid[ny*WIDTH+nx] = ELEMENTS.ZOMBIE.id;
-                            });
-                        }
-                    }
-
-                    if (p === ELEMENTS.LSD.id) {
-                        const neighbors = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]];
-                        neighbors.forEach(([nx, ny]) => {
-                            const t = getPixel(nx, ny);
-                            if (t > 0 && t !== ELEMENTS.BEDROCK.id && t !== ELEMENTS.WALL.id) {
-                                gridTrip[ny*WIDTH+nx] = 255;
-                            }
-                        });
-                    }
-
-                    if (p === ELEMENTS.FIRE.id) {
-                        const neighbors = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]];
-                        neighbors.forEach(([nx, ny]) => {
-                            const t = getPixel(nx, ny);
-                            if ([ELEMENTS.PLANT.id, ELEMENTS.WOOD.id, ELEMENTS.OIL.id, ELEMENTS.HUMAN.id].includes(t)) {
-                                grid[ny*WIDTH+nx] = ELEMENTS.FIRE.id;
-                            } else if (t === ELEMENTS.WATER.id) {
-                                grid[ny*WIDTH+nx] = ELEMENTS.STEAM.id;
-                                grid[idx] = 0;
-                            } else if (t === ELEMENTS.TNT.id) explode(nx, ny, 20);
-                        });
-                        if (Math.random() > 0.9) grid[idx] = 0;
-                    }
-
-                    if (p === ELEMENTS.VOID.id) {
-                        const neighbors = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]];
-                        neighbors.forEach(([nx, ny]) => {
-                            const t = getPixel(nx, ny);
-                            if (t > 0 && t !== ELEMENTS.WALL.id) grid[ny*WIDTH+nx] = 0;
-                        });
-                    }
-
-                    if (p === ELEMENTS.SPARK.id) {
-                        const neighbors = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]];
-                        neighbors.forEach(([nx, ny]) => {
-                            const t = getPixel(nx, ny);
-                            if (t === ELEMENTS.TNT.id || t === ELEMENTS.C4.id) explode(nx, ny, 30);
-                            else if (t === ELEMENTS.WIRE.id || t === ELEMENTS.METAL.id) {
-                                if (Math.random() > 0.5) grid[ny*WIDTH+nx] = ELEMENTS.SPARK.id;
-                            }
-                        });
-                        grid[idx] = 0;
-                    }
-                    if (gridTrip[idx] > 0 && Math.random() > 0.99) gridTrip[idx]--;
+            }
+            
+            if (shouldSync && currentUser) {
+                // Throttling: only sync a fraction of mouse move points to avoid Firestore usage limits
+                if (Math.random() > 0.85) {
+                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'strokes'), {
+                        x, y, type, size, userId: currentUser.uid, ts: serverTimestamp()
+                    }).catch(() => {});
                 }
             }
         }
 
-        function explode(x, y, radius) {
-            for (let i = -radius; i <= radius; i++) {
-                for (let j = -radius; j <= radius; j++) {
-                    if (i*i + j*j > radius*radius) continue;
-                    const nx = x + i, ny = y + j;
-                    const t = getPixel(nx, ny);
-                    if (t !== -1 && t !== ELEMENTS.WALL.id) {
-                        grid[ny*WIDTH + nx] = Math.random() > 0.8 ? ELEMENTS.FIRE.id : 0;
+        function update() {
+            for (let y = HEIGHT - 1; y >= 0; y--) {
+                for (let x = 0; x < WIDTH; x++) {
+                    const idx = y * WIDTH + x;
+                    const p = grid[idx];
+                    if (p === 0 || p === 1 || p === 5 || p === 30 || p === 31 || p === 23) continue;
+
+                    const el = Object.values(ELEMENTS).find(e => e.id === p);
+                    if (!el) continue;
+
+                    if (el.state === 'powder') {
+                        if (y < HEIGHT - 1) {
+                            if (grid[(y + 1) * WIDTH + x] === 0) {
+                                grid[idx] = 0; grid[(y + 1) * WIDTH + x] = p;
+                            } else if (x > 0 && grid[(y + 1) * WIDTH + (x - 1)] === 0) {
+                                grid[idx] = 0; grid[(y + 1) * WIDTH + (x - 1)] = p;
+                            } else if (x < WIDTH - 1 && grid[(y + 1) * WIDTH + (x + 1)] === 0) {
+                                grid[idx] = 0; grid[(y + 1) * WIDTH + (x + 1)] = p;
+                            }
+                        }
+                    } else if (el.state === 'liquid') {
+                        if (y < HEIGHT - 1 && grid[(y + 1) * WIDTH + x] === 0) {
+                            grid[idx] = 0; grid[(y + 1) * WIDTH + x] = p;
+                        } else {
+                            const dir = Math.random() < 0.5 ? -1 : 1;
+                            if (x + dir >= 0 && x + dir < WIDTH && grid[y * WIDTH + (x + dir)] === 0) {
+                                grid[idx] = 0; grid[y * WIDTH + (x + dir)] = p;
+                            }
+                        }
+                    } else if (p === 24) { // Fire
+                        if (Math.random() > 0.9) grid[idx] = 0;
+                        const nx = x + (Math.floor(Math.random()*3)-1);
+                        const ny = y - 1;
+                        if (ny >= 0 && nx >= 0 && nx < WIDTH && grid[ny*WIDTH+nx] === 0) {
+                            grid[idx] = 0; grid[ny*WIDTH+nx] = 24;
+                        }
                     }
                 }
             }
@@ -610,13 +380,7 @@
                 const elId = grid[i];
                 const el = Object.values(ELEMENTS).find(e => e.id === elId) || ELEMENTS.EMPTY;
                 const idx = i * 4;
-                let rgb = hexToRgb(el.color);
-                if (gridTrip[i] > 0) {
-                    const phase = (frameCount * 0.2) + (i * 0.05);
-                    rgb.r = Math.sin(phase) * 127 + 128;
-                    rgb.g = Math.sin(phase + 2) * 127 + 128;
-                    rgb.b = Math.sin(phase + 4) * 127 + 128;
-                }
+                const rgb = hexToRgb(el.color);
                 imgData.data[idx] = rgb.r;
                 imgData.data[idx+1] = rgb.g;
                 imgData.data[idx+2] = rgb.b;
@@ -630,81 +394,40 @@
             return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : { r: 0, g: 0, b: 0 };
         }
 
-        function setupMultiplayer() {
-            if (!user) return;
-            const strokesRef = collection(db, 'artifacts', appId, 'public', 'data', 'strokes');
-            onSnapshot(strokesRef, (snap) => {
-                snap.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        const d = change.doc.data();
-                        if (d.userId !== user.uid) paint(d.x, d.y, d.type, d.size, false);
-                    }
-                });
-            }, (err) => {});
-        }
-
-        window.saveWorld = async () => {
-            if (!user) return;
-            const stateDoc = doc(db, 'artifacts', appId, 'public', 'data', 'world', 'current');
-            const flatGrid = Array.from(grid).join(',');
-            await setDoc(stateDoc, { data: flatGrid, ts: serverTimestamp() });
-        }
-
-        async function paint(x, y, type, size, sync = true) {
-            if (type === 53) type = 0;
-            for (let i = -size; i <= size; i++) {
-                for (let j = -size; j <= size; j++) {
-                    if (i*i + j*j > size*size) continue;
-                    setPixel(Math.floor(x + i), Math.floor(y + j), type);
-                    if (type === ELEMENTS.LSD.id) {
-                        const targetIdx = Math.floor(y+j) * WIDTH + Math.floor(x+i);
-                        if (targetIdx >= 0 && targetIdx < gridTrip.length) gridTrip[targetIdx] = 255;
-                    }
-                }
-            }
-            if(sync && user && Math.random() > 0.9) {
-                try {
-                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'strokes'), {
-                        x, y, type, size, userId: user.uid, ts: serverTimestamp()
-                    });
-                } catch (e) {}
-            }
-        }
-
         function handlePointer(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             const x = (clientX - rect.left) * (WIDTH / rect.width);
             const y = (clientY - rect.top) * (HEIGHT / rect.height);
+            
             const brushCircle = document.getElementById('brush-circle');
             brushCircle.style.left = clientX + 'px';
             brushCircle.style.top = clientY + 'px';
             brushCircle.style.width = (brushSize * (rect.width/WIDTH) * 2) + 'px';
             brushCircle.style.height = (brushSize * (rect.width/WIDTH) * 2) + 'px';
-            if (isMouseDown) paint(x, y, selectedElement, brushSize);
-            const hoveredId = getPixel(Math.floor(x), Math.floor(y));
-            const el = Object.values(ELEMENTS).find(e => e.id === hoveredId);
-            if(el) {
-                document.getElementById('inspector').innerHTML = `<span style="color:white">LINK:</span> ${el.name.toUpperCase()} <span style="color:white; opacity:0.3">[${Math.floor(x)},${Math.floor(y)}]</span>`;
-            }
+            
+            if (isMouseDown) applyPaint(x, y, selectedElement, brushSize, true);
         }
 
-        window.addEventListener('mousedown', (e) => { if(e.target.closest('.hud-panel') || e.target.closest('.admin-trigger')) return; isMouseDown = true; });
+        window.addEventListener('mousedown', (e) => { if(!e.target.closest('.hud-panel') && !e.target.closest('.admin-trigger')) isMouseDown = true; });
         window.addEventListener('mouseup', () => isMouseDown = false);
         window.addEventListener('mousemove', handlePointer);
-        window.addEventListener('touchstart', (e) => { if(e.target.closest('.hud-panel') || e.target.closest('.admin-trigger')) return; isMouseDown = true; handlePointer(e); });
+        window.addEventListener('touchstart', (e) => { if(!e.target.closest('.hud-panel') && !e.target.closest('.admin-trigger')) isMouseDown = true; handlePointer(e); });
         window.addEventListener('touchend', () => isMouseDown = false);
-        window.addEventListener('touchmove', (e) => { if(e.target.closest('.hud-panel') || e.target.closest('.admin-trigger')) return; e.preventDefault(); handlePointer(e); }, {passive: false});
+        window.addEventListener('touchmove', (e) => { if(!e.target.closest('.hud-panel')) e.preventDefault(); handlePointer(e); }, {passive: false});
 
         document.getElementById('brush-size').oninput = (e) => {
             brushSize = parseInt(e.target.value);
             document.getElementById('brush-size-val').innerText = brushSize + 'px';
         };
 
-        window.clearSim = () => { grid.fill(0); gridTrip.fill(0); buildBedrock(); };
+        window.clearSim = () => { grid.fill(0); };
         function loop() { update(); draw(); requestAnimationFrame(loop); }
-        init();
+        
+        initAuth();
+        buildUI();
+        loop();
     </script>
 </body>
 </html>
