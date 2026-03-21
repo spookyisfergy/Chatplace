@@ -165,6 +165,7 @@
     let lastPushTime = 0;
     let user = null;
     let unsubscribeSync = null;
+    let isDirty = false; // Flag to indicate if we need to sync to cloud
 
     const canvas = document.getElementById('sandCanvas');
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -196,15 +197,8 @@
         document.getElementById('brush-val').innerText = val;
     };
 
-    // Helper to get correct path (RULE 1: /artifacts/{appId}/public/data/{collectionName}/{docId})
-    // Note: Documents must have an even number of segments. 
-    // Segment 1: artifacts
-    // Segment 2: appId
-    // Segment 3: public
-    // Segment 4: data
-    // Segment 5: collectionName (e.g. 'world_state')
-    // Segment 6: documentId (e.g. 'current')
-    const getWorldDocRef = () => doc(db, 'artifacts', appId, 'public', 'data', 'world_state', 'v3');
+    // Correct path logic (RULE 1: Even number of segments)
+    const getWorldDocRef = () => doc(db, 'artifacts', appId, 'public', 'data', 'world_v3', 'main_state');
 
     window.toggleOnline = async () => {
         if (!user) {
@@ -230,7 +224,9 @@
             unsubscribeSync = onSnapshot(worldDocRef, (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
-                    if (data.updatedBy !== user.uid && Date.now() - lastPushTime > 1000) {
+                    // Prevent circular updates: Only update local grid if data comes from someone else
+                    // OR if local grid hasn't been changed manually recently.
+                    if (data.updatedBy !== user.uid) {
                         updateLocalGrid(data.gridData);
                         status.innerText = "LIVE (SYNCED)";
                     }
@@ -242,6 +238,9 @@
                 btn.innerText = "Go Live";
                 btn.classList.remove('active');
             });
+
+            // Start the cloud push interval
+            startCloudSync();
         } else {
             isOnline = false;
             if (unsubscribeSync) unsubscribeSync();
@@ -255,12 +254,25 @@
         try {
             const flat = JSON.parse(jsonStr);
             for(let y=0; y<HEIGHT; y++) grid[y].set(flat.slice(y*WIDTH, (y+1)*WIDTH));
-        } catch(e) {}
+        } catch(e) {
+            console.error("Parse error", e);
+        }
+    }
+
+    // Throttled sync logic to prevent Firebase exhaustion
+    function startCloudSync() {
+        if (!isOnline) return;
+        setTimeout(async () => {
+            if (isDirty && isOnline && user) {
+                await pushToCloud();
+                isDirty = false;
+            }
+            startCloudSync();
+        }, 1500); // Sync every 1.5 seconds if changes were made
     }
 
     async function pushToCloud() {
-        if (!isOnline || !user) return;
-        lastPushTime = Date.now();
+        if (!user) return;
         const flat = new Uint8Array(WIDTH * HEIGHT);
         for(let y=0; y<HEIGHT; y++) flat.set(grid[y], y*WIDTH);
         
@@ -271,7 +283,7 @@
                 updatedBy: user.uid,
                 ts: Date.now()
             });
-            document.getElementById('status').innerText = "LIVE (UPDATED)";
+            document.getElementById('status').innerText = "LIVE (CLOUD UPDATED)";
         } catch(e) {
             console.error("Push error", e);
         }
@@ -294,8 +306,10 @@
                         const below = grid[y+1][x];
                         if (below === EMPTY || below === WATER || below === ACID || below === METHANE) {
                             grid[y+1][x] = type; grid[y][x] = below;
+                            if (isOnline) isDirty = true;
                         } else if (x + xDir >= 0 && x + xDir < WIDTH && grid[y+1][x+xDir] === EMPTY) {
                             grid[y+1][x+xDir] = type; grid[y][x] = EMPTY;
+                            if (isOnline) isDirty = true;
                         }
                     }
                 }
@@ -305,18 +319,20 @@
                     if (y < HEIGHT - 1 && (grid[y+1][x] === EMPTY || grid[y+1][x] === METHANE || (type === ACID && grid[y+1][x] === WATER))) {
                         const temp = grid[y+1][x];
                         grid[y+1][x] = type; grid[y][x] = temp;
+                        if (isOnline) isDirty = true;
                     } else {
                         const side = Math.random() > 0.5 ? 1 : -1;
                         if (x + side >= 0 && x + side < WIDTH && (grid[y][side+x] === EMPTY || grid[y][side+x] === METHANE)) {
                             grid[y][side+x] = type; grid[y][x] = EMPTY;
+                            if (isOnline) isDirty = true;
                         }
                     }
                     if (type === LAVA) {
                         [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
                             const nx = x+dx, ny = y+dy;
                             if (nx>=0 && nx<WIDTH && ny>=0 && ny<HEIGHT) {
-                                if (grid[ny][nx] === WATER) { grid[ny][nx] = STEAM; grid[y][x] = OBSIDIAN; }
-                                if (grid[ny][nx] === WOOD || grid[ny][nx] === GUNPOWDER || grid[ny][nx] === METHANE) grid[ny][nx] = FIRE;
+                                if (grid[ny][nx] === WATER) { grid[ny][nx] = STEAM; grid[y][x] = OBSIDIAN; isDirty = true; }
+                                if (grid[ny][nx] === WOOD || grid[ny][nx] === GUNPOWDER || grid[ny][nx] === METHANE) { grid[ny][nx] = FIRE; isDirty = true; }
                             }
                         });
                     }
@@ -327,22 +343,25 @@
                                 if ((grid[ny][nx] === WOOD || grid[ny][nx] === SAND || grid[ny][nx] === WALL) && Math.random() < 0.05) {
                                     grid[ny][nx] = EMPTY;
                                     grid[y][x] = Math.random() < 0.3 ? STEAM : EMPTY;
+                                    isDirty = true;
                                 }
                             }
                         });
                     }
                 }
                 else if (type === FIRE || type === STEAM || type === METHANE) {
-                    if (type === FIRE && Math.random() < 0.15) grid[y][x] = EMPTY;
-                    if (type === STEAM && Math.random() < 0.01) grid[y][x] = WATER;
+                    if (type === FIRE && Math.random() < 0.15) { grid[y][x] = EMPTY; isDirty = true; }
+                    if (type === STEAM && Math.random() < 0.01) { grid[y][x] = WATER; isDirty = true; }
 
                     if (y > 0 && (grid[y-1][x] === EMPTY || (type === FIRE && grid[y-1][x] === METHANE))) {
                         const below = grid[y-1][x];
                         grid[y-1][x] = type; grid[y][x] = below === METHANE ? FIRE : EMPTY;
+                        if (isOnline) isDirty = true;
                     } else {
                         const side = Math.random() > 0.5 ? 1 : -1;
                         if (x+side >= 0 && x+side < WIDTH && grid[y][x+side] === EMPTY) {
                             grid[y][x+side] = type; grid[y][x] = EMPTY;
+                            if (isOnline) isDirty = true;
                         }
                     }
 
@@ -351,13 +370,14 @@
                             const nx = x+dx, ny = y+dy;
                             if (nx>=0 && nx<WIDTH && ny>=0 && ny<HEIGHT) {
                                 const target = grid[ny][nx];
-                                if ((target === WOOD || target === METHANE) && Math.random() < 0.3) grid[ny][nx] = FIRE;
+                                if ((target === WOOD || target === METHANE) && Math.random() < 0.3) { grid[ny][nx] = FIRE; isDirty = true; }
                                 if (target === GUNPOWDER) {
                                     grid[ny][nx] = FIRE;
                                     for(let i=-3; i<=3; i++) for(let j=-3; j<=3; j++) {
                                         let ex=nx+i, ey=ny+j;
                                         if (ex>=0 && ex<WIDTH && ey>=0 && ey<HEIGHT && grid[ey][ex] !== WALL && Math.random()<0.5) grid[ey][ex] = FIRE;
                                     }
+                                    isDirty = true;
                                 }
                             }
                         });
@@ -401,7 +421,7 @@
 
     window.clearGrid = () => {
         for(let y=0; y<HEIGHT; y++) grid[y].fill(0);
-        if (isOnline) pushToCloud();
+        if (isOnline) isDirty = true;
     };
 
     let isDrawing = false;
@@ -413,23 +433,28 @@
         const x = Math.floor((clientX - rect.left) / (rect.width / WIDTH));
         const y = Math.floor((clientY - rect.top) / (rect.height / HEIGHT));
         
+        let changed = false;
         for(let i = -brushSize; i <= brushSize; i++) {
             for(let j = -brushSize; j <= brushSize; j++) {
                 if(i*i + j*j > brushSize*brushSize) continue;
                 const nx = x + i, ny = y + j;
                 if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-                    grid[ny][nx] = currentElement;
+                    if (grid[ny][nx] !== currentElement) {
+                        grid[ny][nx] = currentElement;
+                        changed = true;
+                    }
                 }
             }
         }
+        if (changed && isOnline) isDirty = true;
     };
 
     canvas.addEventListener('mousedown', () => isDrawing = true);
-    window.addEventListener('mouseup', () => { if (isDrawing && isOnline) pushToCloud(); isDrawing = false; });
+    window.addEventListener('mouseup', () => isDrawing = false);
     canvas.addEventListener('mousemove', handleInput);
     canvas.addEventListener('touchstart', (e) => { isDrawing = true; handleInput(e); e.preventDefault(); }, {passive: false});
     canvas.addEventListener('touchmove', (e) => { handleInput(e); e.preventDefault(); }, {passive: false});
-    canvas.addEventListener('touchend', () => { if (isDrawing && isOnline) pushToCloud(); isDrawing = false; });
+    canvas.addEventListener('touchend', () => isDrawing = false);
 
     function loop() {
         updatePhysics();
