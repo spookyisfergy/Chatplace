@@ -2,679 +2,709 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHEM.OS_ULTIMATE_v13.0</title>
-    <link rel="stylesheet" href="https://unpkg.com/98.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SANDBOXELS ULTRA - PRO EDITION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;700&display=swap');
+        
         :root {
-            --os-bg: #008080;
-            --toxic-green: #39ff14;
-            --taskbar-bg: #c0c0c0;
-            --win-title: #000080;
-            --win-text: #ffffff;
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --panel-bg: rgba(8, 8, 12, 0.98);
         }
 
         body {
-            background-color: var(--os-bg);
-            margin: 0; padding: 0;
-            height: 100vh; width: 100vw;
-            font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+            background: #010103;
+            color: #e0e0e0;
+            font-family: 'JetBrains Mono', monospace;
+            height: 100vh;
+            margin: 0;
             overflow: hidden;
-            transition: filter 0.3s, transform 0.3s;
+            touch-action: none;
         }
 
-        /* Trolling/Visual Effects */
-        body.inverted { filter: invert(1); }
-        body.shaking { animation: shake 0.2s infinite; }
-        body.flipped { transform: scaleX(-1); }
-        body.grayscale { filter: grayscale(1); }
-        body.crashed { background: #0000aa !important; }
-
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            50% { transform: translate(-2px, -1px) rotate(1deg); }
-            100% { transform: translate(1px, 1px) rotate(0deg); }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
         }
 
-        @keyframes admin-glow {
-            0% { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
-            33% { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
-            66% { color: #0000ff; text-shadow: 0 0 10px #0000ff; }
-            100% { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
-        }
-        .hacker-aura { animation: admin-glow 1.5s infinite linear; font-weight: bold; }
-        .glitch-text { text-decoration: line-through; font-style: italic; letter-spacing: 2px; }
-
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: var(--toxic-green); z-index: 100000;
-            display: flex; flex-direction: column; padding: 40px; font-family: monospace;
+        canvas {
+            image-rendering: pixelated;
+            background: #000;
+            cursor: crosshair;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border: 1px solid #222;
         }
 
-        .desktop-area { 
-            position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 35px); 
-            padding: 20px; display: flex; flex-direction: column; flex-wrap: wrap; gap: 20px; align-content: flex-start;
+        .hud-panel {
+            position: absolute;
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0,0,0,1);
+            z-index: 100;
+            user-select: none;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+            min-height: 400px;
         }
 
-        .d-icon { 
-            width: 85px; text-align: center; cursor: pointer; color: #fff; 
-            text-shadow: 1px 1px 2px #000; font-size: 11px; user-select: none;
+        .panel-header {
+            background: linear-gradient(90deg, rgba(0, 242, 255, 0.1), transparent);
+            padding: 12px;
+            cursor: move;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
         }
-        .d-icon img { width: 32px; height: 32px; margin-bottom: 5px; pointer-events: none; }
 
-        .window { position: absolute; min-width: 250px; display: none; box-shadow: 4px 4px 10px rgba(0,0,0,0.4); z-index: 100; }
-        .title-bar { cursor: move; }
-
-        #taskbar {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
-            background: var(--taskbar-bg); border-top: 2px solid #fff;
-            display: flex; align-items: center; padding: 2px 5px; z-index: 90000;
+        .element-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 6px;
+            padding: 12px;
+            flex-grow: 1;
+            overflow-y: auto;
         }
 
-        #chat-content { height: 300px; background: #fff; color: #000; border: 2px inset; overflow-y: auto; padding: 8px; }
-        .chat-msg { margin-bottom: 8px; font-size: 12px; display: flex; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .avatar-sm { width: 32px; height: 32px; border: 1px solid #000; object-fit: cover; flex-shrink: 0; }
-        
-        #shop-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; height: 250px; overflow-y: auto; padding: 5px; background: #fff; border: 2px inset; }
-        .item-card { border: 1px solid #777; padding: 5px; text-align: center; background: #eee; font-size: 11px; }
-        .item-card img { width: 60px; height: 60px; object-fit: contain; background: #fff; border: 1px solid #000; }
-
-        #start-menu {
-            position: fixed; bottom: 35px; left: 0; width: 220px;
-            background: var(--taskbar-bg); border: 2px solid #fff;
-            z-index: 99999; display: none; box-shadow: 2px -2px 10px rgba(0,0,0,0.5);
+        .el-btn {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
         }
-        .start-item { padding: 8px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 12px; }
-        .start-item:hover { background: var(--win-title); color: #fff; }
 
-        .smiley-pop { position: absolute; font-size: 40px; pointer-events: none; animation: popUp 1s ease-out forwards; z-index: 10000; }
-        @keyframes popUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-100px) scale(2); } }
+        .el-btn:hover {
+            border-color: var(--neon-blue);
+            transform: scale(1.1);
+            z-index: 10;
+        }
 
-        #mine-grid { display: grid; grid-template-columns: repeat(10, 22px); background: #bdbdbd; border: 2px inset; }
-        .mine-cell { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; background: #c0c0c0; border: 2px outset #fff; user-select: none; }
-        
-        .flex-msg-item { border: 2px solid gold; padding: 5px; background: #fff; display: inline-block; text-align: center; margin-top: 5px; box-shadow: 0 0 5px gold; }
-        .bsod { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0000aa; color: #fff; padding: 40px; font-family: monospace; z-index: 2000000; }
+        .el-btn.active {
+            border-color: #fff;
+            box-shadow: 0 0 15px var(--neon-blue);
+            transform: scale(1.05);
+        }
+
+        .el-btn::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: var(--neon-blue);
+            padding: 4px 8px;
+            font-size: 8px;
+            font-weight: bold;
+            border: 1px solid var(--neon-blue);
+            border-radius: 2px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+
+        .el-btn:hover::after { opacity: 1; }
+
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            background: rgba(0,0,0,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .category-tab {
+            padding: 8px 4px;
+            font-size: 8px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 700;
+            color: #666;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 60px;
+        }
+
+        .category-tab.active {
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+            background: rgba(0, 242, 255, 0.05);
+        }
+
+        #inspector {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 30px;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 2px;
+            font-size: 11px;
+            pointer-events: none;
+            letter-spacing: 2px;
+            z-index: 200;
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        #user-id-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 9px;
+            color: #444;
+            background: rgba(0,0,0,0.8);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid #222;
+        }
+
+        .admin-trigger {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 500;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #ff0055;
+            color: #ff0055;
+            padding: 8px 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
+        }
+
+        .admin-trigger:hover {
+            background: #ff0055;
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .resizer {
+            width: 15px;
+            height: 15px;
+            background: transparent;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            cursor: nwse-resize;
+            background: linear-gradient(135deg, transparent 50%, rgba(0, 242, 255, 0.3) 50%);
+            border-bottom-right-radius: 12px;
+        }
+
+        .element-grid::-webkit-scrollbar { width: 4px; }
+        .element-grid::-webkit-scrollbar-track { background: transparent; }
+        .element-grid::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
-<body onclick="window.closeStart()">
+<body>
 
-<div id="bsod-screen" class="bsod">
-    <h1 style="background:#fff; color:#0000aa; display:inline-block; padding:0 10px;">KHEM.OS</h1>
-    <p>A problem has been detected and KHEM.OS has been shut down to prevent damage to your virtual sanity.</p>
-    <p>ADMIN_FORCED_CRASH_0x0000DEAD</p>
-    <p>Press RESTART to attempt recovery.</p>
-    <button onclick="location.reload()">RESTART</button>
-</div>
-
-<div id="loading-screen">
-    <div id="bios-text"></div>
-    <div style="width: 240px; height: 12px; border: 1px solid #555; margin-top: 20px; padding: 1px;">
-        <div id="boot-progress" style="height: 100%; background: var(--toxic-green); width: 0%;"></div>
+    <div id="game-container">
+        <canvas id="canvas"></canvas>
+        <div id="brush-circle" class="absolute pointer-events-none border border-cyan-400 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-40"></div>
     </div>
-</div>
 
-<div class="desktop-area">
-    <div class="d-icon" onclick="window.openWin('chat-win')"><img src="https://win98icons.alexmeub.com/icons/png/msie2-2.png"><div>Network_Chat</div></div>
-    <div class="d-icon" onclick="window.openWin('shop-win')"><img src="https://win98icons.alexmeub.com/icons/png/envelope_closed-0.png"><div>Marketplace</div></div>
-    <div class="d-icon" onclick="window.openWin('inventory-win')"><img src="https://win98icons.alexmeub.com/icons/png/briefcase-0.png"><div>My_Stuff</div></div>
-    <div class="d-icon" onclick="window.openWin('casino-win')"><img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png"><div>Casino</div></div>
-    <div class="d-icon" onclick="window.openWin('cam-win')"><img src="https://win98icons.alexmeub.com/icons/png/camera-0.png"><div>Media_Hub</div></div>
-    <div class="d-icon" onclick="window.openWin('mine-win')"><img src="https://win98icons.alexmeub.com/icons/png/minesweeper-0.png"><div>Mines</div></div>
-</div>
+    <div id="user-id-display">AUTH_PENDING...</div>
 
-<!-- PROFILE SETUP -->
-<div class="window" id="profile-win" style="width: 320px; top: 20%; left: 30%; z-index: 100000;">
-    <div class="title-bar"><div class="title-bar-text">Identity Setup</div></div>
-    <div class="window-body">
-        <div style="display: flex; gap: 15px;">
-            <div style="text-align:center">
-                <img id="pfp-preview" style="width:64px; height:64px; border:2px inset; object-fit:cover;" src="https://win98icons.alexmeub.com/icons/png/user_world-0.png">
-                <button onclick="document.getElementById('pfp-input').click()" style="width:100%; margin-top:5px;">Photo</button>
-                <input type="file" id="pfp-input" accept="image/*" style="display:none" onchange="window.handlePfp(this)">
+    <button class="admin-trigger" onclick="window.open('https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2F641yf1drx6f91.jpg', '_blank')">ADMIN</button>
+
+    <div class="hud-panel" id="palette-win" style="top: 20px; left: 20px; width: 340px; height: 600px;">
+        <div class="panel-header">
+            <span>UNIVERSE_CORE_v2</span>
+            <div id="status-light" class="w-1.5 h-1.5 rounded-full bg-red-600"></div>
+        </div>
+        <div class="category-tabs" id="tabs">
+            <div class="category-tab active" data-cat="earth">EARTH</div>
+            <div class="category-tab" data-cat="liquid">LIQUID</div>
+            <div class="category-tab" data-cat="life">LIFE</div>
+            <div class="category-tab" data-cat="tech">BUILD</div>
+            <div class="category-tab" data-cat="energy">CHAOS</div>
+            <div class="category-tab" data-cat="special">GOD</div>
+        </div>
+        <div class="element-grid" id="element-list"></div>
+        <div class="p-4 border-t border-white/5 space-y-3 bg-black/40 flex-shrink-0">
+            <div class="flex justify-between text-[9px] font-bold text-gray-500">
+                <span>BRUSH_RADIUS</span>
+                <span id="brush-size-val" class="text-cyan-400">8px</span>
             </div>
-            <div style="flex:1">
-                <div class="field-row-stacked">
-                    <label>Network Handle:</label>
-                    <input id="prof-user" type="text" maxlength="15" style="width:100%">
-                </div>
-                <div class="field-row-stacked" style="margin-top:8px">
-                    <label>Handle Color:</label>
-                    <input id="prof-color" type="color" value="#39ff14" style="width:100%">
-                </div>
+            <input type="range" id="brush-size" min="1" max="60" value="8" class="w-full accent-cyan-500 bg-gray-900 h-1 rounded-lg appearance-none cursor-pointer">
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="clearSim()" class="py-2 bg-red-950/20 border border-red-900/40 text-red-500 text-[9px] hover:bg-red-600 hover:text-white transition-all font-bold uppercase tracking-widest">Reset</button>
+                <button onclick="saveWorld()" class="py-2 bg-blue-950/20 border border-blue-900/40 text-blue-400 text-[9px] hover:bg-blue-600 hover:text-white transition-all font-bold uppercase tracking-widest">Snapshot</button>
             </div>
         </div>
-        <button style="width: 100%; margin-top: 15px; font-weight: bold; height: 30px;" onclick="window.saveProfile()">SYNC & CONNECT</button>
+        <div class="resizer" id="panel-resizer"></div>
     </div>
-</div>
 
-<!-- SHOP WINDOW -->
-<div class="window" id="shop-win" style="width: 400px; top: 50px; left: 450px;">
-    <div class="title-bar"><div class="title-bar-text">Marketplace</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('shop-win')"></button></div></div>
-    <div class="window-body">
-        <div id="shop-list"></div>
-        <hr>
-        <p><b>List New Item (Max 800MB):</b></p>
-        <div class="field-row">
-            <input type="text" id="new-item-name" placeholder="Item Name" style="flex:1">
-            <input type="number" id="new-item-price" placeholder="Price" style="width:60px">
-            <button onclick="document.getElementById('item-upload').click()">Img/File</button>
-            <input type="file" id="item-upload" hidden onchange="window.listItem(this)">
-        </div>
-    </div>
-</div>
+    <div id="inspector">INITIALIZING...</div>
 
-<!-- INVENTORY WINDOW -->
-<div class="window" id="inventory-win" style="width: 320px; top: 100px; left: 870px;">
-    <div class="title-bar"><div class="title-bar-text">My Inventory</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('inventory-win')"></button></div></div>
-    <div class="window-body">
-        <div id="inv-list" style="height:250px; overflow-y:auto; background:#fff; border:2px inset; padding:5px;"></div>
-    </div>
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-<!-- CHAT WINDOW -->
-<div class="window" id="chat-win" style="width: 450px; top: 40px; left: 50px;">
-    <div class="title-bar"><div class="title-bar-text">KHEM_NET Chat</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('chat-win')"></button></div></div>
-    <div class="window-body">
-        <div id="chat-content"></div>
-        <div class="field-row" style="margin-top: 10px;">
-            <button onclick="document.getElementById('chat-img-input').click()" title="Send File (800MB)">📁</button>
-            <input type="file" id="chat-img-input" style="display:none" onchange="window.sendImage(this)">
-            <input id="chat-input" type="text" placeholder="Type message..." style="flex:1" onkeydown="if(event.key==='Enter') window.sendChat()">
-            <button onclick="window.sendChat()">Send</button>
-        </div>
-    </div>
-</div>
+        const WIDTH = 320;
+        const HEIGHT = 240;
 
-<!-- MEDIA HUB (CAMERA) -->
-<div class="window" id="cam-win" style="width: 320px; top: 100px; left: 650px;">
-    <div class="title-bar"><div class="title-bar-text">Media Hub</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('cam-win')"></button></div></div>
-    <div class="window-body">
-        <video id="camera-preview" autoplay playsinline style="width:100%; background:#000; transform: scaleX(-1);"></video>
-        <div style="display:flex; gap:5px; margin-top:5px;">
-            <button onclick="window.startCam()" style="flex:1">Start</button>
-            <button id="snap-btn" onclick="window.takeSnap()" style="flex:1" disabled>Capture</button>
-        </div>
-        <canvas id="cam-canvas" style="display:none"></canvas>
-    </div>
-</div>
-
-<!-- MINESWEEPER -->
-<div class="window" id="mine-win" style="top: 150px; left: 850px;">
-    <div class="title-bar"><div class="title-bar-text">Mines</div><div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('mine-win')"></button></div></div>
-    <div class="window-body">
-        <div id="mine-grid"></div>
-        <button onclick="window.initMines()" style="width: 100%; margin-top: 5px;">Reset</button>
-    </div>
-</div>
-
-<!-- ADMIN CONSOLE -->
-<div class="window" id="admin-win" style="width: 350px; top: 30%; left: 35%;">
-    <div class="title-bar" style="background:linear-gradient(90deg, #800, #000)!important;">
-        <div class="title-bar-text">ADMIN_COMMAND_CENTER_v13.0</div>
-        <div class="title-bar-controls"><button aria-label="Close" onclick="window.closeWin('admin-win')"></button></div>
-    </div>
-    <div class="window-body" style="background:#111; color:lime; font-family:monospace; padding:10px; font-size: 11px;">
-        <p style="border-bottom:1px solid #333">MODERATION</p>
-        <div class="field-row">
-            <input type="checkbox" id="intercept-toggle"> <label for="intercept-toggle">INTERCEPT_MSG</label>
-            <button onclick="window.troll('mute')">SILENCE_ALL</button>
-        </div>
-        
-        <div id="intercept-box" style="display:none; margin-top:5px; border:1px solid red; padding:5px;">
-            <p id="pending-msg-info" style="color:yellow;"></p>
-            <input type="text" id="intercept-edit" style="width:100%; background:#222; color:#fff;">
-            <button onclick="window.releaseIntercept()">RELEASE</button>
-        </div>
-
-        <p style="border-bottom:1px solid #333; margin-top:10px;">IDENTITY</p>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-            <button onclick="window.toggleAdminStyle('aura')">AURA</button>
-            <button onclick="window.toggleAdminStyle('glitch')">GLITCH</button>
-            <input type="color" id="admin-color-picker" onchange="window.updateAdminColor(this.value)" style="width:100%">
-        </div>
-
-        <p style="border-bottom:1px solid #333; margin-top:10px;">GLOBAL OVERRIDE</p>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-            <button onclick="window.troll('shake')">SHAKE</button>
-            <button onclick="window.troll('invert')">INVERT</button>
-            <button onclick="window.troll('flip')">FLIP</button>
-            <button onclick="window.troll('grayscale')">GRAY</button>
-            <button onclick="window.troll('crash')" style="color:red; font-weight:bold;">CRASH_ALL</button>
-            <button onclick="window.troll('rainbow')" style="color:cyan;">RAINBOW_MODE</button>
-        </div>
-
-        <p style="border-bottom:1px solid #333; margin-top:10px;">ECONOMY_HACK</p>
-        <div class="field-row">
-            <input type="text" id="target-user" placeholder="Name or *" style="width:80px; background:#000; color:lime;">
-            <input type="number" id="gift-amt" placeholder="Amt" style="width:50px; background:#000; color:lime;">
-            <button onclick="window.adminGift()">GIVE_CASH</button>
-        </div>
-        <button onclick="window.adminItemAction('remove')" style="width:100%; color:orange; margin-top:5px;">STEAL_INVENTORY</button>
-        <button onclick="window.adminClearAll()" style="width:100%; color:red; margin-top:5px;">WIPE_MARKET</button>
-    </div>
-</div>
-
-<!-- CASINO -->
-<div class="window" id="casino-win" style="width: 200px; top: 400px; left: 500px;">
-    <div class="title-bar"><div class="title-bar-text">Casino</div></div>
-    <div class="window-body">
-        <div style="background:#000; color:gold; text-align:center; padding:10px; border:2px inset; font-family:monospace; margin-bottom: 5px;">$<span id="balance">5000</span></div>
-        <button onclick="window.spin()" style="width:100%">SPIN ($50)</button>
-    </div>
-</div>
-
-<div id="start-menu">
-    <div style="background: var(--win-title); color: #fff; padding: 5px 10px; font-weight: bold;">KHEM.OS v13.0</div>
-    <div class="start-item" onclick="window.authAdmin()">🔑 Admin Access</div>
-    <div class="start-item" onclick="window.openWin('profile-win')">👤 Profile Setup</div>
-    <div class="start-item" onclick="window.openWin('shop-win')">🛍️ Marketplace</div>
-    <hr>
-    <div class="start-item" onclick="location.reload()">🔄 Restart</div>
-</div>
-
-<div id="taskbar">
-    <button onclick="window.toggleStart(event)">Start</button>
-    <div style="margin-left:auto; border:2px inset; padding:2px 10px;" id="clock">00:00</div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onChildAdded, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const config = {
-        apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
-        authDomain: "chatroon-4ded8.firebaseapp.com",
-        databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
-        projectId: "chatroon-4ded8",
-    };
-
-    const app = initializeApp(config);
-    const db = getDatabase(app);
-    const dbPath = "khem_os_v13_0";
-
-    let myData = {
-        name: localStorage.getItem('khem_name') || "",
-        color: localStorage.getItem('khem_color') || "#39ff14",
-        pfp: localStorage.getItem('khem_pfp') || "https://win98icons.alexmeub.com/icons/png/user_world-0.png",
-        bal: parseInt(localStorage.getItem('khem_bal')) || 5000,
-        isAdmin: false,
-        aura: false,
-        glitch: false,
-        isMuted: false,
-        inventory: JSON.parse(localStorage.getItem('khem_inv')) || []
-    };
-
-    // --- PROFANITY FILTER ---
-    const blacklist = ["fuck", "shit", "nigger", "faggot", "cunt", "retard", "bitch", "slut", "whore", "nigga"];
-    function sanitize(text) {
-        if (!text) return "";
-        const lower = text.toLowerCase();
-        for (let word of blacklist) {
-            if (lower.includes(word)) return "Im A Bad Person i tried to type something bad";
-        }
-        return text;
-    }
-
-    // Window Dragging
-    let draggedWin = null, offset = { x: 0, y: 0 };
-    document.addEventListener('mousedown', e => {
-        const bar = e.target.closest('.title-bar');
-        if (bar) {
-            draggedWin = bar.parentElement;
-            draggedWin.style.zIndex = Date.now();
-            offset.x = e.clientX - draggedWin.offsetLeft;
-            offset.y = e.clientY - draggedWin.offsetTop;
-        }
-    });
-    document.addEventListener('mousemove', e => {
-        if (!draggedWin) return;
-        draggedWin.style.left = (e.clientX - offset.x) + "px";
-        draggedWin.style.top = (e.clientY - offset.y) + "px";
-    });
-    document.addEventListener('mouseup', () => draggedWin = null);
-
-    // Boot Sequence
-    const bios = document.getElementById('bios-text');
-    const lines = ["MODEM_SYNC_OK", "MEM_V13.0_LOAD", "CAM_DRIVERS_INIT", "FILE_LIMIT_800MB_SET", "PROF_FILTER_ACTIVE"];
-    lines.forEach((l, i) => {
-        setTimeout(() => {
-            bios.innerHTML += `<div style="color:lime">> ${l}</div>`;
-            document.getElementById('boot-progress').style.width = ((i+1) * 20) + "%";
-        }, i * 250);
-    });
-    setTimeout(() => {
-        document.getElementById('loading-screen').style.display='none';
-        if (!myData.name) window.openWin('profile-win');
-        else {
-            document.getElementById('prof-user').value = myData.name;
-            document.getElementById('prof-color').value = myData.color;
-            document.getElementById('pfp-preview').src = myData.pfp;
-            document.getElementById('balance').innerText = myData.bal;
-            window.openWin('chat-win');
-        }
-    }, 1500);
-
-    // Window Controls
-    window.openWin = id => document.getElementById(id).style.display = 'block';
-    window.closeWin = id => document.getElementById(id).style.display = 'none';
-    window.toggleStart = e => { e.stopPropagation(); const m = document.getElementById('start-menu'); m.style.display = m.style.display==='block'?'none':'block'; };
-    window.closeStart = () => document.getElementById('start-menu').style.display = 'none';
-    
-    window.authAdmin = () => { if(prompt("ACCESS:")==="pine") { myData.isAdmin=true; window.openWin('admin-win'); } };
-
-    window.handlePfp = input => {
-        const reader = new FileReader();
-        reader.onload = e => { myData.pfp = e.target.result; document.getElementById('pfp-preview').src = e.target.result; };
-        reader.readAsDataURL(input.files[0]);
-    };
-
-    window.saveProfile = () => {
-        const n = document.getElementById('prof-user').value;
-        if (!n) return;
-        myData.name = sanitize(n);
-        myData.color = document.getElementById('prof-color').value;
-        localStorage.setItem('khem_name', myData.name);
-        localStorage.setItem('khem_color', myData.color);
-        localStorage.setItem('khem_pfp', myData.pfp);
-        window.closeWin('profile-win');
-        window.openWin('chat-win');
-    };
-
-    // Chat logic
-    window.sendChat = () => {
-        if(myData.isMuted) return alert("You have been silenced by an Administrator.");
-        const inp = document.getElementById('chat-input');
-        if(!inp.value) return;
-        const rawMsg = sanitize(inp.value);
-        if(rawMsg.toLowerCase().includes("smile")) window.spawnSmiley();
-
-        onValue(ref(db, `${dbPath}/config/intercept`), snap => {
-            if(snap.val() && !myData.isAdmin) {
-                push(ref(db, `${dbPath}/intercept_queue`), { from: myData.name, msg: rawMsg, data: { ...myData, bal: null, inventory: null } });
-                inp.value = "";
-                alert("Intercepted by Moderator...");
-            } else {
-                window.postMsg(rawMsg, myData);
-                inp.value = "";
-            }
-        }, { onlyOnce: true });
-    };
-
-    window.postMsg = (msg, sender, type='text', extra={}) => {
-        push(ref(db, `${dbPath}/chat`), { ...sender, msg, type, ...extra, time: Date.now() });
-    };
-
-    window.sendImage = (input) => {
-        if(myData.isMuted) return;
-        const file = input.files[0];
-        // 800MB check (800 * 1024 * 1024 bytes)
-        if (file.size > 800 * 1024 * 1024) {
-            alert("File too large! Max 800MB.");
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = e => window.postMsg(e.target.result, myData, 'image');
-        reader.readAsDataURL(file);
-    };
-
-    window.spawnSmiley = () => {
-        const s = document.createElement('div');
-        s.className = 'smiley-pop';
-        s.innerText = ['😊','😎','😂','🤡','👽'][Math.floor(Math.random()*5)];
-        s.style.left = Math.random() * 80 + 10 + "%";
-        s.style.top = "80%";
-        document.body.appendChild(s);
-        setTimeout(() => s.remove(), 1000);
-    };
-
-    onValue(ref(db, `${dbPath}/chat`), snap => {
-        const box = document.getElementById('chat-content');
-        box.innerHTML = "";
-        snap.forEach(m => {
-            const d = m.val();
-            let style = "";
-            if(d.aura) style += " hacker-aura";
-            if(d.glitch) style += " glitch-text";
-            let content = `<span>${d.msg}</span>`;
-            if(d.type === 'image') {
-                if(d.msg.startsWith('data:image/')) {
-                    content = `<img src="${d.msg}" style="max-width:200px; border:1px solid #000;">`;
-                } else {
-                    content = `<div style="padding:5px; border:1px dashed #777;">Uploaded File (Binary Blob)</div>`;
-                }
-            }
-            if(d.type === 'flex') {
-                content = `<div class="flex-msg-item">
-                    <b>FLEX: ${d.itemName}</b><br>
-                    <img src="${d.msg}" style="width:60px; margin:5px 0;"><br>
-                    <span style="color:green; font-weight:bold;">Paid: $${d.paidPrice}</span>
-                </div>`;
-            }
+        const ELEMENTS = {
+            EMPTY: { id: 0, color: '#000000', name: 'Air', cat: 'earth', icon: '◌' },
+            BEDROCK: { id: 1, color: '#111111', name: 'Bedrock', cat: 'earth', state: 'solid', immovable: true, icon: '⬛' },
+            SAND: { id: 2, color: '#e3b448', name: 'Sand', cat: 'earth', state: 'powder', density: 10, icon: '▒' },
+            DIRT: { id: 3, color: '#5d4037', name: 'Dirt', cat: 'earth', state: 'powder', density: 9, icon: '🧱' },
+            STONE: { id: 5, color: '#757575', name: 'Stone', cat: 'earth', state: 'solid', icon: '🪨' },
+            GRAVEL: { id: 6, color: '#444444', name: 'Gravel', cat: 'earth', state: 'powder', density: 12, icon: '🔘' },
+            SALT: { id: 7, color: '#f5f5f5', name: 'Salt', cat: 'earth', state: 'powder', density: 8, icon: '🧂' },
+            ICE: { id: 9, color: '#a5f3fc', name: 'Ice', cat: 'earth', state: 'solid', icon: '🧊' },
             
-            box.innerHTML += `<div class="chat-msg"><img src="${d.pfp}" class="avatar-sm"><div><b style="color:${d.color}" class="${style}">${d.name}</b>: ${content}</div></div>`;
-        });
-        box.scrollTop = box.scrollHeight;
-    });
-
-    // Marketplace
-    window.listItem = (input) => {
-        const file = input.files[0];
-        if (file.size > 800 * 1024 * 1024) return alert("File too large (800MB max)");
-        
-        const nameInput = document.getElementById('new-item-name');
-        const priceInput = document.getElementById('new-item-price');
-        const name = nameInput.value;
-        const price = parseInt(priceInput.value);
-        if(!name || !price) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            push(ref(db, `${dbPath}/market`), { name, price, img: e.target.result, seller: myData.name });
-            nameInput.value = "";
-            priceInput.value = "";
+            WATER: { id: 10, color: '#2196f3', name: 'Water', cat: 'liquid', state: 'liquid', density: 5, icon: '💧' },
+            OIL: { id: 11, color: '#3e2723', name: 'Oil', cat: 'liquid', state: 'liquid', density: 4, icon: '🛢️' },
+            ACID: { id: 12, color: '#cddc39', name: 'Acid', cat: 'liquid', state: 'liquid', density: 6, icon: '🧪' },
+            LAVA: { id: 13, color: '#ff5722', name: 'Lava', cat: 'liquid', state: 'liquid', density: 15, temp: 1000, icon: '🔥' },
+            MERCURY: { id: 14, color: '#b0bec5', name: 'Mercury', cat: 'liquid', state: 'liquid', density: 50, icon: '🌡️' },
+            METHANE: { id: 15, color: '#80cbc4', name: 'Methane', cat: 'liquid', state: 'gas', density: 1, icon: '☁️' },
+            LSD: { id: 16, color: '#ff00ff', name: 'LSD', cat: 'liquid', state: 'liquid', density: 5, icon: '🌈' },
+            
+            PLANT: { id: 20, color: '#4caf50', name: 'Plant', cat: 'life', state: 'solid', icon: '🌿' },
+            SEED: { id: 21, color: '#8bc34a', name: 'Seed', cat: 'life', state: 'powder', icon: '🌱' },
+            WOOD: { id: 23, color: '#795548', name: 'Wood', cat: 'life', state: 'solid', icon: '🪵' },
+            MUSHROOM: { id: 27, color: '#ce93d8', name: 'Fungus', cat: 'life', state: 'solid', icon: '🍄' },
+            HUMAN: { id: 60, color: '#ffcc80', name: 'Human', cat: 'life', state: 'living', density: 10, icon: '🧍' },
+            ZOMBIE: { id: 61, color: '#33691e', name: 'Zombie', cat: 'life', state: 'living', icon: '🧟' },
+            
+            METAL: { id: 30, color: '#90a4ae', name: 'Steel', cat: 'tech', state: 'solid', conduct: true, icon: '⛓️' },
+            WIRE: { id: 31, color: '#ff9800', name: 'Wire', cat: 'tech', state: 'solid', conduct: true, icon: '⚡' },
+            BATTERY: { id: 36, color: '#d81b60', name: 'Battery', cat: 'tech', state: 'solid', source: true, icon: '🔋' },
+            LED: { id: 37, color: '#444444', name: 'LED', cat: 'tech', state: 'solid', icon: '💡' },
+            FAN: { id: 38, color: '#607d8b', name: 'Fan', cat: 'tech', state: 'solid', icon: '🌀' },
+            
+            FIRE: { id: 24, color: '#f44336', name: 'Fire', cat: 'energy', state: 'gas', temp: 500, icon: '♨️' },
+            STEAM: { id: 25, color: '#cfd8dc', name: 'Steam', cat: 'energy', state: 'gas', icon: '💨' },
+            TNT: { id: 40, color: '#b71c1c', name: 'TNT', cat: 'energy', state: 'solid', icon: '🧨' },
+            C4: { id: 42, color: '#455a64', name: 'C4', cat: 'energy', state: 'solid', icon: '💣' },
+            SPARK: { id: 32, color: '#00bcd4', name: 'Spark', cat: 'energy', state: 'energy', icon: '✨' },
+            
+            VOID: { id: 50, color: '#1a0033', name: 'Void', cat: 'special', state: 'special', icon: '🕳️' },
+            WALL: { id: 52, color: '#ffffff', name: 'Indestructible', cat: 'special', state: 'solid', immovable: true, icon: '💎' },
+            ERASER: { id: 53, color: '#000000', name: 'Eraser', cat: 'special', icon: '✖️' },
+            CLOUD: { id: 54, color: '#eceff1', name: 'Cloud', cat: 'special', state: 'gas', icon: '☁️' },
         };
-        reader.readAsDataURL(file);
-    };
 
-    onValue(ref(db, `${dbPath}/market`), snap => {
-        const list = document.getElementById('shop-list');
-        list.innerHTML = "";
-        snap.forEach(i => {
-            const item = i.val();
-            const isMine = item.seller === myData.name;
-            list.innerHTML += `<div class="item-card">
-                <img src="${item.img}"><br>
-                <b>${item.name}</b><br>
-                <span style="color:green">$${item.price}</span><br>
-                ${isMine 
-                    ? `<button onclick="window.unlistItem('${i.key}')" style="background: #ffaaaa">Remove</button>` 
-                    : `<button onclick="window.buyItem('${i.key}', ${item.price})">Buy</button>`
+        let grid = new Int32Array(WIDTH * HEIGHT);
+        let gridExtra = new Int8Array(WIDTH * HEIGHT);
+        let gridTrip = new Uint8Array(WIDTH * HEIGHT);
+        
+        let selectedElement = 2; 
+        let brushSize = 8;
+        let isMouseDown = false;
+        let user = null;
+        let frameCount = 0;
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sandboxels-ultra-pro';
+
+        async function init() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
                 }
-            </div>`;
-        });
-    });
+            } catch(e) {}
 
-    window.unlistItem = (id) => {
-        if(confirm("Remove this listing?")) {
-            remove(ref(db, `${dbPath}/market/${id}`));
-        }
-    };
+            onAuthStateChanged(auth, (u) => {
+                user = u;
+                if (user) {
+                    document.getElementById('user-id-display').innerText = `ID: ${user.uid}`;
+                    document.getElementById('status-light').className = "w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f2ff]";
+                    setupMultiplayer();
+                }
+            });
 
-    window.buyItem = async (id, price) => {
-        if(myData.bal < price) return alert("Insufficient funds.");
-        
-        const itemSnap = await get(ref(db, `${dbPath}/market/${id}`));
-        const item = itemSnap.val();
-        
-        if(!item) {
-            alert("Item sold or removed!");
-            return;
+            buildBedrock();
+            buildUI();
+            setupPanelInteraction();
+            loop();
         }
 
-        await remove(ref(db, `${dbPath}/market/${id}`));
-        
-        myData.bal -= price;
-        myData.inventory.push({ name: item.name, img: item.img, boughtAt: price });
-        
-        localStorage.setItem('khem_bal', myData.bal);
-        localStorage.setItem('khem_inv', JSON.stringify(myData.inventory));
-        document.getElementById('balance').innerText = myData.bal;
-        window.updateInv();
-        alert(`Successfully acquired ${item.name}!`);
-    };
-
-    window.updateInv = () => {
-        const inv = document.getElementById('inv-list');
-        inv.innerHTML = "";
-        myData.inventory.forEach((it, idx) => {
-            inv.innerHTML += `<div style="display:flex; align-items:center; gap:5px; border-bottom:1px solid #ccc; padding: 3px;">
-                <img src="${it.img}" style="width:24px; height:24px; object-fit: contain;">
-                <span style="flex:1; font-size:10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${it.name}</span>
-                <button onclick="window.flexItem(${idx})" title="Flex original price">Flex</button>
-                <button onclick="window.resellItem(${idx})" style="background: #ccffcc" title="Put back on market">Resell</button>
-            </div>`;
-        });
-    };
-    window.updateInv();
-
-    window.resellItem = (idx) => {
-        const it = myData.inventory[idx];
-        const newPrice = prompt(`Resell "${it.name}" for how much?`, it.boughtAt || 100);
-        if(!newPrice || isNaN(newPrice)) return;
-
-        push(ref(db, `${dbPath}/market`), { 
-            name: it.name, 
-            price: parseInt(newPrice), 
-            img: it.img, 
-            seller: myData.name 
-        });
-
-        myData.inventory.splice(idx, 1);
-        localStorage.setItem('khem_inv', JSON.stringify(myData.inventory));
-        window.updateInv();
-        alert("Relisted!");
-    };
-
-    window.flexItem = (idx) => {
-        const it = myData.inventory[idx];
-        // Now passing the 'boughtAt' price in the flex data
-        push(ref(db, `${dbPath}/chat`), { 
-            ...myData, 
-            msg: it.img, 
-            itemName: it.name, 
-            paidPrice: it.boughtAt || "Unknown",
-            type: 'flex' 
-        });
-    };
-
-    // Camera
-    let stream;
-    window.startCam = async () => {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('camera-preview').srcObject = stream;
-            document.getElementById('snap-btn').disabled = false;
-        } catch(e) { alert("Cam Fail"); }
-    };
-    window.takeSnap = () => {
-        const video = document.getElementById('camera-preview');
-        const canvas = document.getElementById('cam-canvas');
-        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.translate(canvas.width, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0);
-        window.postMsg(canvas.toDataURL('image/jpeg', 0.7), myData, 'image');
-    };
-
-    // Intercept
-    let pending = null;
-    document.getElementById('intercept-toggle').onchange = e => set(ref(db, `${dbPath}/config/intercept`), e.target.checked);
-    onValue(ref(db, `${dbPath}/intercept_queue`), snap => {
-        if(!myData.isAdmin) return;
-        const box = document.getElementById('intercept-box');
-        if(snap.size > 0) {
-            box.style.display = 'block';
-            snap.forEach(m => { pending = { key: m.key, ...m.val() }; document.getElementById('pending-msg-info').innerText = `Review: ${pending.msg}`; document.getElementById('intercept-edit').value = pending.msg; return true; });
-        } else box.style.display = 'none';
-    });
-    window.releaseIntercept = () => {
-        window.postMsg(`[MOD] ${document.getElementById('intercept-edit').value}`, pending.data);
-        remove(ref(db, `${dbPath}/intercept_queue/${pending.key}`));
-    };
-
-    // Trolls & Admin Commands
-    window.troll = type => push(ref(db, `${dbPath}/trolls`), { type, time: Date.now() });
-    onChildAdded(ref(db, `${dbPath}/trolls`), snap => {
-        const t = snap.val(); if(t.time < Date.now() - 5000) return;
-        
-        if(t.type === 'shake') { document.body.classList.add('shaking'); setTimeout(()=>document.body.classList.remove('shaking'), 2000); }
-        else if(t.type === 'invert') document.body.classList.toggle('inverted');
-        else if(t.type === 'flip') document.body.classList.toggle('flipped');
-        else if(t.type === 'grayscale') document.body.classList.toggle('grayscale');
-        else if(t.type === 'mute') { myData.isMuted = true; setTimeout(()=>myData.isMuted=false, 10000); alert("Global Silence initiated by Admin."); }
-        else if(t.type === 'crash') { document.getElementById('bsod-screen').style.display = 'block'; }
-        else if(t.type === 'rainbow') { 
-            let i = 0; 
-            const int = setInterval(()=>{
-                document.body.style.backgroundColor = `hsl(${i}, 50%, 50%)`;
-                i+=10; if(i>360) clearInterval(int);
-            }, 50);
+        function buildBedrock() {
+            for(let y = HEIGHT - 8; y < HEIGHT; y++) {
+                for(let x = 0; x < WIDTH; x++) {
+                    grid[y * WIDTH + x] = ELEMENTS.BEDROCK.id;
+                }
+            }
         }
-        else if(t.type === 'give_cash' && (t.target === myData.name || t.target === "*")) { 
-            myData.bal += parseInt(t.val); 
-            document.getElementById('balance').innerText = myData.bal; 
-            localStorage.setItem('khem_bal', myData.bal); 
-        }
-        else if(t.type === 'steal' && (t.target === myData.name || t.target === "*")) { 
-            myData.inventory = []; 
-            localStorage.setItem('khem_inv', "[]"); 
-            window.updateInv(); 
-            alert("AN ADMIN STOLE ALL YOUR ITEMS!"); 
-        }
-    });
 
-    window.adminGift = () => push(ref(db, `${dbPath}/trolls`), { type: 'give_cash', target: document.getElementById('target-user').value, val: document.getElementById('gift-amt').value, time: Date.now() });
-    window.adminItemAction = (type) => push(ref(db, `${dbPath}/trolls`), { type: 'steal', target: document.getElementById('target-user').value, time: Date.now() });
-    window.toggleAdminStyle = type => { myData[type] = !myData[type]; alert(type + " ENABLED"); };
-    window.updateAdminColor = val => { myData.color = val; localStorage.setItem('khem_color', val); };
-    window.adminClearAll = () => remove(ref(db, `${dbPath}/market`));
+        function buildUI() {
+            const list = document.getElementById('element-list');
+            const tabs = document.getElementById('tabs');
+            
+            function renderCategory(cat) {
+                list.innerHTML = '';
+                Object.values(ELEMENTS).forEach(el => {
+                    if(el.cat !== cat) return;
+                    const btn = document.createElement('div');
+                    btn.className = `el-btn ${selectedElement === el.id ? 'active' : ''}`;
+                    btn.style.background = el.id === 0 ? 'transparent' : el.color;
+                    btn.dataset.tooltip = el.name.toUpperCase();
+                    btn.innerHTML = el.icon;
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        selectedElement = el.id;
+                        document.querySelectorAll('.el-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    };
+                    list.appendChild(btn);
+                });
+            }
 
-    // Casino
-    window.spin = () => {
-        if(myData.bal < 50) return; myData.bal -= 50;
-        if(Math.random() > 0.95) { 
-            myData.bal += 5000; 
-            alert("JACKPOT!!! $5000"); 
-        } else if (Math.random() > 0.8) {
-            myData.bal += 200;
-            alert("WIN $200");
-        }
-        document.getElementById('balance').innerText = myData.bal;
-        localStorage.setItem('khem_bal', myData.bal);
-    };
-
-    // Mines
-    window.initMines = () => {
-        const g = document.getElementById('mine-grid'); g.innerHTML = "";
-        for(let i=0; i<100; i++) {
-            const c = document.createElement('div'); c.className='mine-cell';
-            c.onclick = () => { 
-                const bomb = Math.random() < 0.20; 
-                c.innerText = bomb ? '💣' : '🚩'; 
-                c.style.background = bomb ? 'red' : '#eee';
-                if(bomb) { 
-                    document.body.classList.add('shaking'); 
-                    setTimeout(()=>document.body.classList.remove('shaking'), 500); 
+            tabs.onclick = (e) => {
+                if(e.target.dataset.cat) {
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderCategory(e.target.dataset.cat);
                 }
             };
-            g.appendChild(c);
+            renderCategory('earth');
         }
-    };
-    window.initMines();
 
-    setInterval(() => {
-        const d = new Date();
-        document.getElementById('clock').innerText = d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0');
-    }, 1000);
-</script>
+        function setupPanelInteraction() {
+            const panel = document.getElementById('palette-win');
+            const header = panel.querySelector('.panel-header');
+            const resizer = document.getElementById('panel-resizer');
+
+            header.onmousedown = (e) => {
+                let shiftX = e.clientX - panel.getBoundingClientRect().left;
+                let shiftY = e.clientY - panel.getBoundingClientRect().top;
+                function onMouseMove(e) {
+                    panel.style.left = e.pageX - shiftX + 'px';
+                    panel.style.top = e.pageY - shiftY + 'px';
+                }
+                document.addEventListener('mousemove', onMouseMove);
+                document.onmouseup = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.onmouseup = null;
+                };
+            };
+
+            resizer.onmousedown = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const startWidth = panel.offsetWidth, startHeight = panel.offsetHeight;
+                const startX = e.clientX, startY = e.clientY;
+                function doResize(e) {
+                    panel.style.width = (startWidth + e.clientX - startX) + 'px';
+                    panel.style.height = (startHeight + e.clientY - startY) + 'px';
+                }
+                function stopResize() {
+                    document.removeEventListener('mousemove', doResize);
+                    document.removeEventListener('mouseup', stopResize);
+                }
+                document.addEventListener('mousemove', doResize);
+                document.addEventListener('mouseup', stopResize);
+            };
+        }
+
+        function getPixel(x, y) {
+            if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return -1;
+            return grid[y * WIDTH + x];
+        }
+
+        function setPixel(x, y, val) {
+            if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
+            if (grid[y * WIDTH + x] === ELEMENTS.BEDROCK.id || grid[y * WIDTH + x] === ELEMENTS.WALL.id) return;
+            grid[y * WIDTH + x] = val;
+            gridExtra[y * WIDTH + x] = 0;
+            gridTrip[y * WIDTH + x] = 0;
+        }
+
+        function update() {
+            frameCount++;
+            for (let y = HEIGHT - 1; y >= 0; y--) {
+                const xOffset = Math.floor(Math.random() * WIDTH);
+                for (let i = 0; i < WIDTH; i++) {
+                    const x = (i + xOffset) % WIDTH;
+                    const idx = y * WIDTH + x;
+                    const p = grid[idx];
+                    if (p === 0) continue;
+
+                    const el = Object.values(ELEMENTS).find(e => e.id === p);
+                    if (!el || el.immovable) continue;
+
+                    let trippy = gridTrip[idx] > 0;
+
+                    if (el.state === 'powder') {
+                        let dy = 1;
+                        if (trippy && Math.random() > 0.8) dy = -1;
+                        const below = getPixel(x, y + dy);
+                        if (below === 0) {
+                            grid[idx] = 0; grid[(y + dy) * WIDTH + x] = p;
+                            gridTrip[(y + dy) * WIDTH + x] = gridTrip[idx];
+                            gridTrip[idx] = 0;
+                        } else {
+                            const belowEl = Object.values(ELEMENTS).find(e => e.id === below);
+                            if (belowEl && belowEl.state === 'liquid' && (belowEl.density || 5) < (el.density || 10)) {
+                                grid[idx] = below; grid[(y+dy)*WIDTH+x] = p;
+                                gridTrip[(y+dy)*WIDTH+x] = gridTrip[idx];
+                                gridTrip[idx] = 0;
+                            } else {
+                                const dir = Math.random() < 0.5 ? -1 : 1;
+                                if (getPixel(x + dir, y + dy) === 0) {
+                                    grid[idx] = 0; grid[(y + dy) * WIDTH + (x + dir)] = p;
+                                    gridTrip[(y+dy)*WIDTH+(x+dir)] = gridTrip[idx];
+                                    gridTrip[idx] = 0;
+                                }
+                            }
+                        }
+                    } else if (el.state === 'liquid') {
+                        let dy = 1;
+                        if (trippy && Math.random() > 0.9) dy = 0;
+                        if (getPixel(x, y + dy) === 0) {
+                            grid[idx] = 0; grid[(y + dy) * WIDTH + x] = p;
+                            gridTrip[(y+dy)*WIDTH+x] = gridTrip[idx];
+                            gridTrip[idx] = 0;
+                        } else {
+                            const dir = Math.random() < 0.5 ? -1 : 1;
+                            if (getPixel(x + dir, y + dy) === 0) {
+                                grid[idx] = 0; grid[(y + dy) * WIDTH + (x + dir)] = p;
+                                gridTrip[(y+dy)*WIDTH+(x+dir)] = gridTrip[idx];
+                                gridTrip[idx] = 0;
+                            } else if (getPixel(x + dir, y) === 0) {
+                                grid[idx] = 0; grid[y * WIDTH + (x + dir)] = p;
+                                gridTrip[y*WIDTH+(x+dir)] = gridTrip[idx];
+                                gridTrip[idx] = 0;
+                            }
+                        }
+                    } else if (el.state === 'gas' || p === ELEMENTS.CLOUD.id) {
+                        const dx = Math.floor(Math.random() * 3) - 1;
+                        const dy = Math.random() < 0.8 ? -1 : 0;
+                        if (getPixel(x + dx, y + dy) === 0) {
+                            grid[idx] = 0; grid[(y + dy) * WIDTH + (x + dx)] = p;
+                        }
+                        if (p === ELEMENTS.CLOUD.id && Math.random() > 0.99) {
+                            if (getPixel(x, y + 1) === 0) grid[(y+1)*WIDTH+x] = ELEMENTS.WATER.id;
+                        }
+                    } else if (el.state === 'living') {
+                        const dir = Math.random() < 0.5 ? -1 : 1;
+                        const below = getPixel(x, y + 1);
+                        if (below === 0) {
+                            grid[idx] = 0; grid[(y + 1) * WIDTH + x] = p;
+                            gridTrip[(y+1)*WIDTH+x] = gridTrip[idx];
+                            gridTrip[idx] = 0;
+                        } else if (getPixel(x + dir, y) === 0) {
+                            if (Math.random() > (trippy ? 0.3 : 0.7)) {
+                                grid[idx] = 0; grid[y * WIDTH + (x + dir)] = p;
+                                gridTrip[y*WIDTH+(x+dir)] = gridTrip[idx];
+                                gridTrip[idx] = 0;
+                            }
+                        }
+                        if (p === ELEMENTS.ZOMBIE.id) {
+                            const neighbors = [[x+1,y],[x-1,y],[x,y+1],[x,y-1]];
+                            neighbors.forEach(([nx, ny]) => {
+                                if (getPixel(nx, ny) === ELEMENTS.HUMAN.id) grid[ny*WIDTH+nx] = ELEMENTS.ZOMBIE.id;
+                            });
+                        }
+                    }
+
+                    if (p === ELEMENTS.LSD.id) {
+                        const neighbors = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]];
+                        neighbors.forEach(([nx, ny]) => {
+                            const t = getPixel(nx, ny);
+                            if (t > 0 && t !== ELEMENTS.BEDROCK.id && t !== ELEMENTS.WALL.id) {
+                                gridTrip[ny*WIDTH+nx] = 255;
+                            }
+                        });
+                    }
+
+                    if (p === ELEMENTS.FIRE.id) {
+                        const neighbors = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]];
+                        neighbors.forEach(([nx, ny]) => {
+                            const t = getPixel(nx, ny);
+                            if ([ELEMENTS.PLANT.id, ELEMENTS.WOOD.id, ELEMENTS.OIL.id, ELEMENTS.HUMAN.id].includes(t)) {
+                                grid[ny*WIDTH+nx] = ELEMENTS.FIRE.id;
+                            } else if (t === ELEMENTS.WATER.id) {
+                                grid[ny*WIDTH+nx] = ELEMENTS.STEAM.id;
+                                grid[idx] = 0;
+                            } else if (t === ELEMENTS.TNT.id) explode(nx, ny, 20);
+                        });
+                        if (Math.random() > 0.9) grid[idx] = 0;
+                    }
+
+                    if (p === ELEMENTS.VOID.id) {
+                        const neighbors = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]];
+                        neighbors.forEach(([nx, ny]) => {
+                            const t = getPixel(nx, ny);
+                            if (t > 0 && t !== ELEMENTS.WALL.id) grid[ny*WIDTH+nx] = 0;
+                        });
+                    }
+
+                    if (p === ELEMENTS.SPARK.id) {
+                        const neighbors = [[x,y-1],[x,y+1],[x-1,y],[x+1,y]];
+                        neighbors.forEach(([nx, ny]) => {
+                            const t = getPixel(nx, ny);
+                            if (t === ELEMENTS.TNT.id || t === ELEMENTS.C4.id) explode(nx, ny, 30);
+                            else if (t === ELEMENTS.WIRE.id || t === ELEMENTS.METAL.id) {
+                                if (Math.random() > 0.5) grid[ny*WIDTH+nx] = ELEMENTS.SPARK.id;
+                            }
+                        });
+                        grid[idx] = 0;
+                    }
+                    if (gridTrip[idx] > 0 && Math.random() > 0.99) gridTrip[idx]--;
+                }
+            }
+        }
+
+        function explode(x, y, radius) {
+            for (let i = -radius; i <= radius; i++) {
+                for (let j = -radius; j <= radius; j++) {
+                    if (i*i + j*j > radius*radius) continue;
+                    const nx = x + i, ny = y + j;
+                    const t = getPixel(nx, ny);
+                    if (t !== -1 && t !== ELEMENTS.WALL.id) {
+                        grid[ny*WIDTH + nx] = Math.random() > 0.8 ? ELEMENTS.FIRE.id : 0;
+                    }
+                }
+            }
+        }
+
+        const imgData = ctx.createImageData(WIDTH, HEIGHT);
+        function draw() {
+            for (let i = 0; i < grid.length; i++) {
+                const elId = grid[i];
+                const el = Object.values(ELEMENTS).find(e => e.id === elId) || ELEMENTS.EMPTY;
+                const idx = i * 4;
+                let rgb = hexToRgb(el.color);
+                if (gridTrip[i] > 0) {
+                    const phase = (frameCount * 0.2) + (i * 0.05);
+                    rgb.r = Math.sin(phase) * 127 + 128;
+                    rgb.g = Math.sin(phase + 2) * 127 + 128;
+                    rgb.b = Math.sin(phase + 4) * 127 + 128;
+                }
+                imgData.data[idx] = rgb.r;
+                imgData.data[idx+1] = rgb.g;
+                imgData.data[idx+2] = rgb.b;
+                imgData.data[idx+3] = 255;
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i.exec(hex);
+            return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : { r: 0, g: 0, b: 0 };
+        }
+
+        function setupMultiplayer() {
+            if (!user) return;
+            const strokesRef = collection(db, 'artifacts', appId, 'public', 'data', 'strokes');
+            onSnapshot(strokesRef, (snap) => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const d = change.doc.data();
+                        if (d.userId !== user.uid) paint(d.x, d.y, d.type, d.size, false);
+                    }
+                });
+            }, (err) => {});
+        }
+
+        window.saveWorld = async () => {
+            if (!user) return;
+            const stateDoc = doc(db, 'artifacts', appId, 'public', 'data', 'world', 'current');
+            const flatGrid = Array.from(grid).join(',');
+            await setDoc(stateDoc, { data: flatGrid, ts: serverTimestamp() });
+        }
+
+        async function paint(x, y, type, size, sync = true) {
+            if (type === 53) type = 0;
+            for (let i = -size; i <= size; i++) {
+                for (let j = -size; j <= size; j++) {
+                    if (i*i + j*j > size*size) continue;
+                    setPixel(Math.floor(x + i), Math.floor(y + j), type);
+                    if (type === ELEMENTS.LSD.id) {
+                        const targetIdx = Math.floor(y+j) * WIDTH + Math.floor(x+i);
+                        if (targetIdx >= 0 && targetIdx < gridTrip.length) gridTrip[targetIdx] = 255;
+                    }
+                }
+            }
+            if(sync && user && Math.random() > 0.9) {
+                try {
+                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'strokes'), {
+                        x, y, type, size, userId: user.uid, ts: serverTimestamp()
+                    });
+                } catch (e) {}
+            }
+        }
+
+        function handlePointer(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const x = (clientX - rect.left) * (WIDTH / rect.width);
+            const y = (clientY - rect.top) * (HEIGHT / rect.height);
+            const brushCircle = document.getElementById('brush-circle');
+            brushCircle.style.left = clientX + 'px';
+            brushCircle.style.top = clientY + 'px';
+            brushCircle.style.width = (brushSize * (rect.width/WIDTH) * 2) + 'px';
+            brushCircle.style.height = (brushSize * (rect.width/WIDTH) * 2) + 'px';
+            if (isMouseDown) paint(x, y, selectedElement, brushSize);
+            const hoveredId = getPixel(Math.floor(x), Math.floor(y));
+            const el = Object.values(ELEMENTS).find(e => e.id === hoveredId);
+            if(el) {
+                document.getElementById('inspector').innerHTML = `<span style="color:white">LINK:</span> ${el.name.toUpperCase()} <span style="color:white; opacity:0.3">[${Math.floor(x)},${Math.floor(y)}]</span>`;
+            }
+        }
+
+        window.addEventListener('mousedown', (e) => { if(e.target.closest('.hud-panel') || e.target.closest('.admin-trigger')) return; isMouseDown = true; });
+        window.addEventListener('mouseup', () => isMouseDown = false);
+        window.addEventListener('mousemove', handlePointer);
+        window.addEventListener('touchstart', (e) => { if(e.target.closest('.hud-panel') || e.target.closest('.admin-trigger')) return; isMouseDown = true; handlePointer(e); });
+        window.addEventListener('touchend', () => isMouseDown = false);
+        window.addEventListener('touchmove', (e) => { if(e.target.closest('.hud-panel') || e.target.closest('.admin-trigger')) return; e.preventDefault(); handlePointer(e); }, {passive: false});
+
+        document.getElementById('brush-size').oninput = (e) => {
+            brushSize = parseInt(e.target.value);
+            document.getElementById('brush-size-val').innerText = brushSize + 'px';
+        };
+
+        window.clearSim = () => { grid.fill(0); gridTrip.fill(0); buildBedrock(); };
+        function loop() { update(); draw(); requestAnimationFrame(loop); }
+        init();
+    </script>
 </body>
 </html>
