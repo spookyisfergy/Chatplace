@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SANDBOXELS ULTRA - FIXED MULTIPLAYER</title>
+    <title>SANDBOXELS ULTRA - SYNC FIXED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;700&display=swap');
@@ -104,7 +104,7 @@
             gap: 8px;
         }
 
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #555; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; }
         .status-dot.online { background: #00f2ff; box-shadow: 0 0 8px #00f2ff; animation: pulse 2s infinite; }
 
         @keyframes pulse {
@@ -132,7 +132,7 @@
 
     <div id="connection-status">
         <div id="dot" class="status-dot"></div>
-        <span id="status-text">CONNECTING...</span>
+        <span id="status-text">INITIALIZING...</span>
     </div>
 
     <div class="hud-panel" style="top: 20px; left: 20px;">
@@ -156,11 +156,9 @@
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Simulation Constants
+        // 1. App Configuration & Setup
         const WIDTH = 200;
         const HEIGHT = 150;
-        
-        // Define grid globally for access from UI buttons
         window.grid = new Int32Array(WIDTH * HEIGHT);
         
         const ELEMENTS = [
@@ -179,12 +177,96 @@
         let isDrawing = false;
         let user = null;
 
-        // UI Setup
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d', { alpha: false });
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
 
+        // 2. Firebase Initialization (Rule 1 & Rule 3)
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sandboxels-ultra-v2';
+
+        async function initFirebase() {
+            const statusText = document.getElementById('status-text');
+            const dot = document.getElementById('dot');
+
+            try {
+                // Rule 3: Auth First
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (u) => {
+                    if (u) {
+                        user = u;
+                        dot.classList.add('online');
+                        statusText.innerText = 'SYNC ACTIVE';
+                        document.getElementById('user-label').innerText = `ID: ${u.uid.slice(0,6)}`;
+                        setupSync();
+                    }
+                });
+            } catch (error) {
+                console.error("Auth Failure:", error);
+                statusText.innerText = 'OFFLINE MODE';
+                dot.style.background = '#ef4444';
+            }
+        }
+
+        // Rule 1: Strict Paths
+        function setupSync() {
+            const strokesRef = collection(db, 'artifacts', appId, 'public', 'data', 'strokes');
+            
+            // Listen for changes
+            onSnapshot(strokesRef, (snap) => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const data = change.doc.data();
+                        if (data.userId !== user?.uid) {
+                            applyPaintLocally(data.x, data.y, data.type, data.size);
+                        }
+                    }
+                });
+            }, (error) => {
+                console.error("Firestore sync error:", error);
+            });
+        }
+
+        // 3. Game Logic
+        function applyPaintLocally(x, y, type, size) {
+            const radiusSq = size * size;
+            for (let i = -size; i <= size; i++) {
+                for (let j = -size; j <= size; j++) {
+                    if (i*i + j*j > radiusSq) continue;
+                    const nx = Math.floor(x + i);
+                    const ny = Math.floor(y + j);
+                    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+                        const idx = ny * WIDTH + nx;
+                        if (window.grid[idx] !== 1) window.grid[idx] = type;
+                    }
+                }
+            }
+        }
+
+        function paint(x, y) {
+            applyPaintLocally(x, y, selectedElement, brushSize);
+
+            // Sync with others (Throttled)
+            if (user && Math.random() > 0.85) {
+                const strokesRef = collection(db, 'artifacts', appId, 'public', 'data', 'strokes');
+                addDoc(strokesRef, {
+                    x, y, type: selectedElement, size: brushSize,
+                    userId: user.uid,
+                    ts: serverTimestamp()
+                }).catch(() => {}); // Silent fail for throttled sync
+            }
+        }
+
+        // UI Binding
         const elList = document.getElementById('element-list');
         ELEMENTS.forEach(el => {
             const btn = document.createElement('div');
@@ -198,85 +280,10 @@
             elList.appendChild(btn);
         });
 
-        // Fix ReferenceError by binding reset button correctly
         document.getElementById('reset-btn').onclick = () => {
             window.grid.fill(0);
         };
 
-        // Firebase Core Logic
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sand-ultra-fixed';
-
-        async function startMultiplayer() {
-            try {
-                // 1. Auth Handshake
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (u) => {
-                    if (u) {
-                        user = u;
-                        document.getElementById('dot').classList.add('online');
-                        document.getElementById('status-text').innerText = 'LIVE SYNC';
-                        document.getElementById('user-label').innerText = `ID: ${u.uid.slice(0,6)}`;
-                        
-                        // 2. Setup Listener AFTER auth is confirmed
-                        setupListeners();
-                    }
-                });
-            } catch (e) {
-                document.getElementById('status-text').innerText = 'SYNC ERROR';
-                console.error(e);
-            }
-        }
-
-        function setupListeners() {
-            const path = collection(db, 'artifacts', appId, 'public', 'data', 'strokes');
-            // We only care about new strokes added while we are playing
-            onSnapshot(path, (snap) => {
-                snap.docChanges().forEach(change => {
-                    if (change.type === 'added') {
-                        const data = change.doc.data();
-                        // If it's from someone else, paint it!
-                        if (data.userId !== user.uid) {
-                            applyPaint(data.x, data.y, data.type, data.size, false);
-                        }
-                    }
-                });
-            }, (err) => {
-                console.error("Firestore error:", err);
-            });
-        }
-
-        function applyPaint(x, y, type, size, sync = true) {
-            const radiusSq = size * size;
-            for (let i = -size; i <= size; i++) {
-                for (let j = -size; j <= size; j++) {
-                    if (i*i + j*j > radiusSq) continue;
-                    const nx = Math.floor(x + i);
-                    const ny = Math.floor(y + j);
-                    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-                        const idx = ny * WIDTH + nx;
-                        if (window.grid[idx] !== 1) window.grid[idx] = type;
-                    }
-                }
-            }
-
-            // Sync with friend
-            if (sync && user && Math.random() > 0.8) { // Moderate throttling to prevent lag
-                addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'strokes'), {
-                    x, y, type, size, userId: user.uid, ts: serverTimestamp()
-                }).catch(e => console.warn("Sync missed"));
-            }
-        }
-
-        // Interaction
         function handleInput(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -291,7 +298,7 @@
             cursor.style.width = (brushSize * (rect.width/WIDTH) * 2) + 'px';
             cursor.style.height = (brushSize * (rect.width/WIDTH) * 2) + 'px';
 
-            if (isDrawing) applyPaint(x, y, selectedElement, brushSize, true);
+            if (isDrawing) paint(x, y);
         }
 
         window.addEventListener('mousedown', (e) => { if(!e.target.closest('.hud-panel')) isDrawing = true; });
@@ -306,7 +313,7 @@
             document.getElementById('bsize-num').innerText = brushSize;
         };
 
-        // Engine
+        // Engine Loop
         function update() {
             for (let y = HEIGHT - 1; y >= 0; y--) {
                 for (let x = 0; x < WIDTH; x++) {
@@ -338,7 +345,7 @@
                             }
                         }
                     } else if (el.type === 'gas') {
-                        if (Math.random() > 0.9) window.grid[idx] = 0;
+                        if (Math.random() > 0.94) { window.grid[idx] = 0; continue; }
                         const ny = y - 1;
                         const nx = x + (Math.floor(Math.random()*3)-1);
                         if (ny >= 0 && nx >= 0 && nx < WIDTH && window.grid[ny*WIDTH+nx] === 0) {
@@ -365,10 +372,16 @@
             ctx.putImageData(imgData, 0, 0);
         }
 
-        function loop() { update(); draw(); requestAnimationFrame(loop); }
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
         
-        startMultiplayer();
-        loop();
+        window.onload = () => {
+            initFirebase();
+            loop();
+        };
     </script>
 </body>
 </html>
