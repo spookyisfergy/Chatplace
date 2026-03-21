@@ -7,18 +7,22 @@ const App = () => {
   const [glitch, setGlitch] = useState(false);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   // --- UPDATED IMAGE LINKS ---
-  // Before: The Light of the World / After: The Result of the "Lettuce"
+  // Using direct links from PostImages and reliable Unsplash fallbacks
   const BEFORE_IMAGE_URL = "https://i.postimg.cc/FzBnzy50/Jesus-Light-World-Brent-Borup.jpg"; 
-  const AFTER_IMAGE_URL = "https://i.ibb.co/MY6z3k3/image-2026-03-21-001031888.png";
+  const AFTER_IMAGE_URL = "https://images.unsplash.com/photo-1594322436404-5a0526db4d13?w=800&q=80"; // Using a high-quality placeholder that works
 
   // Reliable fallbacks
   const fallbackBefore = "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80";
-  const fallbackAfter = "https://images.unsplash.com/photo-1594322436404-5a0526db4d13?w=800&q=80";
+  const fallbackAfter = "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800&q=80";
   // ---------------------------
 
   useEffect(() => {
+    // Ensure the component is fully mounted before showing content
+    setIsReady(true);
+
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     
@@ -68,6 +72,10 @@ const App = () => {
       statLabel: "Remaining Motivation Levels"
     }
   ];
+
+  if (!isReady) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white font-black italic uppercase">Initializing Truth...</div>;
+  }
 
   if (view === 'horror') {
     return (
