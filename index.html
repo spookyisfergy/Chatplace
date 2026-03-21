@@ -1,366 +1,238 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Mega Multiplayer Sandbox XL</title>
-    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <style>
-        :root {
-            --accent: #e67e22;
-            --bg: #1a1a1a;
-            --panel: #2d2d2d;
-        }
-        html, body {
-            width: 100%; height: 100%; margin: 0;
-            background-color: #000; color: #fff;
-            font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
-            touch-action: none;
-        }
-        #game-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100vh;
-            padding-top: 10px;
-        }
-        .header { margin-bottom: 5px; text-align: center; }
-        .header h1 { font-size: 14px; margin: 0 0 5px 0; color: var(--accent); text-shadow: 2px 2px #000; }
-        
-        canvas {
-            border: 4px solid #333;
-            image-rendering: pixelated;
-            background: #050505;
-            box-shadow: 0 0 30px rgba(230, 126, 34, 0.2);
-            cursor: crosshair;
-            width: 600px; height: 600px;
-            max-width: 95vw; max-height: 50vh;
-        }
-        
-        .ui-panel {
-            background: var(--panel);
-            padding: 12px;
-            border-radius: 12px;
-            margin-top: 10px;
-            display: flex; flex-direction: column; gap: 8px;
-            width: 95%; max-width: 800px;
-            box-sizing: border-box;
-            border: 2px solid #444;
-        }
-
-        .element-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 6px;
-            max-height: 180px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        button {
-            background: #3d3d3d; color: #fff; border: none;
-            padding: 10px 4px; font-size: 8px; cursor: pointer;
-            border-bottom: 4px solid #1a1a1a;
-            transition: all 0.1s;
-            text-transform: uppercase;
-        }
-        button:hover { background: #4d4d4d; }
-        button.active { 
-            background: var(--accent); 
-            border-bottom: 4px solid #a05a1a;
-            transform: translateY(2px);
-        }
-        
-        .controls-row {
-            display: flex; justify-content: space-between; align-items: center;
-            border-top: 1px solid #444; padding-top: 10px;
-            gap: 15px;
-        }
-
-        .slider-container {
-            display: flex; align-items: center; gap: 10px; font-size: 9px;
-        }
-
-        input[type=range] {
-            cursor: pointer;
-            accent-color: var(--accent);
-            width: 100px;
-        }
-
-        #status { font-size: 8px; color: #00ff00; letter-spacing: 1px; }
-        .btn-special { background: #c0392b; border-bottom-color: #7b241c; }
-        .btn-online { background: #27ae60; border-bottom-color: #1e8449; }
-        .btn-online.active { background: #2980b9; border-bottom-color: #1a5276; }
-
-        .element-grid::-webkit-scrollbar { width: 6px; }
-        .element-grid::-webkit-scrollbar-track { background: #1a1a1a; }
-        .element-grid::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
-    </style>
-</head>
-<body>
-
-<div id="game-container">
-    <div class="header">
-        <h1>REALM BEYOND v3.1</h1>
-        <div id="status">INIT...</div>
-    </div>
-
-    <canvas id="sandCanvas"></canvas>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/genizy/google-class/nova-craft/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nova Craft - Multiplayer</title>
     
-    <div class="ui-panel">
-        <div class="element-grid" id="controls"></div>
-        <div class="controls-row">
-            <div class="slider-container">
-                <span>Brush</span>
-                <input type="range" id="brushSlider" min="1" max="12" value="3" oninput="updateBrush(this.value)">
-                <span id="brush-val">3</span>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button onclick="clearGrid()" class="btn-special">Clear</button>
-                <button onclick="toggleOnline()" id="sync-btn" class="btn-online">Go Live</button>
-            </div>
-        </div>
+    <base href="https://cdn.jsdelivr.net/gh/genizy/google-class/nova-craft/">
+    <script type="module" crossorigin src="https://cdn.jsdelivr.net/gh/genizy/google-class/nova-craft/assets/index-CQ1EvTOM.js"></script>
+    <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/genizy/google-class/nova-craft/assets/index-CzvCHSYC.css">
+
+    <style>
+      /* Multiplayer HUD */
+      #mp-hud {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 10000;
+        font-family: sans-serif;
+        pointer-events: none;
+      }
+
+      #player-badge {
+        background: rgba(0, 0, 0, 0.7);
+        color: #4CAF50;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        border: 1px solid #4CAF50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dot { width: 8px; height: 8px; background: #4CAF50; border-radius: 50%; }
+
+      /* Mini Game Star */
+      #nova-star {
+        position: fixed;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, #fff, #ff00ff);
+        border-radius: 50%;
+        box-shadow: 0 0 20px #ff00ff;
+        cursor: pointer;
+        z-index: 9999;
+        display: none;
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 0 20px #ff00ff; }
+        50% { transform: scale(1.2); box-shadow: 0 0 40px #ff00ff; }
+        100% { transform: scale(1); box-shadow: 0 0 20px #ff00ff; }
+      }
+
+      .supernova {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 100px 50px white;
+        z-index: 10001;
+        pointer-events: none;
+        animation: explode 0.5s ease-out forwards;
+      }
+
+      @keyframes explode {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(50); opacity: 0; }
+      }
+
+      /* Global Notification */
+      #global-notify {
+        position: fixed;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: #e090ff;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        z-index: 10002;
+        border: 1px solid #e090ff;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    
+    <div id="mp-hud">
+      <div id="player-badge">
+        <div class="dot"></div>
+        <span id="player-info">Connecting...</span>
+      </div>
     </div>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <div id="global-notify"></div>
+    <div id="nova-star"></div>
 
-    const firebaseConfig = JSON.parse(__firebase_config);
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'mega-sandbox-xl';
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import { getDatabase, ref, push, onChildAdded, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+      import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    const WIDTH = 150; // Slightly smaller grid for stability
-    const HEIGHT = 150;
-    const EMPTY = 0, SAND = 1, WATER = 2, WALL = 3, FIRE = 4, WOOD = 5, GUNPOWDER = 6, ACID = 7, STEAM = 8, LAVA = 9, OBSIDIAN = 10;
+      const firebaseConfig = {
+        apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
+        authDomain: "chatroon-4ded8.firebaseapp.com",
+        databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
+        projectId: "chatroon-4ded8",
+        storageBucket: "chatroon-4ded8.firebasestorage.app",
+        messagingSenderId: "779421378038",
+        appId: "1:779421378038:web:2e4b804b316b23882f93d7"
+      };
 
-    const ELEMENTS = {
-        [EMPTY]: { name: 'Eraser', color: '#000000' },
-        [SAND]: { name: 'Sand', color: '#f1c40f' },
-        [WATER]: { name: 'Water', color: '#3498db' },
-        [WALL]: { name: 'Steel', color: '#7f8c8d' },
-        [WOOD]: { name: 'Wood', color: '#a36629' },
-        [FIRE]: { name: 'Fire', color: '#e67e22' },
-        [GUNPOWDER]: { name: 'Powder', color: '#555555' },
-        [ACID]: { name: 'Acid', color: '#2ecc71' },
-        [STEAM]: { name: 'Steam', color: '#bdc3c7' },
-        [LAVA]: { name: 'Lava', color: '#ff4d00' },
-        [OBSIDIAN]: { name: 'Obsid', color: '#2c003e' }
-    };
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getDatabase(app);
 
-    let grid = Array(HEIGHT).fill().map(() => new Uint8Array(WIDTH));
-    let currentElement = SAND;
-    let brushSize = 3;
-    let isOnline = false;
-    let user = null;
-    let isDirty = false;
-    let lastSyncTime = 0;
+      const playerInfo = document.getElementById('player-info');
+      const notify = document.getElementById('global-notify');
+      const star = document.getElementById('nova-star');
 
-    const canvas = document.getElementById('sandCanvas');
-    const ctx = canvas.getContext('2d', { alpha: false });
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
+      function showNotification(text) {
+        notify.innerText = text;
+        notify.style.display = 'block';
+        setTimeout(() => notify.style.display = 'none', 3000);
+      }
 
-    // Run-Length Encoding to shrink data size for Firestore
-    function encodeGrid(grid) {
-        let flat = [];
-        for(let y=0; y<HEIGHT; y++) for(let x=0; x<WIDTH; x++) flat.push(grid[y][x]);
-        let encoded = [];
-        let count = 1;
-        for(let i=0; i<flat.length; i++) {
-            if(flat[i] === flat[i+1] && count < 255) {
-                count++;
-            } else {
-                encoded.push(flat[i], count);
-                count = 1;
-            }
-        }
-        return encoded;
-    }
-
-    function decodeGrid(encoded) {
-        let flat = [];
-        for(let i=0; i<encoded.length; i+=2) {
-            let val = encoded[i];
-            let count = encoded[i+1];
-            for(let j=0; j<count; j++) flat.push(val);
-        }
-        for(let y=0; y<HEIGHT; y++) {
-            grid[y].set(flat.slice(y*WIDTH, (y+1)*WIDTH));
-        }
-    }
-
-    const initAuth = async () => {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-            await signInAnonymously(auth);
-        }
-    };
-    initAuth();
-
-    onAuthStateChanged(auth, (u) => {
-        user = u;
-        if(u) document.getElementById('status').innerText = "LOCAL MODE";
-    });
-
-    window.updateBrush = (val) => {
-        brushSize = parseInt(val);
-        document.getElementById('brush-val').innerText = val;
-    };
-
-    const getWorldDocRef = () => doc(db, 'artifacts', appId, 'public', 'data', 'world_v3', 'main_state');
-
-    window.toggleOnline = async () => {
-        if (!user) return;
-        const btn = document.getElementById('sync-btn');
-        const status = document.getElementById('status');
+      signInAnonymously(auth).then(({ user }) => {
+        const userId = user.uid;
+        const shortId = userId.substring(0, 4);
         
-        if (!isOnline) {
-            isOnline = true;
-            btn.innerText = "Disconnect";
-            btn.classList.add('active');
-            status.innerText = "SYNCING...";
-            
-            const worldDocRef = getWorldDocRef();
-            onSnapshot(worldDocRef, (snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.updatedBy !== user.uid && (Date.now() - lastSyncTime > 1000)) {
-                        decodeGrid(data.data);
-                        status.innerText = "ONLINE";
-                    }
-                }
-            }, (err) => { status.innerText = "OFFLINE (ERR)"; });
-            
-            syncLoop();
-        } else {
-            location.reload(); // Cleanest way to kill listeners
-        }
-    };
+        // 1. Presence System
+        const presenceRef = ref(db, `novacraft_v2/presence/${userId}`);
+        const connectedRef = ref(db, '.info/connected');
+        onValue(connectedRef, (snap) => {
+          if (snap.val() === true) {
+            set(presenceRef, true);
+            onDisconnect(presenceRef).remove();
+          }
+        });
 
-    async function syncLoop() {
-        if (!isOnline) return;
-        if (isDirty) {
-            try {
-                lastSyncTime = Date.now();
-                const worldDocRef = getWorldDocRef();
-                await setDoc(worldDocRef, {
-                    data: encodeGrid(grid),
-                    updatedBy: user.uid,
-                    ts: Date.now()
-                });
-                isDirty = false;
-            } catch(e) { console.error(e); }
-        }
-        setTimeout(syncLoop, 2000); // 2 second throttle
-    }
+        onValue(ref(db, 'novacraft_v2/presence'), (snap) => {
+          const count = snap.size || 0;
+          playerInfo.innerText = `Player_${shortId} | ${count} Online`;
+        });
 
-    function updatePhysics() {
-        const xDir = Math.random() > 0.5 ? 1 : -1;
-        for (let y = HEIGHT - 1; y >= 0; y--) {
-            for (let x = 0; x < WIDTH; x++) {
-                const type = grid[y][x];
-                if (type === EMPTY || type === WALL || type === OBSIDIAN) continue;
+        // 2. Collaborative Action Sync
+        // We listen for mouse clicks on the body. If the user is interacting with the 
+        // internal game elements, we broadcast that coordinate and action.
+        const actionsRef = ref(db, 'novacraft_v2/actions');
 
-                if (type === SAND || type === GUNPOWDER) {
-                    if (y < HEIGHT - 1) {
-                        if (grid[y+1][x] === EMPTY || grid[y+1][x] === WATER) {
-                            let old = grid[y+1][x]; grid[y+1][x] = type; grid[y][x] = old;
-                        } else if (x + xDir >= 0 && x + xDir < WIDTH && grid[y+1][x+xDir] === EMPTY) {
-                            grid[y+1][x+xDir] = type; grid[y][x] = EMPTY;
-                        }
-                    }
-                } else if (type === WATER || type === LAVA || type === ACID) {
-                    if (y < HEIGHT - 1 && grid[y+1][x] === EMPTY) {
-                        grid[y+1][x] = type; grid[y][x] = EMPTY;
-                    } else {
-                        const side = Math.random() > 0.5 ? 1 : -1;
-                        if (x+side >= 0 && x+side < WIDTH && grid[y][x+side] === EMPTY) {
-                            grid[y][x+side] = type; grid[y][x] = EMPTY;
-                        }
-                    }
-                } else if (type === FIRE || type === STEAM) {
-                    if (Math.random() < 0.05) { grid[y][x] = EMPTY; continue; }
-                    if (y > 0 && grid[y-1][x] === EMPTY) {
-                        grid[y-1][x] = type; grid[y][x] = EMPTY;
-                    }
-                }
-            }
-        }
-    }
+        window.addEventListener('mousedown', (e) => {
+          // We only sync if the click targets the game canvas or left sidebar
+          // This allows users to "see" where others are clicking/placing
+          push(actionsRef, {
+            uid: shortId,
+            x: e.clientX,
+            y: e.clientY,
+            type: 'interaction',
+            timestamp: Date.now()
+          });
+        });
 
-    function draw() {
-        const imageData = ctx.createImageData(WIDTH, HEIGHT);
-        const data = imageData.data;
-        for (let i = 0; i < WIDTH * HEIGHT; i++) {
-            const y = Math.floor(i / WIDTH);
-            const x = i % WIDTH;
-            const type = grid[y][x];
-            const color = ELEMENTS[type].color;
-            const r = parseInt(color.slice(1,3), 16);
-            const g = parseInt(color.slice(3,5), 16);
-            const b = parseInt(color.slice(5,7), 16);
-            const idx = i * 4;
-            data[idx] = r; data[idx+1] = g; data[idx+2] = b; data[idx+3] = 255;
-        }
-        ctx.putImageData(imageData, 0, 0);
-    }
+        // Visual feedback for other players' actions
+        onChildAdded(actionsRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data.uid === shortId) return; // Skip own clicks
 
-    const controls = document.getElementById('controls');
-    Object.entries(ELEMENTS).forEach(([id, info]) => {
-        const btn = document.createElement('button');
-        btn.innerText = info.name;
-        btn.id = `btn-${id}`;
-        if (id == SAND) btn.className = 'active';
-        btn.onclick = () => {
-            currentElement = parseInt(id);
-            document.querySelectorAll('.element-grid button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+          // Create a temporary ghost cursor to show where others are building
+          const ghost = document.createElement('div');
+          ghost.style.position = 'fixed';
+          ghost.style.left = data.x + 'px';
+          ghost.style.top = data.y + 'px';
+          ghost.style.width = '10px';
+          ghost.style.height = '10px';
+          ghost.style.borderRadius = '50%';
+          ghost.style.border = '2px solid rgba(0, 229, 255, 0.5)';
+          ghost.style.pointerEvents = 'none';
+          ghost.style.zIndex = '9999';
+          ghost.style.transform = 'translate(-50%, -50%)';
+          document.body.appendChild(ghost);
+
+          ghost.animate([
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+            { transform: 'translate(-50%, -50%) scale(3)', opacity: 0 }
+          ], { duration: 1000, easing: 'ease-out' });
+
+          setTimeout(() => ghost.remove(), 1000);
+        });
+
+        // 3. Mini-game Logic
+        setInterval(() => {
+          if (Math.random() > 0.8 && star.style.display === 'none') {
+            star.style.display = 'block';
+            star.style.left = (Math.random() * 80 + 10) + '%';
+            star.style.top = (Math.random() * 80 + 10) + '%';
+            setTimeout(() => star.style.display = 'none', 4000);
+          }
+        }, 10000);
+
+        star.onclick = (e) => {
+          star.style.display = 'none';
+          
+          const ex = document.createElement('div');
+          ex.className = 'supernova';
+          ex.style.left = e.clientX + 'px';
+          ex.style.top = e.clientY + 'px';
+          document.body.appendChild(ex);
+          setTimeout(() => ex.remove(), 500);
+
+          push(actionsRef, {
+            uid: shortId,
+            type: 'star_catch',
+            timestamp: Date.now()
+          });
+          
+          showNotification(`You captured the Nova Star!`);
         };
-        controls.appendChild(btn);
-    });
 
-    window.clearGrid = () => {
-        for(let y=0; y<HEIGHT; y++) grid[y].fill(0);
-        isDirty = true;
-    };
+        // Listen for star catches by others
+        onChildAdded(actionsRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data.type === 'star_catch' && data.uid !== shortId) {
+            showNotification(`Player_${data.uid} captured a Nova Star!`);
+          }
+        });
 
-    let isDrawing = false;
-    const handleInput = (e) => {
-        if (!isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const x = Math.floor((clientX - rect.left) / (rect.width / WIDTH));
-        const y = Math.floor((clientY - rect.top) / (rect.height / HEIGHT));
-        
-        for(let i = -brushSize; i <= brushSize; i++) {
-            for(let j = -brushSize; j <= brushSize; j++) {
-                if(i*i + j*j > brushSize*brushSize) continue;
-                const nx = x + i, ny = y + j;
-                if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-                    grid[ny][nx] = currentElement;
-                    isDirty = true;
-                }
-            }
-        }
-    };
-
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    window.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mousemove', handleInput);
-    canvas.addEventListener('touchstart', (e) => { isDrawing = true; handleInput(e); e.preventDefault(); }, {passive: false});
-    canvas.addEventListener('touchmove', (e) => { handleInput(e); e.preventDefault(); }, {passive: false});
-
-    function loop() {
-        updatePhysics();
-        draw();
-        requestAnimationFrame(loop);
-    }
-    loop();
-</script>
-</body>
+      });
+    </script>
+  </body>
 </html>
