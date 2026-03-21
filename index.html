@@ -31,7 +31,6 @@
             background: #050505;
             box-shadow: 0 0 30px rgba(230, 126, 34, 0.2);
             cursor: crosshair;
-            /* Large display size, but internal resolution is 200x200 */
             width: 600px; height: 600px;
             max-width: 95vw; max-height: 50vh;
         }
@@ -91,7 +90,6 @@
         .btn-online { background: #27ae60; border-bottom-color: #1e8449; }
         .btn-online.active { background: #2980b9; border-bottom-color: #1a5276; }
 
-        /* Custom Scrollbar */
         .element-grid::-webkit-scrollbar { width: 6px; }
         .element-grid::-webkit-scrollbar-track { background: #1a1a1a; }
         .element-grid::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
@@ -114,10 +112,7 @@
     <canvas id="sandCanvas"></canvas>
     
     <div class="ui-panel">
-        <div class="element-grid" id="controls">
-            <!-- Elements dynamically generated -->
-        </div>
-        
+        <div class="element-grid" id="controls"></div>
         <div class="controls-row">
             <div class="slider-container">
                 <span>Brush</span>
@@ -134,10 +129,16 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- Simulation Constants (BIGGER WORLD) ---
+    // --- Config & Globals ---
+    const firebaseConfig = JSON.parse(__firebase_config);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'mega-sandbox-xl';
+
     const WIDTH = 200; 
     const HEIGHT = 200;
     const EMPTY = 0, SAND = 1, WATER = 2, WALL = 3, FIRE = 4, WOOD = 5, GUNPOWDER = 6, ACID = 7, STEAM = 8, LAVA = 9, OBSIDIAN = 10, METHANE = 11;
@@ -157,12 +158,11 @@
         [METHANE]: { name: 'Methane', color: '#aaffff' }
     };
 
-    // --- State Management ---
     let grid = Array(HEIGHT).fill().map(() => new Uint8Array(WIDTH));
     let currentElement = SAND;
     let brushSize = 3;
     let isOnline = false;
-    let lastPush = 0;
+    let lastPushTime = 0;
     let user = null;
     let unsubscribeSync = null;
 
@@ -171,23 +171,18 @@
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
 
-    // --- Firebase Setup ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyC8qE-Un_cYYMQ_raNkFgsCYQtj3G94oYI",
-        authDomain: "boxelgame-aa8c3.firebaseapp.com",
-        projectId: "boxelgame-aa8c3",
-        storageBucket: "boxelgame-aa8c3.firebasestorage.app",
-        messagingSenderId: "552029723760",
-        appId: "1:552029723760:web:468d6e2ed3acd2346668b5"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const appId = 'mega-sandbox-xl'; 
-
+    // --- Auth Implementation (RULE 3) ---
     const initAuth = async () => {
-        try { await signInAnonymously(auth); } catch (e) { console.error(e); }
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (e) {
+            console.error("Auth failed", e);
+            document.getElementById('status').innerText = "AUTH ERROR";
+        }
     };
     initAuth();
 
@@ -201,8 +196,21 @@
         document.getElementById('brush-val').innerText = val;
     };
 
+    // Helper to get correct path (RULE 1: /artifacts/{appId}/public/data/{collectionName}/{docId})
+    // Note: Documents must have an even number of segments. 
+    // Segment 1: artifacts
+    // Segment 2: appId
+    // Segment 3: public
+    // Segment 4: data
+    // Segment 5: collectionName (e.g. 'world_state')
+    // Segment 6: documentId (e.g. 'current')
+    const getWorldDocRef = () => doc(db, 'artifacts', appId, 'public', 'data', 'world_state', 'v3');
+
     window.toggleOnline = async () => {
-        if (!user) return;
+        if (!user) {
+            document.getElementById('status').innerText = "WAITING FOR AUTH...";
+            return;
+        }
         const btn = document.getElementById('sync-btn');
         const status = document.getElementById('status');
         
@@ -210,25 +218,26 @@
             isOnline = true;
             btn.innerText = "Leave Live";
             btn.classList.add('active');
-            status.innerText = "SYNCING REALM...";
+            status.innerText = "CONNECTING...";
             
-            const worldDocRef = doc(db, 'artifacts', appId, 'public', 'world_v3');
+            const worldDocRef = getWorldDocRef();
+            
             try {
                 const initialSnap = await getDoc(worldDocRef);
                 if (initialSnap.exists()) updateLocalGrid(initialSnap.data().gridData);
-            } catch(e) {}
+            } catch(e) { console.error("Initial fetch error", e); }
 
             unsubscribeSync = onSnapshot(worldDocRef, (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
-                    // Live sync condition: only update if data is fresh and not from us
-                    if (data.updatedBy !== user.uid && Date.now() - lastPush > 800) {
+                    if (data.updatedBy !== user.uid && Date.now() - lastPushTime > 1000) {
                         updateLocalGrid(data.gridData);
                         status.innerText = "LIVE (SYNCED)";
                     }
                 }
             }, (err) => {
-                status.innerText = "FIREBASE PERMISSION ERROR";
+                console.error("Firestore error", err);
+                status.innerText = "SYNC ERROR";
                 isOnline = false;
                 btn.innerText = "Go Live";
                 btn.classList.remove('active');
@@ -251,23 +260,26 @@
 
     async function pushToCloud() {
         if (!isOnline || !user) return;
-        lastPush = Date.now();
+        lastPushTime = Date.now();
         const flat = new Uint8Array(WIDTH * HEIGHT);
         for(let y=0; y<HEIGHT; y++) flat.set(grid[y], y*WIDTH);
+        
         try {
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'world_v3'), {
+            const worldDocRef = getWorldDocRef();
+            await setDoc(worldDocRef, {
                 gridData: JSON.stringify(Array.from(flat)),
                 updatedBy: user.uid,
                 ts: Date.now()
             });
-            document.getElementById('status').innerText = "LIVE (UPDATING...)";
-        } catch(e) {}
+            document.getElementById('status').innerText = "LIVE (UPDATED)";
+        } catch(e) {
+            console.error("Push error", e);
+        }
     }
 
-    // --- Game Engine Physics ---
+    // --- Physics Engine ---
     function updatePhysics() {
         const xDir = Math.random() > 0.5 ? 1 : -1;
-        // Interleaving update directions to reduce bias
         const yStart = Math.random() > 0.5 ? HEIGHT - 1 : 0;
         const yEnd = yStart === 0 ? HEIGHT : -1;
         const yStep = yStart === 0 ? 1 : -1;
@@ -277,7 +289,6 @@
                 const type = grid[y][x];
                 if (type === EMPTY || type === WALL || type === OBSIDIAN || type === WOOD) continue;
 
-                // Solids
                 if (type === SAND || type === GUNPOWDER) {
                     if (y < HEIGHT - 1) {
                         const below = grid[y+1][x];
@@ -288,11 +299,9 @@
                         }
                     }
                 }
-                // Liquids
                 else if (type === WATER || type === ACID || type === LAVA) {
                     let flowChance = type === LAVA ? 0.3 : 1.0;
                     if (Math.random() > flowChance) continue;
-
                     if (y < HEIGHT - 1 && (grid[y+1][x] === EMPTY || grid[y+1][x] === METHANE || (type === ACID && grid[y+1][x] === WATER))) {
                         const temp = grid[y+1][x];
                         grid[y+1][x] = type; grid[y][x] = temp;
@@ -302,15 +311,12 @@
                             grid[y][side+x] = type; grid[y][x] = EMPTY;
                         }
                     }
-
-                    // Interactions
                     if (type === LAVA) {
                         [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
                             const nx = x+dx, ny = y+dy;
                             if (nx>=0 && nx<WIDTH && ny>=0 && ny<HEIGHT) {
                                 if (grid[ny][nx] === WATER) { grid[ny][nx] = STEAM; grid[y][x] = OBSIDIAN; }
-                                if (grid[ny][nx] === WOOD || grid[ny][nx] === GUNPOWDER) grid[ny][nx] = FIRE;
-                                if (grid[ny][nx] === METHANE) grid[ny][nx] = FIRE;
+                                if (grid[ny][nx] === WOOD || grid[ny][nx] === GUNPOWDER || grid[ny][nx] === METHANE) grid[ny][nx] = FIRE;
                             }
                         });
                     }
@@ -326,7 +332,6 @@
                         });
                     }
                 }
-                // Gases
                 else if (type === FIRE || type === STEAM || type === METHANE) {
                     if (type === FIRE && Math.random() < 0.15) grid[y][x] = EMPTY;
                     if (type === STEAM && Math.random() < 0.01) grid[y][x] = WATER;
@@ -379,7 +384,6 @@
         ctx.putImageData(imageData, 0, 0);
     }
 
-    // --- UI Init ---
     const controls = document.getElementById('controls');
     Object.entries(ELEMENTS).forEach(([id, info]) => {
         const btn = document.createElement('button');
@@ -400,7 +404,6 @@
         if (isOnline) pushToCloud();
     };
 
-    // --- Interaction ---
     let isDrawing = false;
     const handleInput = (e) => {
         if (!isDrawing) return;
