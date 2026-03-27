@@ -3,164 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ULTIMATE TRUTH NETWORK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <title>Filthy Prompts</title>
     <style>
-        body { font-family: 'Libre+Baskerville', serif; cursor: crosshair; }
-        .font-black { font-family: 'Archivo Black', sans-serif; }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .animate-marquee { display: inline-block; animation: marquee 15s linear infinite; }
-        .glitch-bg { animation: glitch 0.2s infinite; }
-        @keyframes glitch {
-            0% { background-color: #fdf2f0; }
-            50% { background-color: #fee2e2; }
-            100% { background-color: #fdf2f0; }
+        :root {
+            --bg: #121212;
+            --text: #ffffff;
+            --accent: #ff2a5f;
+            --panel: #1e1e1e;
         }
-        .hidden-view { display: none !important; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
+        .container {
+            background: var(--panel);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .hidden { display: none !important; }
+        input[type="text"] {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #333;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: var(--accent); }
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+        button:hover { background: #ff4d79; transform: scale(1.05); }
+        button:active { transform: scale(0.95); }
+        .prompt-text { font-size: 1.5rem; font-weight: bold; margin: 1.5rem 0; }
+        .player-list { list-style: none; padding: 0; margin-top: 1rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;}
+        .player-list li { background: #333; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; }
+        .answer-card {
+            background: #2a2a2a;
+            padding: 1rem;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .answer-card:hover { border-color: var(--accent); }
     </style>
 </head>
-<body class="bg-[#fffcf5] text-slate-900 transition-colors duration-300">
+<body>
 
-    <!-- NAVIGATION -->
-    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-transparent py-5">
-        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="text-red-600 animate-pulse text-3xl">⚠</div>
-                <span class="font-black text-xl md:text-2xl tracking-tighter uppercase italic">ULTIMATE TRUTH NETWORK</span>
-            </div>
-            <div class="hidden md:flex gap-8 font-bold text-xs uppercase tracking-widest items-center">
-                <button onclick="showView('horror')" class="hover:text-red-600 transition underline decoration-red-600 decoration-2 underline-offset-4">The Danger</button>
-                <button onclick="showView('signup')" class="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-black transition border-2 border-red-600">SAVE YOURSELF</button>
-            </div>
-        </div>
-    </nav>
+    <h1>Filthy Prompts</h1>
 
-    <!-- HOME VIEW -->
-    <div id="home-view">
-        <section class="relative h-screen flex items-center justify-center bg-black text-white overflow-hidden">
-            <div class="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-            <div class="relative z-10 max-w-5xl px-6 text-center">
-                <div class="inline-block bg-red-600 text-white px-4 py-1 font-bold mb-4 animate-bounce">ESTABLISHED 1936</div>
-                <h1 class="text-6xl md:text-9xl font-black mb-6 tracking-tighter leading-[0.9] uppercase italic">Worse than <br /><span class="text-red-600 underline decoration-white">CRACK.</span></h1>
-                <p class="text-xl md:text-3xl text-red-100 mb-10 max-w-3xl mx-auto font-bold uppercase">The devil's lettuce has evolved. It's now 400x more addictive than breathing.</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button onclick="showView('horror')" class="bg-red-600 hover:bg-white hover:text-red-600 text-white px-10 py-5 text-xl font-black transition-all transform hover:scale-105 italic shadow-lg">SEE THE HORROR</button>
-                    <button onclick="showView('signup')" class="border-4 border-white hover:bg-white hover:text-black text-white px-10 py-5 text-xl font-black transition-all italic">JOIN THE RESISTANCE</button>
-                </div>
-            </div>
-        </section>
-
-        <div class="bg-yellow-400 text-black py-4 border-y-4 border-black overflow-hidden whitespace-nowrap">
-            <div class="animate-marquee inline-block font-black text-2xl uppercase italic">
-                CRITICAL ALERT: ONE PUFF EQUALS THREE YEARS OF MEMORY LOSS • DON'T LET THE GIGGLE-BUSH WIN • STAY VIGILANT • 
-                CRITICAL ALERT: ONE PUFF EQUALS THREE YEARS OF MEMORY LOSS • DON'T LET THE GIGGLE-BUSH WIN • STAY VIGILANT • 
-            </div>
-        </div>
-
-        <section class="py-24 px-6">
-            <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-12 text-center">
-                <div class="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)]">
-                    <div class="text-4xl mb-4">💀</div>
-                    <h3 class="text-2xl font-black mb-3 uppercase italic">Potency Paradox</h3>
-                    <p class="font-bold text-slate-700 mb-6 leading-tight">Modern greens are 1000x stronger than 1920s jazz-cabbage.</p>
-                    <div class="bg-black text-red-600 p-4 font-black text-3xl">1000x</div>
-                </div>
-                <div class="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)]">
-                    <div class="text-4xl mb-4">⚡</div>
-                    <h3 class="text-2xl font-black mb-3 uppercase italic">Brain Drain</h3>
-                    <p class="font-bold text-slate-700 mb-6 leading-tight">One gram is scientifically more dangerous than industrial bleach.</p>
-                    <div class="bg-black text-red-600 p-4 font-black text-3xl">> CRACK</div>
-                </div>
-                <div class="bg-white p-8 border-8 border-black shadow-[15px_15px_0px_0px_rgba(220,38,38,1)]">
-                    <div class="text-4xl mb-4">👁</div>
-                    <h3 class="text-2xl font-black mb-3 uppercase italic">The Third Eye</h3>
-                    <p class="font-bold text-slate-700 mb-6 leading-tight">Your brain essentially decides it's too chilled out to survive.</p>
-                    <div class="bg-black text-red-600 p-4 font-black text-3xl">0% IQ</div>
-                </div>
-            </div>
-        </section>
-
-        <footer class="bg-black text-white py-16 px-6 text-center">
-            <p class="font-black text-2xl italic tracking-tighter mb-4 uppercase">STOP THE REEFER</p>
-            <p class="text-red-600 font-black italic uppercase tracking-widest text-sm">HAPPY APRIL FOOLS DAY</p>
-        </footer>
+    <div id="login-screen" class="container">
+        <h2>Enter the Degeneracy</h2>
+        <input type="text" id="username" placeholder="Enter your alias..." autocomplete="off">
+        <button onclick="joinGame()">Join Lobby</button>
     </div>
 
-    <!-- HORROR VIEW -->
-    <div id="horror-view" class="hidden-view min-h-screen bg-black text-white p-6 flex flex-col items-center overflow-y-auto">
-        <button onclick="showView('home')" class="fixed top-8 left-8 flex items-center gap-2 font-black uppercase italic hover:text-red-600 transition z-50 bg-black/80 p-3 rounded border border-white/20 text-white">
-            ← Back to Safety
-        </button>
-        
-        <div class="max-w-6xl w-full py-20">
-            <div class="text-center mb-16">
-                <h2 class="text-5xl md:text-8xl font-black italic uppercase mb-4 text-red-600 tracking-tighter">CLASSIFIED</h2>
-                <div class="bg-red-600 text-black inline-block px-4 py-1 font-bold uppercase tracking-widest">Subject 401-B : "The Lettuce Effect"</div>
+    <div id="game-screen" class="container hidden">
+        <div id="lobby-controls">
+            <p>Waiting for players...</p>
+            <ul id="players" class="player-list"></ul>
+            <button onclick="startRound()" id="start-btn">Start Next Round</button>
+        </div>
+
+        <div id="active-game" class="hidden">
+            <div class="prompt-text" id="current-prompt">Loading prompt...</div>
+            
+            <div id="submission-phase">
+                <input type="text" id="player-answer" placeholder="Type your worst idea here..." autocomplete="off">
+                <button onclick="submitAnswer()">Submit Answer</button>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-12">
-                <div class="flex flex-col items-center">
-                    <div class="relative border-8 border-white p-2 bg-white mb-6 shadow-xl transform -rotate-1">
-                        <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 text-xs font-bold uppercase">BEFORE</div>
-                        <img src="https://i.postimg.cc/FzBnzy50/Jesus-Light-World-Brent-Borup.jpg" class="w-full max-w-md object-contain h-[500px]" alt="Before">
-                    </div>
-                    <p class="text-3xl font-black uppercase italic">Purity & Light</p>
-                </div>
-                <div class="flex flex-col items-center">
-                    <div class="relative border-8 border-red-600 p-2 bg-black mb-6 shadow-[0_0_60px_rgba(220,38,38,0.6)] transform rotate-1">
-                        <div class="absolute top-0 right-0 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase">AFTER</div>
-                        <img src="https://i.ibb.co/MY6z3k3/image-2026-03-21-001031888.png" class="w-full max-w-md object-contain h-[500px]" alt="After">
-                    </div>
-                    <p class="text-3xl font-black uppercase italic text-red-600">Total Collapse</p>
-                </div>
+            <div id="voting-phase" class="hidden">
+                <h3>Vote for the worst/best:</h3>
+                <div id="answers-container"></div>
             </div>
-
-            <div class="mt-20 border-4 border-dashed border-red-900 p-8 text-center bg-red-950/20">
-                <p class="text-red-500 font-black uppercase text-xl mb-4 animate-pulse">[ WARNING: MOLECULAR STRUCTURE IS IRREVERSIBLE ]</p>
-                <button onclick="showView('signup')" class="bg-red-600 text-white px-12 py-4 font-black uppercase hover:bg-white hover:text-red-600 transition">ENLIST TO STOP THE MADNESS</button>
+            
+            <div id="results-phase" class="hidden">
+                <h3>Winner:</h3>
+                <div id="winner-display" class="prompt-text"></div>
             </div>
         </div>
     </div>
 
-    <!-- SIGNUP VIEW -->
-    <div id="signup-view" class="hidden-view min-h-screen bg-orange-50 flex items-center justify-center p-6">
-        <div class="max-w-md w-full bg-white border-8 border-black p-8 shadow-[20px_20px_0px_0px_rgba(0,0,0,1)]">
-            <button onclick="showView('home')" class="mb-4 text-xs font-black uppercase underline hover:text-red-600">Cancel</button>
-            <h2 class="text-3xl font-black italic uppercase mb-2 tracking-tighter">Join the Underground</h2>
-            <p class="font-bold text-slate-600 mb-6 leading-tight uppercase text-xs">Credentials required for survival kit.</p>
-            <input type="email" placeholder="YOUR EMAIL" class="w-full p-4 border-4 border-black font-black uppercase outline-none focus:bg-yellow-50 mb-4">
-            <button onclick="alert('Operation Compromised! (Happy April Fools)')" class="w-full bg-red-600 text-white p-4 font-black italic uppercase hover:bg-black transition">ENLIST NOW</button>
-        </div>
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        function showView(viewId) {
-            document.getElementById('home-view').classList.add('hidden-view');
-            document.getElementById('horror-view').classList.add('hidden-view');
-            document.getElementById('signup-view').classList.add('hidden-view');
-            document.getElementById(viewId + '-view').classList.remove('hidden-view');
-            window.scrollTo(0, 0);
-            
-            if(viewId === 'horror') {
-                document.body.style.backgroundColor = '#000';
-            } else if (viewId === 'signup') {
-                document.body.style.backgroundColor = '#fff7ed';
-            } else {
-                document.body.style.backgroundColor = '#fffcf5';
-            }
+        // Your exact Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
+            authDomain: "omegle-c7bdb.firebaseapp.com",
+            projectId: "omegle-c7bdb",
+            storageBucket: "omegle-c7bdb.firebasestorage.app",
+            messagingSenderId: "470349324814",
+            appId: "1:470349324814:web:8271072b8d4cd0de01125f",
+            measurementId: "G-P65WBJMXX3"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const roomRef = db.ref('gameRoom');
+
+        let myId = 'user_' + Math.random().toString(36).substr(2, 9);
+        let myName = '';
+        let currentPhase = 'lobby'; // lobby, answering, voting, results
+
+        // 18+ Comedy Prompts
+        const prompts = [
+            "The real reason I was banned from the petting zoo was...",
+            "Instead of a safe word, I prefer to yell...",
+            "My secret weapon in the bedroom is just a mixture of lube and...",
+            "What's the worst thing to accidentally text your mother?",
+            "The worst thing to hear your surgeon say before you go under is...",
+            "What is a terrible substitute for toilet paper?",
+            "I got fired from the morgue today because I couldn't stop..."
+        ];
+
+        function joinGame() {
+            myName = document.getElementById('username').value.trim();
+            if (!myName) return alert("Enter a name first.");
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            // Add player to DB
+            roomRef.child('players').child(myId).set({ name: myName, score: 0 });
+
+            // Disconnect hook
+            roomRef.child('players').child(myId).onDisconnect().remove();
+
+            listenToGameState();
         }
 
-        window.onscroll = function() {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                nav.classList.add('bg-black', 'text-white', 'py-2');
-                nav.classList.remove('py-5', 'bg-transparent', 'text-black');
-            } else {
-                nav.classList.remove('bg-black', 'text-white', 'py-2');
-                nav.classList.add('py-5', 'bg-transparent', 'text-black');
+        function listenToGameState() {
+            roomRef.on('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                
+                // Update Players List
+                const playersUl = document.getElementById('players');
+                playersUl.innerHTML = '';
+                if (data.players) {
+                    Object.values(data.players).forEach(p => {
+                        playersUl.innerHTML += `<li>${p.name} (${p.score || 0})</li>`;
+                    });
+                }
+
+                // Handle Phases
+                if (data.phase) {
+                    currentPhase = data.phase;
+                    document.getElementById('lobby-controls').classList.add('hidden');
+                    document.getElementById('active-game').classList.remove('hidden');
+                    document.getElementById('current-prompt').innerText = data.currentPrompt || "";
+
+                    if (currentPhase === 'answering') {
+                        document.getElementById('submission-phase').classList.remove('hidden');
+                        document.getElementById('voting-phase').classList.add('hidden');
+                        document.getElementById('results-phase').classList.add('hidden');
+                    } 
+                    else if (currentPhase === 'voting') {
+                        document.getElementById('submission-phase').classList.add('hidden');
+                        document.getElementById('voting-phase').classList.remove('hidden');
+                        renderVoting(data.answers || {});
+                    }
+                    else if (currentPhase === 'results') {
+                        document.getElementById('voting-phase').classList.add('hidden');
+                        document.getElementById('results-phase').classList.remove('hidden');
+                        calculateWinner(data.votes, data.answers);
+                        setTimeout(() => { document.getElementById('lobby-controls').classList.remove('hidden'); }, 5000);
+                    }
+                } else {
+                    document.getElementById('lobby-controls').classList.remove('hidden');
+                    document.getElementById('active-game').classList.add('hidden');
+                }
+            });
+        }
+
+        function startRound() {
+            const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+            roomRef.update({
+                phase: 'answering',
+                currentPrompt: randomPrompt,
+                answers: null,
+                votes: null
+            });
+
+            // Auto-advance to voting after 30 seconds
+            setTimeout(() => { roomRef.update({ phase: 'voting' }); }, 30000);
+            // Auto-advance to results after 60 seconds
+            setTimeout(() => { roomRef.update({ phase: 'results' }); }, 60000);
+        }
+
+        function submitAnswer() {
+            const answer = document.getElementById('player-answer').value.trim();
+            if (!answer) return;
+            
+            roomRef.child('answers').child(myId).set({
+                text: answer,
+                authorId: myId,
+                authorName: myName
+            });
+            document.getElementById('submission-phase').innerHTML = "<p>Waiting for other degenerates...</p>";
+        }
+
+        function renderVoting(answers) {
+            const container = document.getElementById('answers-container');
+            container.innerHTML = '';
+            
+            Object.values(answers).forEach(ans => {
+                // Don't let people vote for themselves
+                if (ans.authorId !== myId) {
+                    const div = document.createElement('div');
+                    div.className = 'answer-card';
+                    div.innerText = ans.text;
+                    div.onclick = () => submitVote(ans.authorId);
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        function submitVote(authorId) {
+            roomRef.child('votes').child(myId).set(authorId);
+            document.getElementById('voting-phase').innerHTML = "<p>Vote cast. Judging others...</p>";
+        }
+
+        function calculateWinner(votes, answers) {
+            if (!votes || !answers) {
+                document.getElementById('winner-display').innerText = "Nobody voted. You all suck.";
+                return;
             }
-        };
+
+            let voteCounts = {};
+            Object.values(votes).forEach(votedId => {
+                voteCounts[votedId] = (voteCounts[votedId] || 0) + 1;
+            });
+
+            let winningId = Object.keys(voteCounts).reduce((a, b) => voteCounts[a] > voteCounts[b] ? a : b);
+            let winningAnswer = answers[winningId];
+
+            document.getElementById('winner-display').innerHTML = `
+                "${winningAnswer.text}" <br>
+                <span style="font-size: 1rem; color: #888;">- ${winningAnswer.authorName}</span>
+            `;
+
+            // Give winner a point
+            if (winningId === myId) {
+                roomRef.child('players').child(myId).child('score').transaction(score => (score || 0) + 1);
+            }
+        }
     </script>
 </body>
 </html>
