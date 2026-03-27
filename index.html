@@ -1,281 +1,398 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filthy Prompts</title>
-    <style>
-        :root {
-            --bg: #121212;
-            --text: #ffffff;
-            --accent: #ff2a5f;
-            --panel: #1e1e1e;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
-            margin: 0;
-        }
-        h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
-        .container {
-            background: var(--panel);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .hidden { display: none !important; }
-        input[type="text"] {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #333;
-            border-radius: 6px;
-            background: #2a2a2a;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus { border-color: var(--accent); }
-        button {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: transform 0.1s, background 0.2s;
-        }
-        button:hover { background: #ff4d79; transform: scale(1.05); }
-        button:active { transform: scale(0.95); }
-        .prompt-text { font-size: 1.5rem; font-weight: bold; margin: 1.5rem 0; }
-        .player-list { list-style: none; padding: 0; margin-top: 1rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;}
-        .player-list li { background: #333; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; }
-        .answer-card {
-            background: #2a2a2a;
-            padding: 1rem;
-            margin: 10px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: border-color 0.2s;
-        }
-        .answer-card:hover { border-color: var(--accent); }
-    </style>
-</head>
-<body>
+import React, { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  onSnapshot, 
+  updateDoc, 
+  arrayUnion, 
+  collection, 
+  getDoc 
+} from 'firebase/firestore';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { MessageSquare, Users, Play, Trash2, Award, Zap } from 'lucide-react';
 
-    <h1>Filthy Prompts</h1>
+// USER PROVIDED CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyD7THaNrq5OdU_b9GuU82AQsnyy_Eewey4",
+  authDomain: "chatroon-4ded8.firebaseapp.com",
+  databaseURL: "https://chatroon-4ded8-default-rtdb.firebaseio.com",
+  projectId: "chatroon-4ded8",
+  storageBucket: "chatroon-4ded8.firebasestorage.app",
+  messagingSenderId: "779421378038",
+  appId: "1:779421378038:web:2e4b804b316b23882f93d7"
+};
 
-    <div id="login-screen" class="container">
-        <h2>Enter the Degeneracy</h2>
-        <input type="text" id="username" placeholder="Enter your alias..." autocomplete="off">
-        <button onclick="joinGame()">Join Lobby</button>
-    </div>
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const appId = "filter-failure-v1"; // Internal ID for pathing
 
-    <div id="game-screen" class="container hidden">
-        <div id="lobby-controls">
-            <p>Waiting for players...</p>
-            <ul id="players" class="player-list"></ul>
-            <button onclick="startRound()" id="start-btn">Start Next Round</button>
+// Game Constants
+const GAME_PHASES = {
+  LOBBY: 'LOBBY',
+  SUBMITTING: 'SUBMITTING',
+  VOTING: 'VOTING',
+  WINNER: 'WINNER'
+};
+
+const PROMPTS = [
+  "My Tinder bio says I'm into ______, but I'm actually just into ______.",
+  "What's the real reason the Easter Bunny is crying?",
+  "The next big Netflix documentary: 'The Man Who Tried to ______ a ______.'",
+  "I don't usually kink-shame, but if you like ______, we can't be friends.",
+  "Worst thing to say at a funeral: 'At least he didn't die doing ______.'",
+  "The secret ingredient in Grandma's famous cookies is actually ______.",
+  "Why is the HR department investigating me this time?",
+  "What did I find in the VIP section of the local strip club?",
+  "The real reason I got banned from the petting zoo.",
+  "I'm not saying she's a gold digger, but she did ______ for a ______."
+];
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [roomCode, setRoomCode] = useState('');
+  const [gameState, setGameState] = useState(null);
+  const [playerName, setPlayerName] = useState('');
+  const [currentSubmission, setCurrentSubmission] = useState('');
+  const [error, setError] = useState('');
+
+  // 1. Auth Init
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        await signInAnonymously(auth);
+      } catch (e) {
+        console.error("Auth error", e);
+      }
+    };
+    initAuth();
+    return onAuthStateChanged(auth, (u) => {
+      if (u) setUser(u);
+    });
+  }, []);
+
+  // 2. Room Listener
+  useEffect(() => {
+    if (!roomCode || !user) return;
+
+    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+    const unsubscribe = onSnapshot(roomRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setGameState(snapshot.data());
+      } else {
+        setGameState(null);
+      }
+    }, (err) => {
+      console.error("Firestore error:", err);
+      setError("Failed to sync game state.");
+    });
+
+    return () => unsubscribe();
+  }, [roomCode, user]);
+
+  // Actions
+  const createRoom = async () => {
+    if (!playerName) return setError("Enter a name first!");
+    const code = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', code);
+    
+    const initialData = {
+      code,
+      hostId: user.uid,
+      phase: GAME_PHASES.LOBBY,
+      players: [{ id: user.uid, name: playerName, score: 0 }],
+      currentPrompt: '',
+      submissions: [],
+      judgeId: user.uid,
+      round: 0,
+      winner: null
+    };
+
+    await setDoc(roomRef, initialData);
+    setRoomCode(code);
+  };
+
+  const joinRoom = async () => {
+    if (!playerName || !roomCode) return setError("Need name and room code!");
+    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode.toUpperCase());
+    const snap = await getDoc(roomRef);
+    
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.players.find(p => p.id === user.uid)) {
+        setRoomCode(roomCode.toUpperCase());
+      } else {
+        await updateDoc(roomRef, {
+          players: arrayUnion({ id: user.uid, name: playerName, score: 0 })
+        });
+        setRoomCode(roomCode.toUpperCase());
+      }
+    } else {
+      setError("Room not found!");
+    }
+  };
+
+  const startGame = async () => {
+    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+    const randomPrompt = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+    await updateDoc(roomRef, {
+      phase: GAME_PHASES.SUBMITTING,
+      currentPrompt: randomPrompt,
+      submissions: [],
+      winner: null,
+      round: (gameState?.round || 0) + 1
+    });
+  };
+
+  const submitCard = async () => {
+    if (!currentSubmission) return;
+    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+    
+    const newSubmission = {
+      playerId: user.uid,
+      playerName: playerName,
+      text: currentSubmission
+    };
+
+    const updatedSubmissions = [...(gameState.submissions || []), newSubmission];
+    
+    const payload = { submissions: updatedSubmissions };
+    
+    // Auto-advance if everyone (minus judge) submitted
+    if (updatedSubmissions.length >= gameState.players.length - 1) {
+      payload.phase = GAME_PHASES.VOTING;
+    }
+
+    await updateDoc(roomRef, payload);
+    setCurrentSubmission('');
+  };
+
+  const pickWinner = async (sub) => {
+    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+    const newPlayers = gameState.players.map(p => {
+      if (p.id === sub.playerId) return { ...p, score: p.score + 1 };
+      return p;
+    });
+
+    // Rotate judge
+    const currentIndex = gameState.players.findIndex(p => p.id === gameState.judgeId);
+    const nextIndex = (currentIndex + 1) % gameState.players.length;
+    const nextJudgeId = gameState.players[nextIndex].id;
+
+    await updateDoc(roomRef, {
+      phase: GAME_PHASES.WINNER,
+      winner: sub,
+      players: newPlayers,
+      judgeId: nextJudgeId
+    });
+  };
+
+  if (!gameState) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center p-6 font-sans">
+        <div className="max-w-md w-full space-y-8 bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-2xl">
+          <div className="text-center">
+            <h1 className="text-5xl font-black tracking-tighter text-red-500 mb-2 italic">FILTER FAILURE</h1>
+            <p className="text-zinc-400 text-sm uppercase tracking-widest font-bold">18+ Multiplayer Comedy</p>
+          </div>
+
+          <div className="space-y-4">
+            <input 
+              type="text" 
+              placeholder="Your Filthy Alias" 
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500"
+              value={playerName}
+              onChange={e => setPlayerName(e.target.value)}
+            />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={createRoom}
+                className="bg-red-600 hover:bg-red-700 font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all"
+              >
+                <Play size={20} /> Host Game
+              </button>
+              <div className="flex flex-col gap-2">
+                <input 
+                  type="text" 
+                  placeholder="CODE" 
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 uppercase text-center font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={roomCode}
+                  onChange={e => setRoomCode(e.target.value.toUpperCase())}
+                />
+                <button 
+                  onClick={joinRoom}
+                  className="bg-zinc-700 hover:bg-zinc-600 font-bold py-2 rounded-lg transition-all"
+                >
+                  Join
+                </button>
+              </div>
+            </div>
+          </div>
+          {error && <p className="text-red-400 text-sm text-center font-medium bg-red-400/10 p-2 rounded">{error}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  const isJudge = gameState.judgeId === user.uid;
+  const hasSubmitted = gameState.submissions?.some(s => s.playerId === user.uid);
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8 font-sans">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        {/* Sidebar: Players */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                <Users size={14} /> Players
+              </h2>
+              <span className="bg-zinc-800 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-400">ROOM: {gameState.code}</span>
+            </div>
+            <div className="space-y-2">
+              {gameState.players.map(p => (
+                <div key={p.id} className={`flex items-center justify-between p-3 rounded-lg border ${p.id === gameState.judgeId ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-zinc-800 bg-zinc-800/50'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold">{p.name}</span>
+                    {p.id === gameState.judgeId && <Award size={16} className="text-yellow-500" />}
+                  </div>
+                  <span className="font-mono text-red-500 font-black">{p.score}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {gameState.phase === GAME_PHASES.LOBBY && gameState.hostId === user.uid && (
+            <button 
+              onClick={startGame}
+              className="w-full bg-green-600 hover:bg-green-700 py-4 rounded-xl font-black text-xl shadow-lg shadow-green-900/20 flex items-center justify-center gap-2"
+            >
+              <Zap size={24} fill="currentColor" /> START GAME
+            </button>
+          )}
         </div>
 
-        <div id="active-game" class="hidden">
-            <div class="prompt-text" id="current-prompt">Loading prompt...</div>
-            
-            <div id="submission-phase">
-                <input type="text" id="player-answer" placeholder="Type your worst idea here..." autocomplete="off">
-                <button onclick="submitAnswer()">Submit Answer</button>
-            </div>
+        {/* Main Game Area */}
+        <div className="lg:col-span-3 space-y-6">
+          
+          {/* Prompt Section */}
+          <div className="bg-zinc-900 border-l-8 border-red-600 rounded-xl p-8 shadow-xl min-h-[200px] flex flex-col justify-center">
+            {gameState.phase === GAME_PHASES.LOBBY ? (
+              <div className="text-center">
+                <h3 className="text-3xl font-black text-zinc-600 mb-2">WAITING FOR HOST...</h3>
+                <p className="text-zinc-500">Share code <span className="text-white font-mono bg-zinc-800 px-2 rounded">{gameState.code}</span> with friends.</p>
+              </div>
+            ) : (
+              <div>
+                <span className="text-red-500 font-bold uppercase tracking-widest text-sm block mb-4">Current Prompt</span>
+                <h3 className="text-3xl md:text-5xl font-black leading-tight italic">
+                  {gameState.currentPrompt.split('______').map((part, i, arr) => (
+                    <span key={i}>
+                      {part}
+                      {i < arr.length - 1 && <span className="border-b-4 border-zinc-700 px-8 mx-2 inline-block h-2"></span>}
+                    </span>
+                  ))}
+                </h3>
+              </div>
+            )}
+          </div>
 
-            <div id="voting-phase" class="hidden">
-                <h3>Vote for the worst/best:</h3>
-                <div id="answers-container"></div>
-            </div>
-            
-            <div id="results-phase" class="hidden">
-                <h3>Winner:</h3>
-                <div id="winner-display" class="prompt-text"></div>
-            </div>
-        </div>
-    </div>
+          {/* Interaction Section */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 min-h-[300px]">
+            {gameState.phase === GAME_PHASES.SUBMITTING && (
+              <div className="space-y-6">
+                {isJudge ? (
+                  <div className="text-center py-12">
+                    <div className="animate-bounce mb-4 text-yellow-500 flex justify-center"><Award size={48} /></div>
+                    <h4 className="text-2xl font-bold">You are the JUDGE</h4>
+                    <p className="text-zinc-500">Wait for the plebs to submit their trash responses.</p>
+                    <div className="mt-4 text-zinc-400 font-mono italic">
+                      Submissions: {gameState.submissions?.length || 0} / {gameState.players.length - 1}
+                    </div>
+                  </div>
+                ) : hasSubmitted ? (
+                  <div className="text-center py-12">
+                    <h4 className="text-2xl font-bold text-green-500">Card Submitted!</h4>
+                    <p className="text-zinc-500">Waiting for other players...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <label className="text-zinc-400 font-bold uppercase text-xs">Your Filthy Response:</label>
+                    <textarea 
+                      className="w-full bg-zinc-800 border-2 border-zinc-700 rounded-xl p-4 text-xl focus:outline-none focus:border-red-600 min-h-[120px]"
+                      placeholder="Type something offensive..."
+                      value={currentSubmission}
+                      onChange={e => setCurrentSubmission(e.target.value)}
+                    />
+                    <button 
+                      onClick={submitCard}
+                      className="w-full bg-white text-black font-black py-4 rounded-xl text-xl hover:bg-zinc-200 transition-colors"
+                    >
+                      SUBMIT CARD
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+            {gameState.phase === GAME_PHASES.VOTING && (
+              <div className="space-y-6">
+                <h4 className="text-center text-xl font-bold text-yellow-500 uppercase tracking-widest italic mb-8">
+                  {isJudge ? "PICK THE BEST ONE" : "JUDGE IS DECIDING..."}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {gameState.submissions.map((sub, idx) => (
+                    <button
+                      key={idx}
+                      disabled={!isJudge}
+                      onClick={() => pickWinner(sub)}
+                      className={`text-left p-6 rounded-xl border-2 transition-all group ${
+                        isJudge 
+                          ? 'border-zinc-700 hover:border-red-600 bg-zinc-800/50 hover:bg-zinc-800 cursor-pointer' 
+                          : 'border-zinc-800 bg-zinc-800/20'
+                      }`}
+                    >
+                      <p className="text-xl font-bold mb-2">"{sub.text}"</p>
+                      {isJudge && <span className="text-xs text-zinc-500 uppercase font-bold opacity-0 group-hover:opacity-100 transition-opacity">Click to Award Point</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-    <script>
-        // Your exact Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
-            authDomain: "omegle-c7bdb.firebaseapp.com",
-            projectId: "omegle-c7bdb",
-            storageBucket: "omegle-c7bdb.firebasestorage.app",
-            messagingSenderId: "470349324814",
-            appId: "1:470349324814:web:8271072b8d4cd0de01125f",
-            measurementId: "G-P65WBJMXX3"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const roomRef = db.ref('gameRoom');
-
-        let myId = 'user_' + Math.random().toString(36).substr(2, 9);
-        let myName = '';
-        let currentPhase = 'lobby'; // lobby, answering, voting, results
-
-        // 18+ Comedy Prompts
-        const prompts = [
-            "The real reason I was banned from the petting zoo was...",
-            "Instead of a safe word, I prefer to yell...",
-            "My secret weapon in the bedroom is just a mixture of lube and...",
-            "What's the worst thing to accidentally text your mother?",
-            "The worst thing to hear your surgeon say before you go under is...",
-            "What is a terrible substitute for toilet paper?",
-            "I got fired from the morgue today because I couldn't stop..."
-        ];
-
-        function joinGame() {
-            myName = document.getElementById('username').value.trim();
-            if (!myName) return alert("Enter a name first.");
-
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-
-            // Add player to DB
-            roomRef.child('players').child(myId).set({ name: myName, score: 0 });
-
-            // Disconnect hook
-            roomRef.child('players').child(myId).onDisconnect().remove();
-
-            listenToGameState();
-        }
-
-        function listenToGameState() {
-            roomRef.on('value', (snapshot) => {
-                const data = snapshot.val() || {};
+            {gameState.phase === GAME_PHASES.WINNER && (
+              <div className="text-center py-8 space-y-6">
+                <div className="inline-block bg-yellow-500 text-black px-6 py-2 rounded-full font-black text-sm uppercase tracking-tighter mb-4 animate-pulse">
+                  WINNER FOUND
+                </div>
+                <div className="bg-zinc-800 p-8 rounded-3xl border-2 border-yellow-500 shadow-2xl shadow-yellow-500/10">
+                  <h2 className="text-4xl md:text-6xl font-black italic mb-4">"{gameState.winner.text}"</h2>
+                  <p className="text-xl text-zinc-400">Response by <span className="text-white font-bold">{gameState.winner.playerName}</span></p>
+                </div>
                 
-                // Update Players List
-                const playersUl = document.getElementById('players');
-                playersUl.innerHTML = '';
-                if (data.players) {
-                    Object.values(data.players).forEach(p => {
-                        playersUl.innerHTML += `<li>${p.name} (${p.score || 0})</li>`;
-                    });
-                }
+                {gameState.hostId === user.uid && (
+                  <button 
+                    onClick={startGame}
+                    className="bg-red-600 hover:bg-red-700 font-bold px-8 py-4 rounded-xl text-lg mt-8"
+                  >
+                    NEXT ROUND
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-                // Handle Phases
-                if (data.phase) {
-                    currentPhase = data.phase;
-                    document.getElementById('lobby-controls').classList.add('hidden');
-                    document.getElementById('active-game').classList.remove('hidden');
-                    document.getElementById('current-prompt').innerText = data.currentPrompt || "";
-
-                    if (currentPhase === 'answering') {
-                        document.getElementById('submission-phase').classList.remove('hidden');
-                        document.getElementById('voting-phase').classList.add('hidden');
-                        document.getElementById('results-phase').classList.add('hidden');
-                    } 
-                    else if (currentPhase === 'voting') {
-                        document.getElementById('submission-phase').classList.add('hidden');
-                        document.getElementById('voting-phase').classList.remove('hidden');
-                        renderVoting(data.answers || {});
-                    }
-                    else if (currentPhase === 'results') {
-                        document.getElementById('voting-phase').classList.add('hidden');
-                        document.getElementById('results-phase').classList.remove('hidden');
-                        calculateWinner(data.votes, data.answers);
-                        setTimeout(() => { document.getElementById('lobby-controls').classList.remove('hidden'); }, 5000);
-                    }
-                } else {
-                    document.getElementById('lobby-controls').classList.remove('hidden');
-                    document.getElementById('active-game').classList.add('hidden');
-                }
-            });
-        }
-
-        function startRound() {
-            const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-            roomRef.update({
-                phase: 'answering',
-                currentPrompt: randomPrompt,
-                answers: null,
-                votes: null
-            });
-
-            // Auto-advance to voting after 30 seconds
-            setTimeout(() => { roomRef.update({ phase: 'voting' }); }, 30000);
-            // Auto-advance to results after 60 seconds
-            setTimeout(() => { roomRef.update({ phase: 'results' }); }, 60000);
-        }
-
-        function submitAnswer() {
-            const answer = document.getElementById('player-answer').value.trim();
-            if (!answer) return;
-            
-            roomRef.child('answers').child(myId).set({
-                text: answer,
-                authorId: myId,
-                authorName: myName
-            });
-            document.getElementById('submission-phase').innerHTML = "<p>Waiting for other degenerates...</p>";
-        }
-
-        function renderVoting(answers) {
-            const container = document.getElementById('answers-container');
-            container.innerHTML = '';
-            
-            Object.values(answers).forEach(ans => {
-                // Don't let people vote for themselves
-                if (ans.authorId !== myId) {
-                    const div = document.createElement('div');
-                    div.className = 'answer-card';
-                    div.innerText = ans.text;
-                    div.onclick = () => submitVote(ans.authorId);
-                    container.appendChild(div);
-                }
-            });
-        }
-
-        function submitVote(authorId) {
-            roomRef.child('votes').child(myId).set(authorId);
-            document.getElementById('voting-phase').innerHTML = "<p>Vote cast. Judging others...</p>";
-        }
-
-        function calculateWinner(votes, answers) {
-            if (!votes || !answers) {
-                document.getElementById('winner-display').innerText = "Nobody voted. You all suck.";
-                return;
-            }
-
-            let voteCounts = {};
-            Object.values(votes).forEach(votedId => {
-                voteCounts[votedId] = (voteCounts[votedId] || 0) + 1;
-            });
-
-            let winningId = Object.keys(voteCounts).reduce((a, b) => voteCounts[a] > voteCounts[b] ? a : b);
-            let winningAnswer = answers[winningId];
-
-            document.getElementById('winner-display').innerHTML = `
-                "${winningAnswer.text}" <br>
-                <span style="font-size: 1rem; color: #888;">- ${winningAnswer.authorName}</span>
-            `;
-
-            // Give winner a point
-            if (winningId === myId) {
-                roomRef.child('players').child(myId).child('score').transaction(score => (score || 0) + 1);
-            }
-        }
-    </script>
-</body>
-</html>
+      {/* Footer Branding */}
+      <div className="mt-12 text-center text-zinc-700 text-xs font-bold uppercase tracking-[0.5em]">
+        FILTER FAILURE // NO HOLDS BARRED
+      </div>
+    </div>
+  );
+}
