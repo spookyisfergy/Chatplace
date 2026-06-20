@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ ChatZone 2000 OS ⚡</title>
+    <title>⚡ ChatZone OS Professional ⚡</title>
     <style>
         /* Retro 2000s OS Aesthetic */
         body {
-            background-color: #008080; /* Classic Win95/98 Teal */
+            background-color: #008080; 
             font-family: "MS Sans Serif", Geneva, sans-serif;
             font-size: 12px;
             color: #000;
@@ -16,18 +16,24 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
+            user-select: none; /* Prevent text selection while dragging */
         }
 
-        /* Desktop Icon */
+        /* Desktop Grid */
+        .desktop {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            width: 100px;
+        }
+
         .desktop-icon {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 64px;
             text-align: center;
             cursor: pointer;
             color: white;
             font-size: 11px;
+            width: 64px;
         }
 
         .desktop-icon img {
@@ -37,7 +43,7 @@
             image-rendering: pixelated;
         }
 
-        .desktop-icon:active span {
+        .desktop-icon:active span, .desktop-icon.selected span {
             background-color: #000080;
             border: 1px dotted white;
         }
@@ -45,27 +51,18 @@
         /* Window Styling */
         .window {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 550px;
             background-color: #d4d0c8;
             border: 2px solid;
             border-color: #fff #404040 #404040 #fff;
             box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
             padding: 3px;
-            display: none; /* Closed by default */
+            display: none; 
+            z-index: 10;
         }
 
-        .window.minimized {
-            top: auto;
-            bottom: 0;
-            left: 0;
-            transform: none;
-            width: 250px;
-            height: 22px;
-            overflow: hidden;
-        }
+        #chat-window { top: 50px; left: 150px; width: 550px; }
+        #admin-panel { top: 100px; left: 200px; width: 350px; }
+        #alert-window { top: 200px; left: 300px; width: 400px; z-index: 9999; }
 
         .title-bar {
             background: linear-gradient(90deg, #000080, #1084d0);
@@ -75,15 +72,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: grab;
         }
 
-        .window.minimized .title-bar {
-            background: #808080; /* Inactive window color */
-        }
+        .title-bar:active { cursor: grabbing; }
 
         .title-bar-text {
             font-size: 12px;
             letter-spacing: 0.5px;
+            pointer-events: none;
         }
 
         .title-bar-controls button {
@@ -96,32 +93,10 @@
             cursor: pointer;
         }
 
-        .title-bar-controls button:active {
-            border-color: #404040 #fff #fff #404040;
-        }
+        .title-bar-controls button:active { border-color: #404040 #fff #fff #404040; }
 
-        /* Chat Layout */
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            padding: 5px;
-        }
-
-        .setup-box {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: #e4e0d8;
-            padding: 5px;
-            border: 1px inset #fff;
-        }
-
-        .setup-group {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
+        /* Window Content */
+        .win-content { padding: 5px; }
 
         .chat-box {
             height: 300px;
@@ -130,50 +105,20 @@
             overflow-y: scroll;
             padding: 5px;
             font-family: "Courier New", Courier, monospace;
+            user-select: text; /* Allow copying chat text */
         }
 
-        .message {
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .timestamp {
-            color: #808080;
-            font-size: 10px;
-        }
-
-        .username {
-            font-weight: bold;
-            color: #0000ff;
-        }
-
-        .pm-message {
-            background-color: #ffffcc;
-            border: 1px dashed #cccc00;
-            padding: 2px;
-        }
-
-        .pm-username {
-            font-weight: bold;
-            color: #800080;
-        }
+        .message { margin-bottom: 4px; line-height: 1.3; }
+        .timestamp { color: #808080; font-size: 10px; }
+        .pm-message { background-color: #ffffcc; border: 1px dashed #cccc00; padding: 2px; }
 
         /* Input Controls */
-        .input-area {
-            display: flex;
-            gap: 5px;
-        }
-
-        input[type="text"] {
+        input[type="text"], select {
             padding: 4px;
             border: 2px inset #fff;
             background-color: #fff;
             font-family: inherit;
         }
-
-        #username-input { width: 90px; }
-        #room-input { width: 80px; }
-        #message-input { flex-grow: 1; }
 
         button.win-btn {
             padding: 4px 12px;
@@ -189,313 +134,305 @@
             padding: 5px 11px 3px 13px;
         }
 
-        .status-bar {
-            margin-top: 5px;
-            border: 2px inset #fff;
-            padding: 2px 5px;
-            background: #d4d0c8;
-            color: #404040;
-            font-size: 11px;
+        /* --- FUN ADMIN EFFECTS --- */
+        @keyframes rainbow {
+            0% { color: red; } 16% { color: orange; } 33% { color: #ccaa00; }
+            50% { color: green; } 66% { color: blue; } 83% { color: purple; } 100% { color: red; }
         }
+        .effect-rainbow { animation: rainbow 2s infinite linear; font-weight: bold; text-shadow: 1px 1px #000; }
 
-        /* Admin Panel */
-        #admin-panel {
-            display: none;
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, 0);
-            width: 300px;
-            background-color: #d4d0c8;
-            border: 2px solid;
-            border-color: #fff #404040 #404040 #fff;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-            padding: 10px;
-            z-index: 100;
+        @keyframes matrix {
+            0% { color: #0f0; text-shadow: 0 0 5px #0f0; }
+            50% { color: #fff; text-shadow: 0 0 20px #0f0; }
+            100% { color: #0f0; text-shadow: 0 0 5px #0f0; }
         }
+        .effect-glow { animation: matrix 1.5s infinite; font-weight: bold; background: #000; padding: 0 4px; }
 
+        @keyframes shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .earthquake { animation: shake 0.5s infinite; }
+
+        /* Broadcast Alert specific */
+        #alert-message { font-size: 14px; font-weight: bold; text-align: center; padding: 20px; color: red; }
+        .alert-icon { font-size: 32px; float: left; margin-right: 10px; }
     </style>
 </head>
 <body>
 
-<!-- Desktop Icon -->
-<div class="desktop-icon" id="desktop-icon">
-    <!-- Base64 Retro Computer Icon -->
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAABH0lEQVR4nO2XvQ3CQAyF7x0T0FBRMQEb0EIFNqCEkZgCJWzC0tHR0BHRUSBCRUKN4t/JS4yT/hSpvOTrd/b5nAOB4I/a7XYL0jQdxphc13WjlMoBwE+ZpumA53nz7eZ5XimEcOI4LqT2H1BKaRzHAwCw2+3mUv0RkVIajDEBAFhV1VzqyU0i22w2wxhTSoUQe9d1h6ZpAABQSi01VVEUR1VVzTAMk20ZpZSklD5d15V1XR/X6/XhGkQZ2bZ9MMaUu93u2IeT/A+klIeu68q+78Nms7m6n/XnB3AcZyG11yS5x+l0ClJ7TZKbm0B4wTCMoJTKWZZtLpfLeTgcjnmeb77gT2b+AEmSpN/K5Z/Yd6G1TzP2iX0X2hD4AQmG5ZzDkFmNAAAAAElFTkSuQmCC" alt="Chat Icon">
-    <span>ChatZone<br>2000</span>
+<div class="desktop">
+    <div class="desktop-icon" ondblclick="openWindow('chat-window')">
+        <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_pnp-0.png" alt="Chat">
+        <span>ChatZone</span>
+    </div>
+    <div class="desktop-icon" onclick="attemptAdminLogin()">
+        <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Admin">
+        <span>Admin Tools</span>
+    </div>
 </div>
 
-<!-- Main Chat Window -->
 <div class="window" id="chat-window">
-    <div class="title-bar">
-        <span class="title-bar-text" id="window-title">🌐 ChatZone v2.0 - [Room: lobby]</span>
+    <div class="title-bar" id="chat-handle">
+        <span class="title-bar-text" id="window-title">🌐 ChatZone v3.0 - [Room: lobby]</span>
         <div class="title-bar-controls">
-            <button id="btn-minimize">_</button>
-            <button id="btn-close">X</button>
+            <button onclick="closeWindow('chat-window')">X</button>
         </div>
     </div>
-
-    <div class="chat-container">
-        <!-- Identity & Room Setup -->
-        <div class="setup-box">
-            <div class="setup-group">
-                <label for="username-input">Name:</label>
-                <input type="text" id="username-input" value="Guest_99">
-            </div>
-            <div class="setup-group" style="margin-left: auto;">
-                <label for="room-input">Room Code:</label>
-                <input type="text" id="room-input" value="lobby">
-                <button id="join-btn" class="win-btn">Join / Create</button>
-            </div>
+    <div class="win-content">
+        <div style="display: flex; gap: 5px; margin-bottom: 5px; background: #e4e0d8; padding: 5px; border: 1px inset #fff;">
+            Name: <input type="text" id="username-input" style="width: 80px;">
+            Room: <input type="text" id="room-input" value="lobby" style="width: 80px;">
+            <button id="join-btn" class="win-btn">Join</button>
         </div>
-
-        <!-- Main Chat Box -->
-        <div id="chat-box" class="chat-box">
-            <!-- Messages load here -->
-        </div>
-
-        <!-- Input Box -->
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Type message... (Use /msg Username to PM)" autocomplete="off">
+        <div id="chat-box" class="chat-box"></div>
+        <div style="display: flex; gap: 5px; margin-top: 5px;">
+            <input type="text" id="message-input" placeholder="Type message... (/msg User to PM)" style="flex-grow: 1;" autocomplete="off">
             <button id="send-btn" class="win-btn">Send</button>
         </div>
     </div>
-
-    <div class="status-bar" id="status-bar">
-        Status: Disconnected
-    </div>
 </div>
 
-<!-- Admin Panel -->
-<div id="admin-panel">
-    <div class="title-bar">
-        <span class="title-bar-text">⚠️ Admin Control Panel</span>
+<div class="window" id="admin-panel">
+    <div class="title-bar" id="admin-handle" style="background: linear-gradient(90deg, #800000, #ff0000);">
+        <span class="title-bar-text">⚠️ Admin Control Center</span>
         <div class="title-bar-controls">
-            <button id="btn-close-admin">X</button>
+            <button onclick="closeWindow('admin-panel')">X</button>
         </div>
     </div>
-    <div style="padding: 10px; display: flex; flex-direction: column; gap: 5px;">
-        <label>System Broadcast:</label>
-        <input type="text" id="admin-msg" placeholder="Warning message...">
-        <button id="btn-admin-send" class="win-btn">Send Global Alert</button>
+    <div class="win-content" style="display: flex; flex-direction: column; gap: 10px;">
+        <fieldset style="border: 2px groove #fff; padding: 5px;">
+            <legend>Your Persona</legend>
+            Name Effect: 
+            <select id="admin-effect">
+                <option value="none">Normal</option>
+                <option value="rainbow">🌈 Rainbow Hack</option>
+                <option value="glow">🟩 Matrix Glow</option>
+            </select>
+        </fieldset>
+
+        <fieldset style="border: 2px groove #fff; padding: 5px;">
+            <legend>Global Commands</legend>
+            <input type="text" id="admin-broadcast" placeholder="Enter Global Alert..." style="width: 100%; box-sizing: border-box; margin-bottom: 5px;">
+            <div style="display: flex; gap: 5px;">
+                <button id="btn-broadcast" class="win-btn" style="flex-grow: 1; color: red; font-weight: bold;">Send Alert Popup</button>
+                <button id="btn-earthquake" class="win-btn" style="flex-grow: 1;">Trigger Earthquake</button>
+            </div>
+        </fieldset>
     </div>
 </div>
 
-<!-- Firebase SDK Scripts -->
+<div class="window" id="alert-window">
+    <div class="title-bar" id="alert-handle" style="background: linear-gradient(90deg, #800000, #ff0000);">
+        <span class="title-bar-text">System Message</span>
+        <div class="title-bar-controls">
+            <button onclick="closeWindow('alert-window')">X</button>
+        </div>
+    </div>
+    <div class="win-content">
+        <span class="alert-icon">⚠️</span>
+        <div id="alert-message">This is a test broadcast.</div>
+        <div style="text-align: center; margin-top: 10px;">
+            <button class="win-btn" onclick="closeWindow('alert-window')">OK</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
         authDomain: "omegle-c7bdb.firebaseapp.com",
         projectId: "omegle-c7bdb",
         storageBucket: "omegle-c7bdb.firebasestorage.app",
         messagingSenderId: "470349324814",
-        appId: "1:470349324814:web:8271072b8d4cd0de01125f",
-        measurementId: "G-P65WBJMXX3"
+        appId: "1:470349324814:web:8271072b8d4cd0de01125f"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const messagesCollection = collection(db, "messages");
 
-    // UI Elements
-    const chatWindow = document.getElementById('chat-window');
-    const desktopIcon = document.getElementById('desktop-icon');
-    const btnMinimize = document.getElementById('btn-minimize');
-    const btnClose = document.getElementById('btn-close');
-    const windowTitle = document.getElementById('window-title');
-    const statusBar = document.getElementById('status-bar');
+    // --- Window Management (Draggable logic) ---
+    window.openWindow = (id) => { 
+        document.getElementById(id).style.display = 'block'; 
+        bringToFront(document.getElementById(id));
+    };
+    window.closeWindow = (id) => { document.getElementById(id).style.display = 'none'; };
     
-    const chatBox = document.getElementById('chat-box');
-    const messageInput = document.getElementById('message-input');
+    let zIndexCounter = 100;
+    function bringToFront(el) {
+        zIndexCounter++;
+        el.style.zIndex = zIndexCounter;
+    }
+
+    function makeDraggable(winId, handleId) {
+        const win = document.getElementById(winId);
+        const handle = document.getElementById(handleId);
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        
+        win.onmousedown = () => bringToFront(win);
+        handle.onmousedown = (e) => {
+            e.preventDefault();
+            pos3 = e.clientX; pos4 = e.clientY;
+            document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+            document.onmousemove = (e) => {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
+                pos3 = e.clientX; pos4 = e.clientY;
+                win.style.top = (win.offsetTop - pos2) + "px";
+                win.style.left = (win.offsetLeft - pos1) + "px";
+            };
+        };
+    }
+
+    makeDraggable('chat-window', 'chat-handle');
+    makeDraggable('admin-panel', 'admin-handle');
+    makeDraggable('alert-window', 'alert-handle');
+
+    // --- Admin Authentication ---
+    let isAdmin = false;
+    window.attemptAdminLogin = () => {
+        if(isAdmin) { openWindow('admin-panel'); return; }
+        if (prompt("Enter Admin Password:") === "KHEMIST") {
+            isAdmin = true;
+            alert("Access Granted.");
+            openWindow('admin-panel');
+        } else {
+            alert("Access Denied.");
+        }
+    };
+
+    // --- Core Chat Logic ---
     const usernameInput = document.getElementById('username-input');
     const roomInput = document.getElementById('room-input');
-    const joinBtn = document.getElementById('join-btn');
-    const sendBtn = document.getElementById('send-btn');
-
+    const messageInput = document.getElementById('message-input');
+    const chatBox = document.getElementById('chat-box');
+    const adminEffect = document.getElementById('admin-effect');
+    
+    usernameInput.value = "Guest" + Math.floor(Math.random() * 9000);
     let currentRoom = "lobby";
     let unsubscribe = null;
 
-    // --- Window State Management ---
-    desktopIcon.addEventListener('click', () => {
-        chatWindow.style.display = 'block';
-        chatWindow.classList.remove('minimized');
-        if(!unsubscribe) joinRoom("lobby");
-    });
-
-    btnMinimize.addEventListener('click', () => {
-        chatWindow.classList.toggle('minimized');
-    });
-
-    btnClose.addEventListener('click', () => {
-        chatWindow.style.display = 'none';
-    });
-
-    // Randomize initial screen name
-    usernameInput.value = "User" + Math.floor(Math.random() * 9000 + 1000);
-
-    // --- Chat Logic ---
     function joinRoom(roomCode) {
         if (!roomCode) return;
         currentRoom = roomCode.toLowerCase();
-        windowTitle.innerText = `🌐 ChatZone v2.0 - [Room: ${currentRoom}]`;
-        roomInput.value = currentRoom;
-        statusBar.innerText = `Status: Connected to Room '${currentRoom}'`;
+        document.getElementById('window-title').innerText = `🌐 ChatZone v3.0 - [Room: ${currentRoom}]`;
 
-        if (unsubscribe) {
-            unsubscribe(); // Stop listening to old room
-        }
+        if (unsubscribe) unsubscribe();
 
-        // Query messages for the current room
-        const q = query(
-            messagesCollection, 
-            where("room", "==", currentRoom),
-            orderBy("createdAt", "asc"), 
-            limit(100)
-        );
+        const q = query(messagesCollection, where("room", "==", currentRoom), orderBy("createdAt", "asc"), limit(50));
         
         unsubscribe = onSnapshot(q, (snapshot) => {
-            chatBox.innerHTML = `
-                <div class="message"><span class="timestamp">[System]</span> <span class="username" style="color:red;">Info:</span> Welcome to room <b>${escapeHTML(currentRoom)}</b>.</div>
-                <div class="message"><span class="timestamp">[System]</span> <span class="username" style="color:red;">Info:</span> To invite someone, PM them the room code: <i>/msg Username ${escapeHTML(currentRoom)}</i></div>
-                <hr style="border: 1px dashed #ccc;">
-            `;
-            
+            chatBox.innerHTML = '';
             const currentUser = usernameInput.value.trim().toLowerCase();
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                if (!data.text) return;
-
-                // Handle Private Messages (Client-side filtering)
-                let isPM = false;
-                if (data.to) {
-                    const toUser = data.to.toLowerCase();
-                    const fromUser = data.username.toLowerCase();
-                    // If it's a PM, only show if it's sent TO me or FROM me
-                    if (toUser !== currentUser && fromUser !== currentUser) {
-                        return; // Skip rendering this message
-                    }
-                    isPM = true;
-                }
-
-                // Format Time
-                let timeStr = "??:??";
-                if (data.createdAt) {
-                    const date = data.createdAt.toDate();
-                    timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                }
-
-                const msgDiv = document.createElement('div');
-                msgDiv.className = isPM ? 'message pm-message' : 'message';
                 
-                if (isPM) {
-                    msgDiv.innerHTML = `
-                        <span class="timestamp">[${timeStr}]</span> 
-                        <span class="pm-username">[PM] &lt;${escapeHTML(data.username)}&gt; to &lt;${escapeHTML(data.to)}&gt;:</span> 
-                        <span class="text">${escapeHTML(data.text)}</span>
-                    `;
+                // --- Handle System Commands ---
+                if (data.msgType === 'earthquake') {
+                    // Trigger shake if it's recent (hacky way to prevent shaking on historical load)
+                    if(data.createdAt && (Date.now() - data.createdAt.toMillis() < 5000)) {
+                        document.body.classList.add('earthquake');
+                        setTimeout(() => document.body.classList.remove('earthquake'), 2000);
+                    }
+                    return; // Don't render as chat
+                }
+                if (data.msgType === 'broadcast') {
+                    if(data.createdAt && (Date.now() - data.createdAt.toMillis() < 10000)) {
+                        document.getElementById('alert-message').innerText = data.text;
+                        openWindow('alert-window');
+                    }
+                    return; // Don't render as chat
+                }
+
+                // --- Render Normal/PM Messages ---
+                if (data.to && data.to.toLowerCase() !== currentUser && data.username.toLowerCase() !== currentUser) return;
+
+                let timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "??:??";
+                const msgDiv = document.createElement('div');
+                msgDiv.className = data.to ? 'message pm-message' : 'message';
+                
+                // Determine effect class
+                let effectClass = "";
+                if (data.effect === 'rainbow') effectClass = "effect-rainbow";
+                if (data.effect === 'glow') effectClass = "effect-glow";
+
+                const safeName = escapeHTML(data.username);
+                const safeText = escapeHTML(data.text);
+                const nameDisplay = `<span class="username ${effectClass}" style="color:${data.isAdmin ? 'red' : '#0000ff'}">&lt;${safeName}&gt;</span>`;
+
+                if (data.to) {
+                    msgDiv.innerHTML = `<span class="timestamp">[${timeStr}]</span> <b>[PM]</b> ${nameDisplay} to &lt;${escapeHTML(data.to)}&gt;: ${safeText}`;
                 } else {
-                    const nameColor = data.isAdmin ? "red" : "#0000ff";
-                    msgDiv.innerHTML = `
-                        <span class="timestamp">[${timeStr}]</span> 
-                        <span class="username" style="color:${nameColor}">&lt;${escapeHTML(data.username)}&gt;:</span> 
-                        <span class="text">${escapeHTML(data.text)}</span>
-                    `;
+                    msgDiv.innerHTML = `<span class="timestamp">[${timeStr}]</span> ${nameDisplay}: ${safeText}`;
                 }
                 chatBox.appendChild(msgDiv);
             });
-
             chatBox.scrollTop = chatBox.scrollHeight;
         });
     }
 
-    joinBtn.addEventListener('click', () => {
-        const newRoom = roomInput.value.trim();
-        if(newRoom !== currentRoom) joinRoom(newRoom);
-    });
-
-    async function sendMessage(isAdminOverride = false, adminText = "") {
-        let text = isAdminOverride ? adminText : messageInput.value.trim();
-        let username = isAdminOverride ? "SYSADMIN" : (usernameInput.value.trim() || "Anonymous");
-        let targetUser = null;
-
-        if (text === "") return;
-
-        // Check for Private Message syntax: /msg TargetUser Hello world
-        if (!isAdminOverride && text.startsWith("/msg ")) {
-            const parts = text.split(" ");
-            if (parts.length > 2) {
-                targetUser = parts[1]; // Get target username
-                text = parts.slice(2).join(" "); // Get the rest as the message
-            }
-        }
-
+    async function sendPayload(text, msgType = 'chat', targetUser = null) {
+        if (!text && msgType === 'chat') return;
+        
         try {
             await addDoc(messagesCollection, {
-                username: username,
+                username: isAdmin ? ("★" + usernameInput.value.trim()) : usernameInput.value.trim(),
                 text: text,
                 room: currentRoom,
                 to: targetUser,
-                isAdmin: isAdminOverride,
+                isAdmin: isAdmin,
+                msgType: msgType, // 'chat', 'broadcast', 'earthquake'
+                effect: isAdmin ? adminEffect.value : 'none',
                 createdAt: serverTimestamp()
             });
-            if(!isAdminOverride) {
-                messageInput.value = "";
-                messageInput.focus();
-            }
-        } catch (error) {
-            console.error("Error adding document: ", error);
-        }
+        } catch (error) { console.error("Error:", error); }
     }
 
-    sendBtn.addEventListener('click', () => sendMessage(false));
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage(false);
+    // Chat UI Listeners
+    document.getElementById('join-btn').addEventListener('click', () => joinRoom(roomInput.value.trim()));
+    document.getElementById('send-btn').addEventListener('click', () => {
+        let text = messageInput.value.trim();
+        let target = null;
+        if (text.startsWith("/msg ")) {
+            const parts = text.split(" ");
+            if (parts.length > 2) { target = parts[1]; text = parts.slice(2).join(" "); }
+        }
+        sendPayload(text, 'chat', target);
+        messageInput.value = "";
+        messageInput.focus();
+    });
+    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('send-btn').click(); });
+
+    // Admin UI Listeners
+    document.getElementById('btn-broadcast').addEventListener('click', () => {
+        const txt = document.getElementById('admin-broadcast').value.trim();
+        if(txt) { sendPayload(txt, 'broadcast'); document.getElementById('admin-broadcast').value = ""; }
+    });
+    document.getElementById('btn-earthquake').addEventListener('click', () => {
+        sendPayload("SHAKE", 'earthquake');
     });
 
-    // Helper to prevent XSS
+    // Helper
     function escapeHTML(str) {
-        return str.replace(/[&<>'"]/g, 
-            tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-        );
+        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
     }
 
-    // --- Admin Menu Logic ---
-    const adminPanel = document.getElementById('admin-panel');
-    const btnCloseAdmin = document.getElementById('btn-close-admin');
-    const btnAdminSend = document.getElementById('btn-admin-send');
-    const adminMsg = document.getElementById('admin-msg');
-
-    window.addEventListener('keydown', (e) => {
-        if (e.key === '|') {
-            e.preventDefault();
-            const pwd = prompt("Enter Admin Password:");
-            if (pwd === "KHEMIST") {
-                adminPanel.style.display = 'block';
-            } else if (pwd !== null) {
-                alert("Access Denied.");
-            }
-        }
-    });
-
-    btnCloseAdmin.addEventListener('click', () => {
-        adminPanel.style.display = 'none';
-    });
-
-    btnAdminSend.addEventListener('click', () => {
-        if (adminMsg.value.trim() !== "") {
-            sendMessage(true, "⚠️ GLOBAL ALERT: " + adminMsg.value.trim());
-            adminMsg.value = "";
-        }
-    });
-
-    // Auto-open lobby on load
+    // Init
     joinRoom("lobby");
-
 </script>
 </body>
 </html>
