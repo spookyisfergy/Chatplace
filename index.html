@@ -1,3 +1,14 @@
+Keeping the server safe from creeps is a top priority, especially if you're building a public chatroom. Adding an automated filter that instantly intercepts and overwrites those messages is a classic and highly effective moderation tactic.
+
+I've also wired up an image-sending feature. Because Firebase databases have strict size limits for text documents (1MB maximum), I built a tiny script into the image uploader that automatically resizes and compresses the image into a "retro" thumbnail size before sending it. This ensures your database doesn't crash or hit its limits while people are sharing memes.
+
+Here is the V6 update with the **Image Uploader** and the **Auto-Censor Filter** built right in.
+
+### The Code (`index.html`)
+
+Copy and paste this completely over your file to apply the V6 update:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,11 +170,9 @@
         button.win-btn:active { border-color: #404040 #fff #fff #404040; padding: 5px 11px 3px 13px; }
 
         /* --- DYNAMIC ADMIN EFFECTS --- */
-        /* Rainbow overrides colors naturally */
         @keyframes rainbow { 0% { color: red; } 16% { color: orange; } 33% { color: #ccaa00; } 50% { color: green; } 66% { color: blue; } 83% { color: purple; } 100% { color: red; } }
         .effect-rainbow { animation: rainbow 2s infinite linear; font-weight: bold; text-shadow: 1px 1px #000; }
 
-        /* Matrix and Fire now use --eff-color variable passed from JS */
         @keyframes matrix { 
             0% { color: var(--eff-color, #0f0); text-shadow: 0 0 5px var(--eff-color, #0f0); } 
             50% { color: #fff; text-shadow: 0 0 20px var(--eff-color, #0f0); } 
@@ -200,7 +209,7 @@
 
 <div class="window" id="chat-window">
     <div class="title-bar" id="chat-handle">
-        <span class="title-bar-text" id="window-title">🌐 ChatZone v5.0</span>
+        <span class="title-bar-text" id="window-title">🌐 ChatZone v6.0</span>
         <div class="title-bar-controls">
             <button onclick="closeWindow('chat-window')">X</button>
         </div>
@@ -232,6 +241,9 @@
                 <div id="chat-box" class="chat-box"></div>
                 
                 <div style="display: flex; gap: 5px;">
+                    <input type="file" id="image-input" accept="image/*" style="display: none;">
+                    <button id="btn-upload-img" class="win-btn" title="Send Image">🖼️</button>
+                    
                     <input type="text" id="message-input" placeholder="Type message... (/msg User to PM)" style="flex-grow: 1;" autocomplete="off">
                     <button id="send-btn" class="win-btn">Send</button>
                 </div>
@@ -372,21 +384,16 @@
         let currentNameLower = myUsername.toLowerCase();
         let originalBannedName = localStorage.getItem('ban_' + room.id); 
 
-        // 1. Is my current name in the room's ban array?
         if (room.banned && room.banned.includes(currentNameLower)) {
-            localStorage.setItem('ban_' + room.id, currentNameLower); // Save token to browser
+            localStorage.setItem('ban_' + room.id, currentNameLower); 
             return true;
         }
-
-        // 2. I changed my name, but my browser has a ban token. Let's check if my original name is STILL banned.
         if (originalBannedName && room.banned && room.banned.includes(originalBannedName)) {
-            return true; // The admin hasn't unbanned my original identity yet
+            return true; 
         } else if (originalBannedName) {
-            // My original identity is no longer in the DB list! The admin forgave me.
             localStorage.removeItem('ban_' + room.id);
             return false;
         }
-
         return false;
     }
 
@@ -414,7 +421,6 @@
         currentRoomDoc = allRooms.find(r => r.id === currentRoomId) || null;
         updateRoomToolsUI();
 
-        // Real-time kick if we get banned while sitting in the room
         if (currentRoomDoc && currentRoomDoc.id !== "Lobby" && isBanned(currentRoomDoc)) {
             alert("You have been banned from this room by a moderator.");
             attemptJoinRoom(allRooms.find(r => r.id === "Lobby"));
@@ -452,7 +458,7 @@
         
         currentRoomId = room.id;
         currentRoomDoc = room;
-        document.getElementById('window-title').innerText = `🌐 ChatZone v5.0 - [${room.name}]`;
+        document.getElementById('window-title').innerText = `🌐 ChatZone v6.0 - [${room.name}]`;
         
         document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
         updateRoomToolsUI();
@@ -510,7 +516,6 @@
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 
-                // System Commands
                 if (data.msgType === 'system') {
                     if (data.action === 'earthquake' && data.createdAt && (Date.now() - data.createdAt.toMillis() < 5000)) {
                         document.body.classList.add('earthquake');
@@ -532,15 +537,19 @@
                 let effectClass = data.effect && data.effect !== 'none' ? `effect-${data.effect}` : "";
                 let colorHex = data.color || (data.isAdmin ? "red" : "#0000ff");
 
-                // CSS Variable injection here makes colors dynamic!
                 const safeName = escapeHTML(data.username);
-                const safeText = escapeHTML(data.text);
                 const nameDisplay = `<span class="username ${effectClass}" style="color:${colorHex}; --eff-color:${colorHex};">&lt;${safeName}&gt;</span>`;
 
+                // Handle Image Messages
+                let messageBody = escapeHTML(data.text);
+                if (data.msgType === 'image' && data.imageUrl) {
+                    messageBody = `<br><img src="${data.imageUrl}" style="max-width: 100%; border: 2px inset #fff; margin-top: 5px;">`;
+                }
+
                 if (data.to) {
-                    msgDiv.innerHTML = `<span class="timestamp">[${timeStr}]</span> <b>[PM]</b> ${nameDisplay} to &lt;${escapeHTML(data.to)}&gt;: ${safeText}`;
+                    msgDiv.innerHTML = `<span class="timestamp">[${timeStr}]</span> <b>[PM]</b> ${nameDisplay} to &lt;${escapeHTML(data.to)}&gt;: ${messageBody}`;
                 } else {
-                    msgDiv.innerHTML = `<span class="timestamp">[${timeStr}]</span> ${nameDisplay}: ${safeText}`;
+                    msgDiv.innerHTML = `<span class="timestamp">[${timeStr}]</span> ${nameDisplay}: ${messageBody}`;
                 }
                 chatBox.appendChild(msgDiv);
             });
@@ -548,10 +557,17 @@
         });
     }
 
+    // Send Normal Message
     async function sendMessage() {
         let text = document.getElementById('message-input').value.trim();
         if (!text) return;
         
+        // --- CHAT FILTER ---
+        const badWordsRegex = /pedo|pedophile|p3do|nonce|child\s?porn|jailbait/i;
+        if (badWordsRegex.test(text)) {
+            text = "NOPE";
+        }
+
         let target = null;
         if (text.startsWith("/msg ")) {
             const parts = text.split(" ");
@@ -581,6 +597,54 @@
 
     document.getElementById('send-btn').addEventListener('click', sendMessage);
     document.getElementById('message-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    // --- Send Image Logic ---
+    document.getElementById('btn-upload-img').onclick = () => document.getElementById('image-input').click();
+    document.getElementById('image-input').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = async function() {
+                // Resize image so it fits within Firebase Firestore limits (Max 1MB)
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 300; // Keep it small and retro!
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // Compress to jpeg Base64
+                const base64Img = canvas.toDataURL('image/jpeg', 0.8);
+
+                let finalColor = isAdmin ? document.getElementById('admin-color').value : "#0000ff";
+                let finalEffect = isAdmin ? document.getElementById('admin-effect').value : "none";
+                let finalName = isAdmin ? ("★" + myUsername) : myUsername;
+
+                try {
+                    await addDoc(messagesCollection, {
+                        username: finalName,
+                        text: "", // Images don't have text
+                        imageUrl: base64Img,
+                        room: currentRoomId,
+                        isAdmin: isAdmin,
+                        msgType: 'image',
+                        color: finalColor,
+                        effect: finalEffect,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (error) { console.error("Image Send Error:", error); }
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(file);
+        this.value = ''; // Reset the input
+    });
+
 
     // Send System Command (Admin)
     async function sendSystemCommand(action, text = "") {
@@ -619,3 +683,5 @@
 </script>
 </body>
 </html>
+
+```
