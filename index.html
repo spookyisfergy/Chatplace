@@ -72,7 +72,7 @@
             justify-content: space-between;
             align-items: center;
             cursor: grab;
-            user-select: none; /* Only prevent selection on title bar */
+            user-select: none;
         }
 
         .title-bar:active { cursor: grabbing; }
@@ -92,11 +92,7 @@
         /* Window Content */
         .win-content { padding: 5px; }
 
-        .main-layout {
-            display: flex;
-            gap: 5px;
-            height: 350px;
-        }
+        .main-layout { display: flex; gap: 5px; height: 350px; }
 
         /* Sidebar */
         .sidebar {
@@ -115,29 +111,20 @@
             padding: 2px;
         }
 
-        .room-item {
-            padding: 3px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-        }
+        .room-item { padding: 3px; cursor: pointer; display: flex; justify-content: space-between; }
         .room-item:hover { background: #000080; color: #fff; }
         .room-item.active { background: #1084d0; color: #fff; font-weight: bold; }
 
         /* Chat Area */
-        .chat-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
 
         .room-tools {
             background: #e4e0d8;
             padding: 4px;
             border: 1px inset #fff;
-            display: none; /* Hidden by default */
+            display: none;
             gap: 5px;
+            flex-wrap: wrap;
         }
 
         .chat-box {
@@ -171,14 +158,24 @@
         }
         button.win-btn:active { border-color: #404040 #fff #fff #404040; padding: 5px 11px 3px 13px; }
 
-        /* --- FUN ADMIN EFFECTS --- */
+        /* --- DYNAMIC ADMIN EFFECTS --- */
+        /* Rainbow overrides colors naturally */
         @keyframes rainbow { 0% { color: red; } 16% { color: orange; } 33% { color: #ccaa00; } 50% { color: green; } 66% { color: blue; } 83% { color: purple; } 100% { color: red; } }
         .effect-rainbow { animation: rainbow 2s infinite linear; font-weight: bold; text-shadow: 1px 1px #000; }
 
-        @keyframes matrix { 0% { color: #0f0; text-shadow: 0 0 5px #0f0; } 50% { color: #fff; text-shadow: 0 0 20px #0f0; } 100% { color: #0f0; text-shadow: 0 0 5px #0f0; } }
+        /* Matrix and Fire now use --eff-color variable passed from JS */
+        @keyframes matrix { 
+            0% { color: var(--eff-color, #0f0); text-shadow: 0 0 5px var(--eff-color, #0f0); } 
+            50% { color: #fff; text-shadow: 0 0 20px var(--eff-color, #0f0); } 
+            100% { color: var(--eff-color, #0f0); text-shadow: 0 0 5px var(--eff-color, #0f0); } 
+        }
         .effect-glow { animation: matrix 1.5s infinite; font-weight: bold; background: #000; padding: 0 4px; }
 
-        @keyframes fire { 0% { color: #ffeb3b; text-shadow: 0 -2px 4px #ff9800, 0 -4px 6px #f44336; } 50% { color: #fff; text-shadow: 0 -1px 2px #ff9800, 0 -3px 5px #f44336; } 100% { color: #ffeb3b; text-shadow: 0 -2px 4px #ff9800, 0 -4px 6px #f44336; } }
+        @keyframes fire { 
+            0% { color: var(--eff-color, #ffeb3b); text-shadow: 0 -2px 4px #ff9800, 0 -4px 6px #f44336; } 
+            50% { color: #fff; text-shadow: 0 -1px 2px #ff9800, 0 -3px 5px #f44336; } 
+            100% { color: var(--eff-color, #ffeb3b); text-shadow: 0 -2px 4px #ff9800, 0 -4px 6px #f44336; } 
+        }
         .effect-fire { animation: fire 0.8s infinite alternate; font-weight: bold; }
 
         @keyframes shake { 0% { transform: translate(2px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(0px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(2px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(2px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
@@ -203,7 +200,7 @@
 
 <div class="window" id="chat-window">
     <div class="title-bar" id="chat-handle">
-        <span class="title-bar-text" id="window-title">🌐 ChatZone v4.0</span>
+        <span class="title-bar-text" id="window-title">🌐 ChatZone v5.0</span>
         <div class="title-bar-controls">
             <button onclick="closeWindow('chat-window')">X</button>
         </div>
@@ -217,18 +214,19 @@
         <div class="main-layout">
             <div class="sidebar">
                 <div style="background: #d4d0c8; padding: 2px 5px; border-bottom: 1px solid #808080; font-weight: bold;">Rooms</div>
-                <ul class="room-list" id="room-list-ui">
-                    </ul>
+                <ul class="room-list" id="room-list-ui"></ul>
                 <button id="btn-create-room" class="win-btn" style="margin: 2px;">+ New Room</button>
             </div>
 
             <div class="chat-area">
                 <div class="room-tools" id="room-tools">
-                    <b style="color:red">Room Admin:</b>
+                    <b style="color:red">Mod:</b>
                     <button id="btn-lock-room" class="win-btn">Lock</button>
                     <button id="btn-unlock-room" class="win-btn">Unlock</button>
-                    <button id="btn-ban-user" class="win-btn">Ban User</button>
-                    <button id="btn-delete-room" class="win-btn">Delete Room</button>
+                    <button id="btn-ban-user" class="win-btn">Ban</button>
+                    <button id="btn-unban-user" class="win-btn">Unban</button>
+                    <button id="btn-wipe-chat" class="win-btn">Wipe Chat</button>
+                    <button id="btn-delete-room" class="win-btn" style="color:red;">Delete Room</button>
                 </div>
 
                 <div id="chat-box" class="chat-box"></div>
@@ -259,17 +257,20 @@
             <select id="admin-effect">
                 <option value="none">Normal</option>
                 <option value="rainbow">🌈 Rainbow Hack</option>
-                <option value="glow">🟩 Matrix Glow</option>
-                <option value="fire">🔥 Hellfire</option>
+                <option value="glow">🟩 Custom Glow</option>
+                <option value="fire">🔥 Custom Hellfire</option>
             </select>
         </fieldset>
 
         <fieldset style="border: 2px groove #fff; padding: 5px;">
             <legend>Global Commands</legend>
             <input type="text" id="admin-broadcast" placeholder="Enter Global Alert..." style="width: 100%; box-sizing: border-box; margin-bottom: 5px;">
-            <div style="display: flex; gap: 5px;">
+            <div style="display: flex; gap: 5px; margin-bottom: 5px;">
                 <button id="btn-broadcast" class="win-btn" style="flex-grow: 1; color: red; font-weight: bold;">Send Alert Popup</button>
+            </div>
+            <div style="display: flex; gap: 5px;">
                 <button id="btn-earthquake" class="win-btn" style="flex-grow: 1;">Trigger Earthquake</button>
+                <button id="btn-admin-wipe" class="win-btn" style="flex-grow: 1; color: red;">Nuke All Servers</button>
             </div>
         </fieldset>
     </div>
@@ -293,7 +294,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, updateDoc, arrayUnion, query, where, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, query, where, orderBy, limit, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
@@ -327,10 +328,9 @@
         }
     };
 
-    // --- Window Dragging Logic (Fixed) ---
+    // --- Window Dragging Logic ---
     window.openWindow = (id) => { document.getElementById(id).style.display = 'block'; bringToFront(document.getElementById(id)); };
     window.closeWindow = (id) => { document.getElementById(id).style.display = 'none'; };
-    
     let zIndexCounter = 100;
     function bringToFront(el) { zIndexCounter++; el.style.zIndex = zIndexCounter; }
 
@@ -338,10 +338,9 @@
         const win = document.getElementById(winId);
         const handle = document.getElementById(handleId);
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        
         win.onmousedown = () => bringToFront(win);
         handle.onmousedown = (e) => {
-            e.preventDefault(); // Prevents selection on title bar
+            e.preventDefault(); 
             pos3 = e.clientX; pos4 = e.clientY;
             document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
             document.onmousemove = (e) => {
@@ -368,13 +367,33 @@
         }
     };
 
-    // --- Rooms Manager ---
-    function ensureLobbyExists() {
-        setDoc(doc(roomsCollection, "Lobby"), { name: "Lobby", creator: "System", locked: false, password: "", banned: [] }, { merge: true });
+    // --- BAN LOGIC: Persistent & Bypass-Proof ---
+    function isBanned(room) {
+        let currentNameLower = myUsername.toLowerCase();
+        let originalBannedName = localStorage.getItem('ban_' + room.id); 
+
+        // 1. Is my current name in the room's ban array?
+        if (room.banned && room.banned.includes(currentNameLower)) {
+            localStorage.setItem('ban_' + room.id, currentNameLower); // Save token to browser
+            return true;
+        }
+
+        // 2. I changed my name, but my browser has a ban token. Let's check if my original name is STILL banned.
+        if (originalBannedName && room.banned && room.banned.includes(originalBannedName)) {
+            return true; // The admin hasn't unbanned my original identity yet
+        } else if (originalBannedName) {
+            // My original identity is no longer in the DB list! The admin forgave me.
+            localStorage.removeItem('ban_' + room.id);
+            return false;
+        }
+
+        return false;
     }
+
+    // --- Rooms Manager ---
+    function ensureLobbyExists() { setDoc(doc(roomsCollection, "Lobby"), { name: "Lobby", creator: "System", locked: false, password: "", banned: [] }, { merge: true }); }
     ensureLobbyExists();
 
-    // Listen to all rooms
     onSnapshot(roomsCollection, (snapshot) => {
         allRooms = [];
         const uiList = document.getElementById('room-list-ui');
@@ -392,15 +411,20 @@
             uiList.appendChild(li);
         });
 
-        // Update active room doc reference if things change (like bans/locks)
         currentRoomDoc = allRooms.find(r => r.id === currentRoomId) || null;
         updateRoomToolsUI();
+
+        // Real-time kick if we get banned while sitting in the room
+        if (currentRoomDoc && currentRoomDoc.id !== "Lobby" && isBanned(currentRoomDoc)) {
+            alert("You have been banned from this room by a moderator.");
+            attemptJoinRoom(allRooms.find(r => r.id === "Lobby"));
+        }
     });
 
     document.getElementById('btn-create-room').onclick = async () => {
         let rName = prompt("Enter new room name:");
         if (!rName) return;
-        let rId = rName.replace(/[^a-zA-Z0-9]/g, ''); // alphanumeric ID
+        let rId = rName.replace(/[^a-zA-Z0-9]/g, ''); 
         if (rId === "") return;
 
         await setDoc(doc(roomsCollection, rId), {
@@ -414,8 +438,8 @@
     };
 
     function attemptJoinRoom(room) {
-        if (room.banned && room.banned.includes(myUsername.toLowerCase())) {
-            alert("You are banned from this room.");
+        if (isBanned(room)) {
+            alert("You are permanently banned from this room.");
             return;
         }
         if (room.locked && room.id !== currentRoomId) {
@@ -428,9 +452,8 @@
         
         currentRoomId = room.id;
         currentRoomDoc = room;
-        document.getElementById('window-title').innerText = `🌐 ChatZone v4.0 - [${room.name}]`;
+        document.getElementById('window-title').innerText = `🌐 ChatZone v5.0 - [${room.name}]`;
         
-        // Update active class in UI manually for instant feedback
         document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
         updateRoomToolsUI();
         loadChatForRoom();
@@ -446,28 +469,31 @@
         }
     }
 
-    document.getElementById('btn-lock-room').onclick = async () => {
-        if(!currentRoomDoc) return;
-        let pwd = prompt("Enter password to lock room:");
-        if (pwd) await updateDoc(doc(roomsCollection, currentRoomId), { locked: true, password: pwd });
-    };
-
-    document.getElementById('btn-unlock-room').onclick = async () => {
-        if(!currentRoomDoc) return;
-        await updateDoc(doc(roomsCollection, currentRoomId), { locked: false, password: "" });
-    };
-
+    document.getElementById('btn-lock-room').onclick = async () => { let pwd = prompt("Enter password to lock room:"); if (pwd) await updateDoc(doc(roomsCollection, currentRoomId), { locked: true, password: pwd }); };
+    document.getElementById('btn-unlock-room').onclick = async () => { await updateDoc(doc(roomsCollection, currentRoomId), { locked: false, password: "" }); };
+    
     document.getElementById('btn-ban-user').onclick = async () => {
-        if(!currentRoomDoc) return;
         let target = prompt("Enter EXACT username to ban:");
         if (target) await updateDoc(doc(roomsCollection, currentRoomId), { banned: arrayUnion(target.toLowerCase()) });
     };
 
+    document.getElementById('btn-unban-user').onclick = async () => {
+        let target = prompt("Enter EXACT username to unban:");
+        if (target) await updateDoc(doc(roomsCollection, currentRoomId), { banned: arrayRemove(target.toLowerCase()) });
+    };
+
+    document.getElementById('btn-wipe-chat').onclick = async () => {
+        if(confirm("Are you sure you want to permanently delete all messages in this room?")) {
+            const q = query(messagesCollection, where("room", "==", currentRoomId));
+            const snap = await getDocs(q);
+            snap.forEach(d => deleteDoc(d.ref));
+        }
+    };
+
     document.getElementById('btn-delete-room').onclick = async () => {
-        if(!currentRoomDoc) return;
-        if(confirm("Are you sure you want to delete this room?")) {
+        if(confirm("Are you sure you want to delete this room entirely?")) {
             await deleteDoc(doc(roomsCollection, currentRoomId));
-            attemptJoinRoom(allRooms.find(r => r.id === "Lobby")); // Kick back to lobby
+            attemptJoinRoom(allRooms.find(r => r.id === "Lobby")); 
         }
     };
 
@@ -494,22 +520,22 @@
                         document.getElementById('alert-message').innerText = data.text;
                         openWindow('alert-window');
                     }
-                    return; // Skip rendering
+                    return; 
                 }
 
-                // Render Chat
                 if (data.to && data.to.toLowerCase() !== myUsername.toLowerCase() && data.username.toLowerCase() !== myUsername.toLowerCase()) return;
 
                 let timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "??:??";
                 const msgDiv = document.createElement('div');
                 msgDiv.className = data.to ? 'message pm-message' : 'message';
                 
-                let effectClass = data.effect ? `effect-${data.effect}` : "";
+                let effectClass = data.effect && data.effect !== 'none' ? `effect-${data.effect}` : "";
                 let colorHex = data.color || (data.isAdmin ? "red" : "#0000ff");
 
+                // CSS Variable injection here makes colors dynamic!
                 const safeName = escapeHTML(data.username);
                 const safeText = escapeHTML(data.text);
-                const nameDisplay = `<span class="username ${effectClass}" style="color:${colorHex}">&lt;${safeName}&gt;</span>`;
+                const nameDisplay = `<span class="username ${effectClass}" style="color:${colorHex}; --eff-color:${colorHex};">&lt;${safeName}&gt;</span>`;
 
                 if (data.to) {
                     msgDiv.innerHTML = `<span class="timestamp">[${timeStr}]</span> <b>[PM]</b> ${nameDisplay} to &lt;${escapeHTML(data.to)}&gt;: ${safeText}`;
@@ -522,7 +548,6 @@
         });
     }
 
-    // Send Message
     async function sendMessage() {
         let text = document.getElementById('message-input').value.trim();
         if (!text) return;
@@ -533,7 +558,6 @@
             if (parts.length > 2) { target = parts[1]; text = parts.slice(2).join(" "); }
         }
 
-        // Get admin preferences if active
         let finalColor = isAdmin ? document.getElementById('admin-color').value : "#0000ff";
         let finalEffect = isAdmin ? document.getElementById('admin-effect').value : "none";
         let finalName = isAdmin ? ("★" + myUsername) : myUsername;
@@ -561,7 +585,7 @@
     // Send System Command (Admin)
     async function sendSystemCommand(action, text = "") {
         await addDoc(messagesCollection, {
-            room: currentRoomId, // Broadcst hits the current room stream
+            room: currentRoomId,
             msgType: 'system',
             action: action,
             text: text,
@@ -574,15 +598,23 @@
         if(txt) { sendSystemCommand('broadcast', txt); document.getElementById('admin-broadcast').value = ""; }
     });
     document.getElementById('btn-earthquake').addEventListener('click', () => sendSystemCommand('earthquake'));
+    
+    document.getElementById('btn-admin-wipe').addEventListener('click', async () => {
+        if(confirm("DANGER: This will delete ALL messages across ALL rooms on the server. Proceed?")) {
+            const snap = await getDocs(messagesCollection);
+            snap.forEach(d => deleteDoc(d.ref));
+            sendSystemCommand('broadcast', "SYSTEM: All chatrooms have been wiped by an Administrator.");
+        }
+    });
 
-    // Helper - Now bulletproof against undefined database fields
+    // Helper
     function escapeHTML(str) { 
-        if (!str) return ""; // If the text is missing, just return empty string instead of crashing
+        if (!str) return "";
         return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); 
     }
 
     // Start
-    setTimeout(() => attemptJoinRoom({id: "Lobby", name: "Lobby"}), 500); // Small delay to let rooms load
+    setTimeout(() => attemptJoinRoom({id: "Lobby", name: "Lobby"}), 500);
 
 </script>
 </body>
