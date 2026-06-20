@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ ChatZone 2000 ⚡</title>
+    <title>⚡ ChatZone 2000 OS ⚡</title>
     <style>
         /* Retro 2000s OS Aesthetic */
         body {
@@ -11,20 +11,60 @@
             font-family: "MS Sans Serif", Geneva, sans-serif;
             font-size: 12px;
             color: #000;
-            margin: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 90vh;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
 
+        /* Desktop Icon */
+        .desktop-icon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 64px;
+            text-align: center;
+            cursor: pointer;
+            color: white;
+            font-size: 11px;
+        }
+
+        .desktop-icon img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 5px;
+            image-rendering: pixelated;
+        }
+
+        .desktop-icon:active span {
+            background-color: #000080;
+            border: 1px dotted white;
+        }
+
+        /* Window Styling */
         .window {
-            width: 500px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 550px;
             background-color: #d4d0c8;
             border: 2px solid;
             border-color: #fff #404040 #404040 #fff;
             box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
             padding: 3px;
+            display: none; /* Closed by default */
+        }
+
+        .window.minimized {
+            top: auto;
+            bottom: 0;
+            left: 0;
+            transform: none;
+            width: 250px;
+            height: 22px;
+            overflow: hidden;
         }
 
         .title-bar {
@@ -37,6 +77,10 @@
             align-items: center;
         }
 
+        .window.minimized .title-bar {
+            background: #808080; /* Inactive window color */
+        }
+
         .title-bar-text {
             font-size: 12px;
             letter-spacing: 0.5px;
@@ -44,7 +88,7 @@
 
         .title-bar-controls button {
             padding: 1px 4px;
-            font-size: 9px;
+            font-size: 10px;
             font-weight: bold;
             background-color: #d4d0c8;
             border: 1px solid;
@@ -52,17 +96,8 @@
             cursor: pointer;
         }
 
-        .menu-bar {
-            display: flex;
-            gap: 10px;
-            padding: 4px 5px;
-            border-bottom: 1px solid #808080;
-            margin-bottom: 5px;
-        }
-
-        .menu-item {
-            text-decoration: underline;
-            cursor: pointer;
+        .title-bar-controls button:active {
+            border-color: #404040 #fff #fff #404040;
         }
 
         /* Chat Layout */
@@ -75,15 +110,21 @@
 
         .setup-box {
             display: flex;
-            gap: 5px;
+            gap: 10px;
             align-items: center;
             background: #e4e0d8;
             padding: 5px;
             border: 1px inset #fff;
         }
 
+        .setup-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
         .chat-box {
-            height: 250px;
+            height: 300px;
             background-color: #fff;
             border: 2px inset #fff;
             overflow-y: scroll;
@@ -106,6 +147,17 @@
             color: #0000ff;
         }
 
+        .pm-message {
+            background-color: #ffffcc;
+            border: 1px dashed #cccc00;
+            padding: 2px;
+        }
+
+        .pm-username {
+            font-weight: bold;
+            color: #800080;
+        }
+
         /* Input Controls */
         .input-area {
             display: flex;
@@ -119,13 +171,9 @@
             font-family: inherit;
         }
 
-        #username-input {
-            width: 100px;
-        }
-
-        #message-input {
-            flex-grow: 1;
-        }
+        #username-input { width: 90px; }
+        #room-input { width: 80px; }
+        #message-input { flex-grow: 1; }
 
         button.win-btn {
             padding: 4px 12px;
@@ -149,52 +197,96 @@
             color: #404040;
             font-size: 11px;
         }
+
+        /* Admin Panel */
+        #admin-panel {
+            display: none;
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 300px;
+            background-color: #d4d0c8;
+            border: 2px solid;
+            border-color: #fff #404040 #404040 #fff;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            padding: 10px;
+            z-index: 100;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="window">
-    <div class="title-bar">
-        <span class="title-bar-text">🌐 ChatZone v1.2 - [Room: Lobby]</span>
-        <div class="title-bar-controls">
-            <button>_</button>
-            <button>X</button>
-        </div>
-    </div>
+<!-- Desktop Icon -->
+<div class="desktop-icon" id="desktop-icon">
+    <!-- Base64 Retro Computer Icon -->
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAABH0lEQVR4nO2XvQ3CQAyF7x0T0FBRMQEb0EIFNqCEkZgCJWzC0tHR0BHRUSBCRUKN4t/JS4yT/hSpvOTrd/b5nAOB4I/a7XYL0jQdxphc13WjlMoBwE+ZpumA53nz7eZ5XimEcOI4LqT2H1BKaRzHAwCw2+3mUv0RkVIajDEBAFhV1VzqyU0i22w2wxhTSoUQe9d1h6ZpAABQSi01VVEUR1VVzTAMk20ZpZSklD5d15V1XR/X6/XhGkQZ2bZ9MMaUu93u2IeT/A+klIeu68q+78Nms7m6n/XnB3AcZyG11yS5x+l0ClJ7TZKbm0B4wTCMoJTKWZZtLpfLeTgcjnmeb77gT2b+AEmSpN/K5Z/Yd6G1TzP2iX0X2hD4AQmG5ZzDkFmNAAAAAElFTkSuQmCC" alt="Chat Icon">
+    <span>ChatZone<br>2000</span>
+</div>
 
-    <div class="menu-bar">
-        <span class="menu-item">File</span>
-        <span class="menu-item">Edit</span>
-        <span class="menu-item">View</span>
-        <span class="menu-item">Help</span>
+<!-- Main Chat Window -->
+<div class="window" id="chat-window">
+    <div class="title-bar">
+        <span class="title-bar-text" id="window-title">🌐 ChatZone v2.0 - [Room: lobby]</span>
+        <div class="title-bar-controls">
+            <button id="btn-minimize">_</button>
+            <button id="btn-close">X</button>
+        </div>
     </div>
 
     <div class="chat-container">
+        <!-- Identity & Room Setup -->
         <div class="setup-box">
-            <label for="username-input">Screen Name:</label>
-            <input type="text" id="username-input" value="Guest_99">
+            <div class="setup-group">
+                <label for="username-input">Name:</label>
+                <input type="text" id="username-input" value="Guest_99">
+            </div>
+            <div class="setup-group" style="margin-left: auto;">
+                <label for="room-input">Room Code:</label>
+                <input type="text" id="room-input" value="lobby">
+                <button id="join-btn" class="win-btn">Join / Create</button>
+            </div>
         </div>
 
+        <!-- Main Chat Box -->
         <div id="chat-box" class="chat-box">
-            <div class="message"><span class="timestamp">[00:00]</span> <span class="username" style="color:red;">System:</span> Welcome to ChatZone! Type a message and hit Send.</div>
+            <!-- Messages load here -->
         </div>
 
+        <!-- Input Box -->
         <div class="input-area">
-            <input type="text" id="message-input" placeholder="Type your instant message here..." autocomplete="off">
+            <input type="text" id="message-input" placeholder="Type message... (Use /msg Username to PM)" autocomplete="off">
             <button id="send-btn" class="win-btn">Send</button>
         </div>
     </div>
 
-    <div class="status-bar">
-        Status: Connected to Firebase Server // 56k Modem Mode
+    <div class="status-bar" id="status-bar">
+        Status: Disconnected
     </div>
 </div>
 
+<!-- Admin Panel -->
+<div id="admin-panel">
+    <div class="title-bar">
+        <span class="title-bar-text">⚠️ Admin Control Panel</span>
+        <div class="title-bar-controls">
+            <button id="btn-close-admin">X</button>
+        </div>
+    </div>
+    <div style="padding: 10px; display: flex; flex-direction: column; gap: 5px;">
+        <label>System Broadcast:</label>
+        <input type="text" id="admin-msg" placeholder="Warning message...">
+        <button id="btn-admin-send" class="win-btn">Send Global Alert</button>
+    </div>
+</div>
+
+<!-- Firebase SDK Scripts -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Your provided Firebase Configuration
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
         authDomain: "omegle-c7bdb.firebaseapp.com",
@@ -205,84 +297,205 @@
         measurementId: "G-P65WBJMXX3"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const messagesCollection = collection(db, "messages");
 
-    // Randomize initial screen name to look authentic
-    document.getElementById('username-input').value = "User" + Math.floor(Math.random() * 9000 + 1000);
-
+    // UI Elements
+    const chatWindow = document.getElementById('chat-window');
+    const desktopIcon = document.getElementById('desktop-icon');
+    const btnMinimize = document.getElementById('btn-minimize');
+    const btnClose = document.getElementById('btn-close');
+    const windowTitle = document.getElementById('window-title');
+    const statusBar = document.getElementById('status-bar');
+    
     const chatBox = document.getElementById('chat-box');
     const messageInput = document.getElementById('message-input');
     const usernameInput = document.getElementById('username-input');
+    const roomInput = document.getElementById('room-input');
+    const joinBtn = document.getElementById('join-btn');
     const sendBtn = document.getElementById('send-btn');
 
-    // 1. Send Message to Firestore
-    async function sendMessage() {
-        const text = messageInput.value.trim();
-        const username = usernameInput.value.trim() || "Anonymous";
+    let currentRoom = "lobby";
+    let unsubscribe = null;
+
+    // --- Window State Management ---
+    desktopIcon.addEventListener('click', () => {
+        chatWindow.style.display = 'block';
+        chatWindow.classList.remove('minimized');
+        if(!unsubscribe) joinRoom("lobby");
+    });
+
+    btnMinimize.addEventListener('click', () => {
+        chatWindow.classList.toggle('minimized');
+    });
+
+    btnClose.addEventListener('click', () => {
+        chatWindow.style.display = 'none';
+    });
+
+    // Randomize initial screen name
+    usernameInput.value = "User" + Math.floor(Math.random() * 9000 + 1000);
+
+    // --- Chat Logic ---
+    function joinRoom(roomCode) {
+        if (!roomCode) return;
+        currentRoom = roomCode.toLowerCase();
+        windowTitle.innerText = `🌐 ChatZone v2.0 - [Room: ${currentRoom}]`;
+        roomInput.value = currentRoom;
+        statusBar.innerText = `Status: Connected to Room '${currentRoom}'`;
+
+        if (unsubscribe) {
+            unsubscribe(); // Stop listening to old room
+        }
+
+        // Query messages for the current room
+        const q = query(
+            messagesCollection, 
+            where("room", "==", currentRoom),
+            orderBy("createdAt", "asc"), 
+            limit(100)
+        );
+        
+        unsubscribe = onSnapshot(q, (snapshot) => {
+            chatBox.innerHTML = `
+                <div class="message"><span class="timestamp">[System]</span> <span class="username" style="color:red;">Info:</span> Welcome to room <b>${escapeHTML(currentRoom)}</b>.</div>
+                <div class="message"><span class="timestamp">[System]</span> <span class="username" style="color:red;">Info:</span> To invite someone, PM them the room code: <i>/msg Username ${escapeHTML(currentRoom)}</i></div>
+                <hr style="border: 1px dashed #ccc;">
+            `;
+            
+            const currentUser = usernameInput.value.trim().toLowerCase();
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (!data.text) return;
+
+                // Handle Private Messages (Client-side filtering)
+                let isPM = false;
+                if (data.to) {
+                    const toUser = data.to.toLowerCase();
+                    const fromUser = data.username.toLowerCase();
+                    // If it's a PM, only show if it's sent TO me or FROM me
+                    if (toUser !== currentUser && fromUser !== currentUser) {
+                        return; // Skip rendering this message
+                    }
+                    isPM = true;
+                }
+
+                // Format Time
+                let timeStr = "??:??";
+                if (data.createdAt) {
+                    const date = data.createdAt.toDate();
+                    timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                }
+
+                const msgDiv = document.createElement('div');
+                msgDiv.className = isPM ? 'message pm-message' : 'message';
+                
+                if (isPM) {
+                    msgDiv.innerHTML = `
+                        <span class="timestamp">[${timeStr}]</span> 
+                        <span class="pm-username">[PM] &lt;${escapeHTML(data.username)}&gt; to &lt;${escapeHTML(data.to)}&gt;:</span> 
+                        <span class="text">${escapeHTML(data.text)}</span>
+                    `;
+                } else {
+                    const nameColor = data.isAdmin ? "red" : "#0000ff";
+                    msgDiv.innerHTML = `
+                        <span class="timestamp">[${timeStr}]</span> 
+                        <span class="username" style="color:${nameColor}">&lt;${escapeHTML(data.username)}&gt;:</span> 
+                        <span class="text">${escapeHTML(data.text)}</span>
+                    `;
+                }
+                chatBox.appendChild(msgDiv);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+
+    joinBtn.addEventListener('click', () => {
+        const newRoom = roomInput.value.trim();
+        if(newRoom !== currentRoom) joinRoom(newRoom);
+    });
+
+    async function sendMessage(isAdminOverride = false, adminText = "") {
+        let text = isAdminOverride ? adminText : messageInput.value.trim();
+        let username = isAdminOverride ? "SYSADMIN" : (usernameInput.value.trim() || "Anonymous");
+        let targetUser = null;
 
         if (text === "") return;
+
+        // Check for Private Message syntax: /msg TargetUser Hello world
+        if (!isAdminOverride && text.startsWith("/msg ")) {
+            const parts = text.split(" ");
+            if (parts.length > 2) {
+                targetUser = parts[1]; // Get target username
+                text = parts.slice(2).join(" "); // Get the rest as the message
+            }
+        }
 
         try {
             await addDoc(messagesCollection, {
                 username: username,
                 text: text,
+                room: currentRoom,
+                to: targetUser,
+                isAdmin: isAdminOverride,
                 createdAt: serverTimestamp()
             });
-            messageInput.value = ""; // Clear input field
-            messageInput.focus();
+            if(!isAdminOverride) {
+                messageInput.value = "";
+                messageInput.focus();
+            }
         } catch (error) {
             console.error("Error adding document: ", error);
         }
     }
 
-    // Event Listeners for sending
-    sendBtn.addEventListener('click', sendMessage);
+    sendBtn.addEventListener('click', () => sendMessage(false));
     messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+        if (e.key === 'Enter') sendMessage(false);
     });
 
-    // 2. Listen to Real-Time Updates from Firestore
-    const q = query(messagesCollection, orderBy("createdAt", "asc"), limit(100));
-    
-    onSnapshot(q, (snapshot) => {
-        // Clear screen except for the first system message
-        chatBox.innerHTML = `<div class="message"><span class="timestamp">[00:00]</span> <span class="username" style="color:red;">System:</span> Welcome to ChatZone! Type a message and hit Send.</div>`;
-        
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            if (!data.text) return;
-
-            // Generate a simple retro timestamp
-            let timeStr = "??:??";
-            if (data.createdAt) {
-                const date = data.createdAt.toDate();
-                timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            }
-
-            // Create message element
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
-            msgDiv.innerHTML = `
-                <span class="timestamp">[${timeStr}]</span> 
-                <span class="username">&lt;${escapeHTML(data.username)}&gt;:</span> 
-                <span class="text">${escapeHTML(data.text)}</span>
-            `;
-            chatBox.appendChild(msgDiv);
-        });
-
-        // Auto-scroll to the bottom like real chat applications
-        chatBox.scrollTop = chatBox.scrollHeight;
-    });
-
-    // Helper function to prevent script injections (XSS)
+    // Helper to prevent XSS
     function escapeHTML(str) {
         return str.replace(/[&<>'"]/g, 
             tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
         );
     }
+
+    // --- Admin Menu Logic ---
+    const adminPanel = document.getElementById('admin-panel');
+    const btnCloseAdmin = document.getElementById('btn-close-admin');
+    const btnAdminSend = document.getElementById('btn-admin-send');
+    const adminMsg = document.getElementById('admin-msg');
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === '|') {
+            e.preventDefault();
+            const pwd = prompt("Enter Admin Password:");
+            if (pwd === "KHEMIST") {
+                adminPanel.style.display = 'block';
+            } else if (pwd !== null) {
+                alert("Access Denied.");
+            }
+        }
+    });
+
+    btnCloseAdmin.addEventListener('click', () => {
+        adminPanel.style.display = 'none';
+    });
+
+    btnAdminSend.addEventListener('click', () => {
+        if (adminMsg.value.trim() !== "") {
+            sendMessage(true, "⚠️ GLOBAL ALERT: " + adminMsg.value.trim());
+            adminMsg.value = "";
+        }
+    });
+
+    // Auto-open lobby on load
+    joinRoom("lobby");
+
 </script>
 </body>
 </html>
