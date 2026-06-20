@@ -575,8 +575,11 @@
     });
     document.getElementById('btn-earthquake').addEventListener('click', () => sendSystemCommand('earthquake'));
 
-    // Helper
-    function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+    // Helper - Now bulletproof against undefined database fields
+    function escapeHTML(str) { 
+        if (!str) return ""; // If the text is missing, just return empty string instead of crashing
+        return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); 
+    }
 
     // Start
     setTimeout(() => attemptJoinRoom({id: "Lobby", name: "Lobby"}), 500); // Small delay to let rooms load
