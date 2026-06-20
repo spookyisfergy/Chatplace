@@ -16,7 +16,6 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
-            user-select: none; /* Prevent text selection while dragging */
         }
 
         /* Desktop Grid */
@@ -43,7 +42,7 @@
             image-rendering: pixelated;
         }
 
-        .desktop-icon:active span, .desktop-icon.selected span {
+        .desktop-icon:active span {
             background-color: #000080;
             border: 1px dotted white;
         }
@@ -60,7 +59,7 @@
             z-index: 10;
         }
 
-        #chat-window { top: 50px; left: 150px; width: 550px; }
+        #chat-window { top: 40px; left: 100px; width: 650px; }
         #admin-panel { top: 100px; left: 200px; width: 350px; }
         #alert-window { top: 200px; left: 300px; width: 400px; z-index: 9999; }
 
@@ -73,15 +72,11 @@
             justify-content: space-between;
             align-items: center;
             cursor: grab;
+            user-select: none; /* Only prevent selection on title bar */
         }
 
         .title-bar:active { cursor: grabbing; }
-
-        .title-bar-text {
-            font-size: 12px;
-            letter-spacing: 0.5px;
-            pointer-events: none;
-        }
+        .title-bar-text { font-size: 12px; letter-spacing: 0.5px; pointer-events: none; }
 
         .title-bar-controls button {
             padding: 1px 4px;
@@ -92,28 +87,74 @@
             border-color: #fff #404040 #404040 #fff;
             cursor: pointer;
         }
-
         .title-bar-controls button:active { border-color: #404040 #fff #fff #404040; }
 
         /* Window Content */
         .win-content { padding: 5px; }
 
+        .main-layout {
+            display: flex;
+            gap: 5px;
+            height: 350px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 150px;
+            background: #fff;
+            border: 2px inset #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room-list {
+            flex-grow: 1;
+            overflow-y: scroll;
+            list-style: none;
+            margin: 0;
+            padding: 2px;
+        }
+
+        .room-item {
+            padding: 3px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .room-item:hover { background: #000080; color: #fff; }
+        .room-item.active { background: #1084d0; color: #fff; font-weight: bold; }
+
+        /* Chat Area */
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .room-tools {
+            background: #e4e0d8;
+            padding: 4px;
+            border: 1px inset #fff;
+            display: none; /* Hidden by default */
+            gap: 5px;
+        }
+
         .chat-box {
-            height: 300px;
+            flex-grow: 1;
             background-color: #fff;
             border: 2px inset #fff;
             overflow-y: scroll;
             padding: 5px;
             font-family: "Courier New", Courier, monospace;
-            user-select: text; /* Allow copying chat text */
         }
 
         .message { margin-bottom: 4px; line-height: 1.3; }
         .timestamp { color: #808080; font-size: 10px; }
         .pm-message { background-color: #ffffcc; border: 1px dashed #cccc00; padding: 2px; }
 
-        /* Input Controls */
-        input[type="text"], select {
+        /* Inputs */
+        input[type="text"], input[type="password"], select {
             padding: 4px;
             border: 2px inset #fff;
             background-color: #fff;
@@ -128,42 +169,21 @@
             font-family: inherit;
             cursor: pointer;
         }
-
-        button.win-btn:active {
-            border-color: #404040 #fff #fff #404040;
-            padding: 5px 11px 3px 13px;
-        }
+        button.win-btn:active { border-color: #404040 #fff #fff #404040; padding: 5px 11px 3px 13px; }
 
         /* --- FUN ADMIN EFFECTS --- */
-        @keyframes rainbow {
-            0% { color: red; } 16% { color: orange; } 33% { color: #ccaa00; }
-            50% { color: green; } 66% { color: blue; } 83% { color: purple; } 100% { color: red; }
-        }
+        @keyframes rainbow { 0% { color: red; } 16% { color: orange; } 33% { color: #ccaa00; } 50% { color: green; } 66% { color: blue; } 83% { color: purple; } 100% { color: red; } }
         .effect-rainbow { animation: rainbow 2s infinite linear; font-weight: bold; text-shadow: 1px 1px #000; }
 
-        @keyframes matrix {
-            0% { color: #0f0; text-shadow: 0 0 5px #0f0; }
-            50% { color: #fff; text-shadow: 0 0 20px #0f0; }
-            100% { color: #0f0; text-shadow: 0 0 5px #0f0; }
-        }
+        @keyframes matrix { 0% { color: #0f0; text-shadow: 0 0 5px #0f0; } 50% { color: #fff; text-shadow: 0 0 20px #0f0; } 100% { color: #0f0; text-shadow: 0 0 5px #0f0; } }
         .effect-glow { animation: matrix 1.5s infinite; font-weight: bold; background: #000; padding: 0 4px; }
 
-        @keyframes shake {
-            0% { transform: translate(2px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(0px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(2px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(2px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
+        @keyframes fire { 0% { color: #ffeb3b; text-shadow: 0 -2px 4px #ff9800, 0 -4px 6px #f44336; } 50% { color: #fff; text-shadow: 0 -1px 2px #ff9800, 0 -3px 5px #f44336; } 100% { color: #ffeb3b; text-shadow: 0 -2px 4px #ff9800, 0 -4px 6px #f44336; } }
+        .effect-fire { animation: fire 0.8s infinite alternate; font-weight: bold; }
+
+        @keyframes shake { 0% { transform: translate(2px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(0px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(2px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(2px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
         .earthquake { animation: shake 0.5s infinite; }
 
-        /* Broadcast Alert specific */
         #alert-message { font-size: 14px; font-weight: bold; text-align: center; padding: 20px; color: red; }
         .alert-icon { font-size: 32px; float: left; margin-right: 10px; }
     </style>
@@ -183,21 +203,41 @@
 
 <div class="window" id="chat-window">
     <div class="title-bar" id="chat-handle">
-        <span class="title-bar-text" id="window-title">🌐 ChatZone v3.0 - [Room: lobby]</span>
+        <span class="title-bar-text" id="window-title">🌐 ChatZone v4.0</span>
         <div class="title-bar-controls">
             <button onclick="closeWindow('chat-window')">X</button>
         </div>
     </div>
     <div class="win-content">
-        <div style="display: flex; gap: 5px; margin-bottom: 5px; background: #e4e0d8; padding: 5px; border: 1px inset #fff;">
-            Name: <input type="text" id="username-input" style="width: 80px;">
-            Room: <input type="text" id="room-input" value="lobby" style="width: 80px;">
-            <button id="join-btn" class="win-btn">Join</button>
+        <div style="display: flex; gap: 5px; margin-bottom: 5px; background: #e4e0d8; padding: 5px; border: 1px inset #fff; align-items: center;">
+            <b>My Name:</b> <input type="text" id="username-input" style="width: 120px;" readonly>
+            <button onclick="changeName()" class="win-btn">Change</button>
         </div>
-        <div id="chat-box" class="chat-box"></div>
-        <div style="display: flex; gap: 5px; margin-top: 5px;">
-            <input type="text" id="message-input" placeholder="Type message... (/msg User to PM)" style="flex-grow: 1;" autocomplete="off">
-            <button id="send-btn" class="win-btn">Send</button>
+        
+        <div class="main-layout">
+            <div class="sidebar">
+                <div style="background: #d4d0c8; padding: 2px 5px; border-bottom: 1px solid #808080; font-weight: bold;">Rooms</div>
+                <ul class="room-list" id="room-list-ui">
+                    </ul>
+                <button id="btn-create-room" class="win-btn" style="margin: 2px;">+ New Room</button>
+            </div>
+
+            <div class="chat-area">
+                <div class="room-tools" id="room-tools">
+                    <b style="color:red">Room Admin:</b>
+                    <button id="btn-lock-room" class="win-btn">Lock</button>
+                    <button id="btn-unlock-room" class="win-btn">Unlock</button>
+                    <button id="btn-ban-user" class="win-btn">Ban User</button>
+                    <button id="btn-delete-room" class="win-btn">Delete Room</button>
+                </div>
+
+                <div id="chat-box" class="chat-box"></div>
+                
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="message-input" placeholder="Type message... (/msg User to PM)" style="flex-grow: 1;" autocomplete="off">
+                    <button id="send-btn" class="win-btn">Send</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -212,11 +252,15 @@
     <div class="win-content" style="display: flex; flex-direction: column; gap: 10px;">
         <fieldset style="border: 2px groove #fff; padding: 5px;">
             <legend>Your Persona</legend>
+            <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 5px;">
+                Name Color: <input type="color" id="admin-color" value="#0000ff">
+            </div>
             Name Effect: 
             <select id="admin-effect">
                 <option value="none">Normal</option>
                 <option value="rainbow">🌈 Rainbow Hack</option>
                 <option value="glow">🟩 Matrix Glow</option>
+                <option value="fire">🔥 Hellfire</option>
             </select>
         </fieldset>
 
@@ -249,7 +293,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, updateDoc, arrayUnion, query, where, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
@@ -263,19 +307,32 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const messagesCollection = collection(db, "messages");
+    const roomsCollection = collection(db, "rooms");
 
-    // --- Window Management (Draggable logic) ---
-    window.openWindow = (id) => { 
-        document.getElementById(id).style.display = 'block'; 
-        bringToFront(document.getElementById(id));
+    // --- State & Setup ---
+    let myUsername = "Guest" + Math.floor(Math.random() * 9000);
+    document.getElementById('username-input').value = myUsername;
+    
+    let currentRoomId = "Lobby";
+    let currentRoomDoc = null; 
+    let allRooms = [];
+    let unsubscribeChat = null;
+    let isAdmin = false;
+
+    window.changeName = () => {
+        let newName = prompt("Enter new screen name:", myUsername);
+        if(newName && newName.trim() !== "") {
+            myUsername = newName.trim();
+            document.getElementById('username-input').value = myUsername;
+        }
     };
+
+    // --- Window Dragging Logic (Fixed) ---
+    window.openWindow = (id) => { document.getElementById(id).style.display = 'block'; bringToFront(document.getElementById(id)); };
     window.closeWindow = (id) => { document.getElementById(id).style.display = 'none'; };
     
     let zIndexCounter = 100;
-    function bringToFront(el) {
-        zIndexCounter++;
-        el.style.zIndex = zIndexCounter;
-    }
+    function bringToFront(el) { zIndexCounter++; el.style.zIndex = zIndexCounter; }
 
     function makeDraggable(winId, handleId) {
         const win = document.getElementById(winId);
@@ -284,11 +341,10 @@
         
         win.onmousedown = () => bringToFront(win);
         handle.onmousedown = (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Prevents selection on title bar
             pos3 = e.clientX; pos4 = e.clientY;
             document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
             document.onmousemove = (e) => {
-                e.preventDefault();
                 pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
                 pos3 = e.clientX; pos4 = e.clientY;
                 win.style.top = (win.offsetTop - pos2) + "px";
@@ -296,83 +352,164 @@
             };
         };
     }
-
     makeDraggable('chat-window', 'chat-handle');
     makeDraggable('admin-panel', 'admin-handle');
     makeDraggable('alert-window', 'alert-handle');
 
     // --- Admin Authentication ---
-    let isAdmin = false;
     window.attemptAdminLogin = () => {
         if(isAdmin) { openWindow('admin-panel'); return; }
         if (prompt("Enter Admin Password:") === "KHEMIST") {
             isAdmin = true;
-            alert("Access Granted.");
+            alert("Access Granted. You have system override.");
             openWindow('admin-panel');
         } else {
             alert("Access Denied.");
         }
     };
 
-    // --- Core Chat Logic ---
-    const usernameInput = document.getElementById('username-input');
-    const roomInput = document.getElementById('room-input');
-    const messageInput = document.getElementById('message-input');
-    const chatBox = document.getElementById('chat-box');
-    const adminEffect = document.getElementById('admin-effect');
-    
-    usernameInput.value = "Guest" + Math.floor(Math.random() * 9000);
-    let currentRoom = "lobby";
-    let unsubscribe = null;
+    // --- Rooms Manager ---
+    function ensureLobbyExists() {
+        setDoc(doc(roomsCollection, "Lobby"), { name: "Lobby", creator: "System", locked: false, password: "", banned: [] }, { merge: true });
+    }
+    ensureLobbyExists();
 
-    function joinRoom(roomCode) {
-        if (!roomCode) return;
-        currentRoom = roomCode.toLowerCase();
-        document.getElementById('window-title').innerText = `🌐 ChatZone v3.0 - [Room: ${currentRoom}]`;
+    // Listen to all rooms
+    onSnapshot(roomsCollection, (snapshot) => {
+        allRooms = [];
+        const uiList = document.getElementById('room-list-ui');
+        uiList.innerHTML = "";
 
-        if (unsubscribe) unsubscribe();
+        snapshot.forEach(docSnap => {
+            let r = docSnap.data();
+            r.id = docSnap.id;
+            allRooms.push(r);
+            
+            let li = document.createElement('li');
+            li.className = `room-item ${r.id === currentRoomId ? 'active' : ''}`;
+            li.innerHTML = `<span>${escapeHTML(r.name)}</span> <span>${r.locked ? '🔒' : ''}</span>`;
+            li.onclick = () => attemptJoinRoom(r);
+            uiList.appendChild(li);
+        });
 
-        const q = query(messagesCollection, where("room", "==", currentRoom), orderBy("createdAt", "asc"), limit(50));
+        // Update active room doc reference if things change (like bans/locks)
+        currentRoomDoc = allRooms.find(r => r.id === currentRoomId) || null;
+        updateRoomToolsUI();
+    });
+
+    document.getElementById('btn-create-room').onclick = async () => {
+        let rName = prompt("Enter new room name:");
+        if (!rName) return;
+        let rId = rName.replace(/[^a-zA-Z0-9]/g, ''); // alphanumeric ID
+        if (rId === "") return;
+
+        await setDoc(doc(roomsCollection, rId), {
+            name: rName,
+            creator: myUsername.toLowerCase(),
+            locked: false,
+            password: "",
+            banned: []
+        });
+        attemptJoinRoom({ id: rId, name: rName, locked: false, password: "", banned: [] });
+    };
+
+    function attemptJoinRoom(room) {
+        if (room.banned && room.banned.includes(myUsername.toLowerCase())) {
+            alert("You are banned from this room.");
+            return;
+        }
+        if (room.locked && room.id !== currentRoomId) {
+            let pwd = prompt(`Room '${room.name}' is locked. Password:`);
+            if (pwd !== room.password) {
+                alert("Incorrect password.");
+                return;
+            }
+        }
         
-        unsubscribe = onSnapshot(q, (snapshot) => {
-            chatBox.innerHTML = '';
-            const currentUser = usernameInput.value.trim().toLowerCase();
+        currentRoomId = room.id;
+        currentRoomDoc = room;
+        document.getElementById('window-title').innerText = `🌐 ChatZone v4.0 - [${room.name}]`;
+        
+        // Update active class in UI manually for instant feedback
+        document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
+        updateRoomToolsUI();
+        loadChatForRoom();
+    }
 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
+    // --- Room Creator Admin Tools ---
+    function updateRoomToolsUI() {
+        const toolsDiv = document.getElementById('room-tools');
+        if (currentRoomDoc && currentRoomDoc.creator === myUsername.toLowerCase() && currentRoomDoc.id !== "Lobby") {
+            toolsDiv.style.display = 'flex';
+        } else {
+            toolsDiv.style.display = 'none';
+        }
+    }
+
+    document.getElementById('btn-lock-room').onclick = async () => {
+        if(!currentRoomDoc) return;
+        let pwd = prompt("Enter password to lock room:");
+        if (pwd) await updateDoc(doc(roomsCollection, currentRoomId), { locked: true, password: pwd });
+    };
+
+    document.getElementById('btn-unlock-room').onclick = async () => {
+        if(!currentRoomDoc) return;
+        await updateDoc(doc(roomsCollection, currentRoomId), { locked: false, password: "" });
+    };
+
+    document.getElementById('btn-ban-user').onclick = async () => {
+        if(!currentRoomDoc) return;
+        let target = prompt("Enter EXACT username to ban:");
+        if (target) await updateDoc(doc(roomsCollection, currentRoomId), { banned: arrayUnion(target.toLowerCase()) });
+    };
+
+    document.getElementById('btn-delete-room').onclick = async () => {
+        if(!currentRoomDoc) return;
+        if(confirm("Are you sure you want to delete this room?")) {
+            await deleteDoc(doc(roomsCollection, currentRoomId));
+            attemptJoinRoom(allRooms.find(r => r.id === "Lobby")); // Kick back to lobby
+        }
+    };
+
+    // --- Chat Logic ---
+    function loadChatForRoom() {
+        if (unsubscribeChat) unsubscribeChat();
+
+        const q = query(messagesCollection, where("room", "==", currentRoomId), orderBy("createdAt", "asc"), limit(75));
+        
+        unsubscribeChat = onSnapshot(q, (snapshot) => {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
                 
-                // --- Handle System Commands ---
-                if (data.msgType === 'earthquake') {
-                    // Trigger shake if it's recent (hacky way to prevent shaking on historical load)
-                    if(data.createdAt && (Date.now() - data.createdAt.toMillis() < 5000)) {
+                // System Commands
+                if (data.msgType === 'system') {
+                    if (data.action === 'earthquake' && data.createdAt && (Date.now() - data.createdAt.toMillis() < 5000)) {
                         document.body.classList.add('earthquake');
                         setTimeout(() => document.body.classList.remove('earthquake'), 2000);
                     }
-                    return; // Don't render as chat
-                }
-                if (data.msgType === 'broadcast') {
-                    if(data.createdAt && (Date.now() - data.createdAt.toMillis() < 10000)) {
+                    if (data.action === 'broadcast' && data.createdAt && (Date.now() - data.createdAt.toMillis() < 10000)) {
                         document.getElementById('alert-message').innerText = data.text;
                         openWindow('alert-window');
                     }
-                    return; // Don't render as chat
+                    return; // Skip rendering
                 }
 
-                // --- Render Normal/PM Messages ---
-                if (data.to && data.to.toLowerCase() !== currentUser && data.username.toLowerCase() !== currentUser) return;
+                // Render Chat
+                if (data.to && data.to.toLowerCase() !== myUsername.toLowerCase() && data.username.toLowerCase() !== myUsername.toLowerCase()) return;
 
                 let timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "??:??";
                 const msgDiv = document.createElement('div');
                 msgDiv.className = data.to ? 'message pm-message' : 'message';
                 
-                // Determine effect class
-                let effectClass = "";
-                if (data.effect === 'rainbow') effectClass = "effect-rainbow";
-                if (data.effect === 'glow') effectClass = "effect-glow";
+                let effectClass = data.effect ? `effect-${data.effect}` : "";
+                let colorHex = data.color || (data.isAdmin ? "red" : "#0000ff");
 
                 const safeName = escapeHTML(data.username);
                 const safeText = escapeHTML(data.text);
-                const nameDisplay = `<span class="username ${effectClass}" style="color:${data.isAdmin ? 'red' : '#0000ff'}">&lt;${safeName}&gt;</span>`;
+                const nameDisplay = `<span class="username ${effectClass}" style="color:${colorHex}">&lt;${safeName}&gt;</span>`;
 
                 if (data.to) {
                     msgDiv.innerHTML = `<span class="timestamp">[${timeStr}]</span> <b>[PM]</b> ${nameDisplay} to &lt;${escapeHTML(data.to)}&gt;: ${safeText}`;
@@ -385,54 +522,65 @@
         });
     }
 
-    async function sendPayload(text, msgType = 'chat', targetUser = null) {
-        if (!text && msgType === 'chat') return;
+    // Send Message
+    async function sendMessage() {
+        let text = document.getElementById('message-input').value.trim();
+        if (!text) return;
         
-        try {
-            await addDoc(messagesCollection, {
-                username: isAdmin ? ("★" + usernameInput.value.trim()) : usernameInput.value.trim(),
-                text: text,
-                room: currentRoom,
-                to: targetUser,
-                isAdmin: isAdmin,
-                msgType: msgType, // 'chat', 'broadcast', 'earthquake'
-                effect: isAdmin ? adminEffect.value : 'none',
-                createdAt: serverTimestamp()
-            });
-        } catch (error) { console.error("Error:", error); }
-    }
-
-    // Chat UI Listeners
-    document.getElementById('join-btn').addEventListener('click', () => joinRoom(roomInput.value.trim()));
-    document.getElementById('send-btn').addEventListener('click', () => {
-        let text = messageInput.value.trim();
         let target = null;
         if (text.startsWith("/msg ")) {
             const parts = text.split(" ");
             if (parts.length > 2) { target = parts[1]; text = parts.slice(2).join(" "); }
         }
-        sendPayload(text, 'chat', target);
-        messageInput.value = "";
-        messageInput.focus();
-    });
-    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('send-btn').click(); });
 
-    // Admin UI Listeners
-    document.getElementById('btn-broadcast').addEventListener('click', () => {
-        const txt = document.getElementById('admin-broadcast').value.trim();
-        if(txt) { sendPayload(txt, 'broadcast'); document.getElementById('admin-broadcast').value = ""; }
-    });
-    document.getElementById('btn-earthquake').addEventListener('click', () => {
-        sendPayload("SHAKE", 'earthquake');
-    });
+        // Get admin preferences if active
+        let finalColor = isAdmin ? document.getElementById('admin-color').value : "#0000ff";
+        let finalEffect = isAdmin ? document.getElementById('admin-effect').value : "none";
+        let finalName = isAdmin ? ("★" + myUsername) : myUsername;
 
-    // Helper
-    function escapeHTML(str) {
-        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+        try {
+            await addDoc(messagesCollection, {
+                username: finalName,
+                text: text,
+                room: currentRoomId,
+                to: target,
+                isAdmin: isAdmin,
+                msgType: 'chat',
+                color: finalColor,
+                effect: finalEffect,
+                createdAt: serverTimestamp()
+            });
+            document.getElementById('message-input').value = "";
+            document.getElementById('message-input').focus();
+        } catch (error) { console.error("Send Error:", error); }
     }
 
-    // Init
-    joinRoom("lobby");
+    document.getElementById('send-btn').addEventListener('click', sendMessage);
+    document.getElementById('message-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    // Send System Command (Admin)
+    async function sendSystemCommand(action, text = "") {
+        await addDoc(messagesCollection, {
+            room: currentRoomId, // Broadcst hits the current room stream
+            msgType: 'system',
+            action: action,
+            text: text,
+            createdAt: serverTimestamp()
+        });
+    }
+
+    document.getElementById('btn-broadcast').addEventListener('click', () => {
+        const txt = document.getElementById('admin-broadcast').value.trim();
+        if(txt) { sendSystemCommand('broadcast', txt); document.getElementById('admin-broadcast').value = ""; }
+    });
+    document.getElementById('btn-earthquake').addEventListener('click', () => sendSystemCommand('earthquake'));
+
+    // Helper
+    function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+
+    // Start
+    setTimeout(() => attemptJoinRoom({id: "Lobby", name: "Lobby"}), 500); // Small delay to let rooms load
+
 </script>
 </body>
 </html>
