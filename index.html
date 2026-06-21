@@ -3,239 +3,258 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ CHATZONE RAVE OS ⚡</title>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<title>🫧 BubbleBeat — Chat &amp; Tunes</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --acid: #39FF14;
-  --acid2: #00ffcc;
-  --hot: #ff00ff;
-  --dark: #0a0a0a;
-  --panel: #111;
-  --panel2: #1a1a1a;
-  --border: #39FF14;
-  --text: #e0ffe0;
-  --win-bg: #0f0f0f;
+  --sky1: #eaf6ff;
+  --sky2: #ffe6f4;
+  --blue: #3fa9f5;
+  --blue-dark: #1d7fd6;
+  --pink: #ff6fa8;
+  --purple: #b07cff;
+  --yellow: #ffd34f;
+  --mint: #4fd9ae;
+  --ink: #2c3a4e;
+  --ink-soft: #74859a;
+  --glass: rgba(255,255,255,0.74);
+  --glass-strong: rgba(255,255,255,0.94);
+  --border: #bfe1f7;
+  --shadow: 0 12px 28px rgba(70,110,160,0.18);
 }
 * { box-sizing: border-box; }
 body {
-  background: var(--dark);
-  background-image: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(57,255,20,0.03) 40px, rgba(57,255,20,0.03) 80px);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 12px;
-  color: var(--text);
+  background: linear-gradient(160deg, var(--sky1), var(--sky2)) fixed;
+  font-family: 'Nunito', 'Trebuchet MS', Verdana, sans-serif;
+  font-size: 13px;
+  color: var(--ink);
   margin: 0; padding: 0;
   height: 100vh; overflow: hidden; position: relative;
 }
 
-/* SCANLINES OVERLAY */
-body::after {
-  content:''; position:fixed; top:0;left:0;right:0;bottom:0;
-  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 3px);
-  pointer-events:none; z-index:999997;
+/* FLOATING BUBBLES */
+.bg-bubble {
+  position: fixed; bottom: -120px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(170,220,255,0.3) 60%, rgba(170,220,255,0.05) 100%);
+  pointer-events: none; z-index: 0;
+  animation: bubble-rise linear infinite;
+}
+@keyframes bubble-rise {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  8% { opacity: 0.8; }
+  92% { opacity: 0.5; }
+  100% { transform: translateY(-115vh) translateX(24px); opacity: 0; }
 }
 
 /* DESKTOP */
-.desktop { display:flex; flex-direction:column; gap:16px; padding:16px; width:90px; }
-.desktop-icon { text-align:center; cursor:pointer; color:var(--acid); font-size:10px; width:68px; font-family:'Share Tech Mono',monospace; }
-.desktop-icon img { width:32px; height:32px; margin-bottom:4px; image-rendering:pixelated; filter:hue-rotate(90deg) brightness(1.5) saturate(3); }
-.desktop-icon span { display:inline-block; padding:1px 2px; text-shadow:0 0 6px var(--acid); }
-.desktop-icon:hover span { background:var(--acid); color:#000; }
-.desktop-icon:active span { background:var(--hot); color:#000; }
+.desktop { display:flex; flex-direction:column; gap:18px; padding:18px; width:90px; position:relative; z-index:2; }
+.desktop-icon { text-align:center; cursor:pointer; color:var(--blue-dark); font-size:10px; width:72px; font-family:'Nunito',sans-serif; font-weight:700; }
+.desktop-icon .icon-bubble {
+  width:44px; height:44px; border-radius:50%; margin:0 auto 4px auto;
+  background: radial-gradient(circle at 32% 28%, #ffffff, var(--sky1) 55%, var(--blue) 130%);
+  border:1px solid var(--border); box-shadow:0 4px 10px rgba(70,110,160,0.25);
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  transition: transform .15s ease;
+}
+.desktop-icon:hover .icon-bubble { transform: translateY(-3px) scale(1.05); }
+.desktop-icon:active .icon-bubble { transform: translateY(0) scale(0.96); }
+.desktop-icon span { display:inline-block; padding:1px 4px; text-shadow:0 1px 0 #fff; }
 
 /* WINDOWS */
 .window {
   position:absolute; display:none;
-  background:var(--win-bg);
-  border:2px solid var(--acid);
-  box-shadow:0 0 20px rgba(57,255,20,0.4), inset 0 0 10px rgba(0,0,0,0.8);
-  padding:2px; z-index:10;
-  font-family:'Share Tech Mono',monospace;
+  background:var(--glass);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border:1px solid rgba(255,255,255,0.7);
+  border-radius:16px;
+  box-shadow: var(--shadow);
+  padding:0; z-index:10;
+  font-family:'Nunito',sans-serif;
+  overflow:hidden;
 }
 .title-bar {
-  background:linear-gradient(90deg, #0f3d00, #1a7a00, #0f3d00);
-  border-bottom:1px solid var(--acid);
-  color:var(--acid);
-  padding:4px 6px;
-  font-weight:bold;
+  background:linear-gradient(180deg, #ffffff 0%, #d8f0ff 42%, #8fd3fb 43%, #4fb6ec 100%);
+  border-bottom:1px solid var(--blue);
+  color:var(--blue-dark);
+  padding:7px 10px;
+  font-weight:800;
   display:flex; justify-content:space-between; align-items:center;
   cursor:grab; user-select:none;
-  text-shadow:0 0 8px var(--acid);
-  font-family:'Black Han Sans',sans-serif;
-  letter-spacing:1px;
+  text-shadow:0 1px 0 rgba(255,255,255,0.7);
+  font-family:'Baloo 2',sans-serif;
+  letter-spacing:0.3px;
 }
 .title-bar:active { cursor:grabbing; }
-.title-bar-text { font-size:12px; pointer-events:none; }
+.title-bar-text { font-size:13px; pointer-events:none; }
 .title-bar-controls button {
-  padding:1px 6px; font-size:11px; font-weight:bold;
-  background:#0f0f0f; border:1px solid var(--acid);
-  color:var(--acid); cursor:pointer; font-family:inherit;
+  padding:2px 8px; font-size:12px; font-weight:800;
+  background:#ffffffcc; border:1px solid var(--blue);
+  border-radius:999px;
+  color:var(--blue-dark); cursor:pointer; font-family:inherit;
 }
-.title-bar-controls button:hover { background:var(--acid); color:#000; }
-.win-content { padding:6px; }
+.title-bar-controls button:hover { background:var(--blue); color:#fff; }
+.win-content { padding:10px; }
 
 /* TITLE BAR VARIANTS */
-.title-bar.red { background:linear-gradient(90deg,#3d0000,#7a0000,#3d0000); border-bottom-color:#ff3300; color:#ff3300; text-shadow:0 0 8px #ff3300; }
-.title-bar.red .title-bar-controls button { border-color:#ff3300; color:#ff3300; }
-.title-bar.hot { background:linear-gradient(90deg,#3d003d,#7a007a,#3d003d); border-bottom-color:var(--hot); color:var(--hot); text-shadow:0 0 8px var(--hot); }
+.title-bar.red { background:linear-gradient(180deg,#ffffff 0%,#ffe0df 42%,#ffb3ad 43%,#ff8a7c 100%); border-bottom-color:#ff7a68; color:#c43d2a; }
+.title-bar.red .title-bar-controls button { border-color:#ff8a7c; color:#c43d2a; }
+.title-bar.hot { background:linear-gradient(180deg,#ffffff 0%,#f6dcff 42%,#e3a9ff 43%,#c97bff 100%); border-bottom-color:var(--purple); color:#7b3ec9; }
+.title-bar.hot .title-bar-controls button { border-color:var(--purple); color:#7b3ec9; }
 
 /* POSITIONS */
-#login-window { top:25%; left:38%; width:320px; display:block; z-index:99999; }
-#chat-window  { top:30px; left:90px; width:660px; }
-#admin-panel  { top:80px; left:200px; width:420px; }
-#alert-window { top:180px; left:280px; width:420px; z-index:9999; }
-#radio-window { top:30px; left:760px; width:390px; }
+#login-window { top:25%; left:38%; width:330px; display:block; z-index:99999; }
+#chat-window  { top:30px; left:90px; width:670px; }
+#admin-panel  { top:80px; left:200px; width:430px; }
+#alert-window { top:180px; left:280px; width:400px; z-index:9999; }
+#visualizer-window { top:30px; left:780px; width:390px; }
 
 /* OVERLAY */
 #os-overlay {
   position:fixed; top:0;left:0; width:100vw; height:100vh;
-  background:#000; z-index:99998; display:block;
+  background:linear-gradient(160deg, var(--sky1), var(--sky2));
+  z-index:99998; display:block;
 }
 #os-overlay-inner {
   position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  text-align:center; color:var(--acid);
-  font-family:'Black Han Sans',sans-serif;
-  font-size:48px; text-shadow:0 0 30px var(--acid), 0 0 60px var(--acid);
-  animation: pulseglow 1.5s infinite;
+  text-align:center; color:var(--blue-dark);
+  font-family:'Baloo 2',sans-serif;
+  font-size:46px; text-shadow:0 2px 0 #fff, 0 8px 20px rgba(70,110,160,0.25);
+  animation: bobble 2s infinite ease-in-out;
 }
-@keyframes pulseglow { 0%,100%{text-shadow:0 0 20px var(--acid),0 0 40px var(--acid)} 50%{text-shadow:0 0 40px var(--acid),0 0 80px var(--acid),0 0 120px var(--acid)} }
+@keyframes bobble { 0%,100%{ transform: translate(-50%,-50%) translateY(0); } 50%{ transform: translate(-50%,-50%) translateY(-8px); } }
 
 /* INPUTS */
 input[type="text"], input[type="password"], select, textarea {
-  padding:4px 6px;
-  background:#050505; border:1px solid var(--acid);
-  color:var(--acid); font-family:'Share Tech Mono',monospace;
+  padding:6px 10px;
+  background:#ffffffd9; border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--ink); font-family:'Nunito',sans-serif;
   font-size:12px; outline:none;
 }
-input[type="text"]:focus, input[type="password"]:focus, select:focus { border-color:var(--acid2); box-shadow:0 0 6px var(--acid); }
-select option { background:#0a0a0a; }
+input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(63,169,245,0.18); }
+select option { background:#ffffff; }
 
 /* BUTTONS */
 button.win-btn {
-  padding:4px 10px;
-  background:#0a0a0a; border:1px solid var(--acid);
-  color:var(--acid); font-family:'Share Tech Mono',monospace;
+  padding:6px 12px;
+  background:linear-gradient(180deg,#ffffff,#dff1ff);
+  border:1px solid var(--border);
+  border-radius:999px;
+  color:var(--blue-dark); font-family:'Nunito',sans-serif; font-weight:700;
   font-size:11px; cursor:pointer;
+  box-shadow:0 2px 0 rgba(70,110,160,0.12);
+  transition: transform .1s ease, box-shadow .1s ease;
 }
-button.win-btn:hover { background:var(--acid); color:#000; }
-button.win-btn:active { background:#1a8a00; }
-button.win-btn:disabled { opacity:0.4; cursor:default; }
-button.win-btn.danger { border-color:#ff3300; color:#ff3300; }
-button.win-btn.danger:hover { background:#ff3300; color:#000; }
-button.win-btn.hot { border-color:var(--hot); color:var(--hot); }
-button.win-btn.hot:hover { background:var(--hot); color:#000; }
+button.win-btn:hover { transform: translateY(-1px); box-shadow:0 4px 8px rgba(70,110,160,0.2); }
+button.win-btn:active { transform: translateY(1px); box-shadow:0 1px 0 rgba(70,110,160,0.12); }
+button.win-btn:disabled { opacity:0.5; cursor:default; transform:none; }
+button.win-btn.danger { border-color:#ffb3ad; color:#c43d2a; background:linear-gradient(180deg,#ffffff,#ffe1de); }
+button.win-btn.danger:hover { background:linear-gradient(180deg,#ffe1de,#ffb3ad); }
+button.win-btn.hot { border-color:var(--purple); color:#7b3ec9; background:linear-gradient(180deg,#ffffff,#f1e0ff); }
+button.win-btn.hot:hover { background:linear-gradient(180deg,#f1e0ff,#e3a9ff); }
 
 /* CHAT LAYOUT */
-.main-layout { display:flex; gap:5px; height:350px; }
-.sidebar { width:150px; background:#050505; border:1px solid var(--acid); display:flex; flex-direction:column; }
-.sidebar-header { background:#0f2d00; padding:3px 6px; border-bottom:1px solid var(--acid); color:var(--acid); font-weight:bold; font-size:11px; text-shadow:0 0 5px var(--acid); }
-.room-list { flex-grow:1; overflow-y:auto; list-style:none; margin:0; padding:2px; }
-.room-item { padding:4px 6px; cursor:pointer; display:flex; justify-content:space-between; border-bottom:1px solid #1a1a1a; font-size:11px; color:#aaa; }
-.room-item:hover { background:#0f2d00; color:var(--acid); }
-.room-item.active { background:#1a5a00; color:var(--acid); font-weight:bold; border-left:2px solid var(--acid); }
-.chat-area { flex-grow:1; display:flex; flex-direction:column; gap:4px; }
-.room-tools { background:#0a0a0a; padding:4px; border:1px solid #ff3300; display:none; gap:4px; flex-wrap:wrap; align-items:center; }
+.main-layout { display:flex; gap:8px; height:355px; }
+.sidebar { width:150px; background:var(--glass-strong); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; overflow:hidden; }
+.sidebar-header { background:linear-gradient(180deg,#fff,#e3f3ff); padding:6px 8px; border-bottom:1px solid var(--border); color:var(--blue-dark); font-weight:800; font-size:11px; font-family:'Baloo 2',sans-serif; }
+.room-list { flex-grow:1; overflow-y:auto; list-style:none; margin:0; padding:4px; }
+.room-item { padding:6px 8px; cursor:pointer; display:flex; justify-content:space-between; border-radius:8px; margin-bottom:2px; font-size:11px; color:var(--ink-soft); font-weight:700; }
+.room-item:hover { background:#eaf6ff; color:var(--blue-dark); }
+.room-item.active { background:linear-gradient(180deg,#dff1ff,#bfe4fb); color:var(--blue-dark); }
+.chat-area { flex-grow:1; display:flex; flex-direction:column; gap:6px; min-width:0; }
+.room-tools { background:#fff3f1; border:1px solid #ffb3ad; border-radius:10px; padding:5px 6px; display:none; gap:5px; flex-wrap:wrap; align-items:center; }
 .chat-box {
   flex-grow:1;
-  background:#020202;
-  border:1px solid var(--acid);
-  overflow-y:auto; padding:6px;
-  font-family:'Share Tech Mono',monospace; font-size:11px;
-  line-height:1.5;
+  background:var(--glass-strong);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow-y:auto; padding:8px;
+  font-family:'Nunito',sans-serif; font-size:12px;
+  line-height:1.6;
 }
-.message { margin-bottom:3px; }
-.timestamp { color:#3a5a3a; font-size:10px; }
-.pm-message { background:#0a0a15; border:1px dashed var(--acid2); padding:2px 4px; }
-.sys-msg { color:#666; font-style:italic; font-size:10px; }
+.message { margin-bottom:5px; }
+.timestamp { color:#a8b8c9; font-size:10px; }
+.pm-message { background:#f8f0ff; border:1px dashed var(--purple); border-radius:8px; padding:3px 6px; }
+.sys-msg { color:#9aa8b8; font-style:italic; font-size:11px; }
 
 /* CHAT INPUT ROW */
-.chat-input-row { display:flex; gap:4px; }
+.chat-input-row { display:flex; gap:5px; }
 .chat-input-row input { flex-grow:1; }
 
+/* NOW PLAYING BAR */
+.now-playing-bar { display:flex; align-items:center; gap:8px; background:var(--glass-strong); border:1px solid var(--border); border-radius:10px; padding:5px 8px; }
+.np-icon { font-size:15px; }
+.np-title { flex-grow:1; font-size:11px; color:var(--ink-soft); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; }
+.now-playing-bar audio { height:30px; max-width:200px; }
+
+/* AUDIO MESSAGE CARD */
+.audio-msg-card { display:inline-flex; align-items:center; gap:7px; background:linear-gradient(135deg,#eaf6ff,#ffe9f5); border:1px solid var(--border); border-radius:999px; padding:4px 12px 4px 4px; margin-top:3px; }
+.audio-msg-card .btn-play-track { border-radius:50%; width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; font-size:11px; }
+.audio-msg-title { font-weight:800; color:var(--ink); font-size:11px; }
+.audio-msg-tag { font-size:9px; background:var(--blue); color:#fff; padding:1px 7px; border-radius:999px; font-weight:800; }
+
 /* FIELDSET */
-fieldset { border:1px solid var(--acid); padding:6px; margin:0; }
-legend { color:var(--acid); font-size:11px; padding:0 4px; text-shadow:0 0 5px var(--acid); }
+fieldset { border:1px solid var(--border); border-radius:12px; padding:8px; margin:0; }
+legend { color:var(--blue-dark); font-size:11px; padding:0 5px; font-weight:800; font-family:'Baloo 2',sans-serif; }
 
-/* RADIO */
-.radio-now-playing {
-  background:#000; color:var(--acid);
-  padding:6px 8px; border:1px solid var(--acid);
-  margin-bottom:5px; font-size:11px; min-height:32px; line-height:1.5;
-  text-shadow:0 0 4px var(--acid);
-}
-.radio-queue { background:#020202; border:1px solid #2a5a2a; max-height:120px; overflow-y:auto; margin-bottom:5px; }
-.queue-item { display:flex; align-items:center; gap:4px; padding:4px 6px; border-bottom:1px solid #1a1a1a; font-size:11px; color:#aaa; }
-.queue-item:last-child { border-bottom:none; }
-.queue-item.now-playing-item { background:#0f2d00; color:var(--acid); font-weight:bold; }
-.queue-title { flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.queue-sub { color:#3a5a3a; font-size:10px; white-space:nowrap; }
-.queue-item.now-playing-item .queue-sub { color:#5aaa5a; }
-.vote-bar { background:#0a0a0a; border:1px solid #2a5a2a; padding:5px; margin-bottom:5px; display:none; align-items:center; gap:5px; flex-wrap:wrap; }
-.vote-progress { flex-grow:1; background:#050505; border:1px solid #2a4a2a; height:10px; min-width:40px; }
-.vote-progress-fill { background:var(--acid); height:100%; transition:width 0.4s; box-shadow:0 0 6px var(--acid); }
-.volume-row { display:flex; align-items:center; gap:6px; background:#0a0a0a; padding:5px; border:1px solid #2a5a2a; margin-bottom:5px; }
-input[type="range"] { -webkit-appearance:none; height:8px; background:#050505; border:1px solid var(--acid); outline:none; cursor:pointer; flex-grow:1; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--acid); border:none; cursor:pointer; box-shadow:0 0 6px var(--acid); }
-.sc-frame-wrap { background:#000; border:1px solid var(--acid); margin-bottom:5px; overflow:hidden; height:130px; box-shadow:0 0 10px rgba(57,255,20,0.2); }
-.sc-frame-wrap iframe { width:100%; height:130px; border:none; display:block; }
+/* VISUALIZER */
+.viz-now-playing { font-size:11px; color:var(--ink-soft); margin-bottom:6px; font-weight:800; text-align:center; }
+.viz-canvas-wrap { background:#0c1a2b; border-radius:12px; overflow:hidden; border:1px solid var(--border); margin-bottom:6px; }
+#viz-canvas { display:block; width:100%; height:180px; }
+.viz-controls { display:flex; align-items:center; gap:6px; justify-content:center; font-size:11px; color:var(--ink); font-weight:700; }
 
-/* EFFECTS */
-@keyframes rainbow { 0%{color:red}14%{color:orange}28%{color:#ffff00}42%{color:#39FF14}56%{color:#00ffff}70%{color:#0080ff}85%{color:#ff00ff}100%{color:red} }
-.effect-rainbow { animation:rainbow 1.5s infinite linear; font-weight:bold; }
-@keyframes neon { 0%,100%{color:var(--eff-color,#39FF14);text-shadow:0 0 4px var(--eff-color,#39FF14),0 0 10px var(--eff-color,#39FF14)} 50%{color:#fff;text-shadow:0 0 10px var(--eff-color,#39FF14),0 0 30px var(--eff-color,#39FF14),0 0 60px var(--eff-color,#39FF14)} }
-.effect-glow { animation:neon 1.2s infinite; font-weight:bold; }
-@keyframes fire { 0%{color:#ffeb3b;text-shadow:0 -2px 4px #ff9800,0 -4px 8px #f44336,0 -8px 16px #ff0000} 50%{color:#fff;text-shadow:0 -2px 8px #ffeb3b,0 -6px 16px #ff9800} 100%{color:#ffeb3b;text-shadow:0 -2px 4px #ff9800,0 -4px 8px #f44336} }
-.effect-fire { animation:fire 0.6s infinite alternate; font-weight:bold; }
-@keyframes glitch { 0%,100%{transform:none;text-shadow:2px 0 #ff00ff,-2px 0 #00ffff} 25%{transform:skew(-2deg);text-shadow:-4px 0 #ff00ff,4px 0 #00ffff} 50%{transform:skew(1deg);text-shadow:3px 0 #00ffff,-3px 0 #ff00ff} 75%{transform:none;text-shadow:-2px 0 #ff00ff,2px 0 #00ffff} }
-.effect-glitch { animation:glitch 0.4s infinite; font-weight:bold; }
-@keyframes shake { 0%{transform:translate(2px,1px)}20%{transform:translate(-3px,0)}40%{transform:translate(1px,-2px)}60%{transform:translate(-2px,2px)}80%{transform:translate(-1px,-1px)}100%{transform:translate(1px,-2px)} }
-.earthquake { animation:shake 0.4s infinite; }
-@keyframes strobe { 0%,49%{opacity:1} 50%,100%{opacity:0} }
-.strobe-effect { animation:strobe 0.12s infinite; }
-@keyframes matrix-rain { 0%{color:#39FF14;text-shadow:0 0 5px #39FF14} 100%{color:#003300;text-shadow:none} }
-.effect-matrix { animation:matrix-rain 0.5s infinite alternate; font-family:'Share Tech Mono',monospace; }
-@keyframes invert-flash { 0%,100%{filter:none} 50%{filter:invert(1)} }
+/* EFFECTS (username flair) */
+@keyframes rainbow { 0%{color:red}14%{color:orange}28%{color:#e6c200}42%{color:#39c95f}56%{color:#00c2c9}70%{color:#3f8dff}85%{color:#cf3fff}100%{color:red} }
+.effect-rainbow { animation:rainbow 2s infinite linear; font-weight:800; }
+@keyframes neon { 0%,100%{color:var(--eff-color,#3fa9f5);text-shadow:0 0 3px var(--eff-color,#3fa9f5)} 50%{color:#fff;text-shadow:0 0 8px var(--eff-color,#3fa9f5),0 0 16px var(--eff-color,#3fa9f5)} }
+.effect-glow { animation:neon 1.4s infinite; font-weight:800; }
+@keyframes fire { 0%{color:#ffd34f;text-shadow:0 -1px 3px #ff9800} 50%{color:#fff;text-shadow:0 -2px 6px #ff9800,0 -4px 10px #ff5252} 100%{color:#ffd34f;text-shadow:0 -1px 3px #ff9800} }
+.effect-fire { animation:fire 0.8s infinite alternate; font-weight:800; }
+@keyframes glitch { 0%,100%{transform:none;text-shadow:1px 0 #ff6fa8,-1px 0 #3fa9f5} 50%{transform:skew(1deg);text-shadow:-2px 0 #ff6fa8,2px 0 #3fa9f5} }
+.effect-glitch { animation:glitch 0.5s infinite; font-weight:800; }
+@keyframes matrixfx { 0%{color:#4fd9ae;text-shadow:0 0 4px #4fd9ae} 100%{color:#1d8a64;text-shadow:none} }
+.effect-matrix { animation:matrixfx 0.6s infinite alternate; font-family:'Nunito',sans-serif; }
+@keyframes shake { 0%{transform:translate(1px,1px)}25%{transform:translate(-2px,0)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,1px)}100%{transform:translate(1px,-1px)} }
+.earthquake { animation:shake 0.3s infinite; }
+@keyframes softflash { 0%,100%{ filter:brightness(1); } 50%{ filter:brightness(1.35); } }
+.strobe-effect { animation:softflash 0.3s infinite; }
 
 /* ADMIN COLOR ROW */
-.admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:4px; }
-.color-label { font-size:10px; color:#888; margin-bottom:2px; }
+.admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:5px; }
+.color-label { font-size:10px; color:var(--ink-soft); margin-bottom:2px; font-weight:700; }
 
 /* SCROLLBARS */
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-track { background:#050505; }
-::-webkit-scrollbar-thumb { background:var(--acid); }
-::-webkit-scrollbar-thumb:hover { background:var(--acid2); }
+::-webkit-scrollbar { width:7px; height:7px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:8px; }
+::-webkit-scrollbar-thumb:hover { background:var(--blue); }
 
 /* LOGIN */
-#login-window .win-content p { color:#888; margin:0 0 10px 0; font-size:11px; }
-#login-window label { color:var(--acid); font-size:11px; }
+#login-window .win-content p { color:var(--ink-soft); margin:0 0 10px 0; font-size:11px; }
+#login-window label { color:var(--blue-dark); font-size:11px; font-weight:800; }
 
 /* ALERT */
-#alert-message { color:var(--hot); font-size:14px; font-weight:bold; text-align:center; padding:16px; text-shadow:0 0 10px var(--hot); font-family:'Black Han Sans',sans-serif; }
+#alert-message { color:#c43d2a; font-size:14px; font-weight:800; text-align:center; padding:16px; font-family:'Baloo 2',sans-serif; }
 
 /* STATUS BAR */
-#status-bar { position:fixed; bottom:0; left:0; right:0; height:20px; background:#050505; border-top:1px solid var(--acid); display:flex; align-items:center; padding:0 10px; gap:20px; font-size:10px; color:#3a8a3a; z-index:99996; }
-#status-bar span { color:var(--acid); }
+#status-bar { position:fixed; bottom:0; left:0; right:0; height:24px; background:var(--glass-strong); backdrop-filter:blur(6px); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 12px; gap:20px; font-size:10px; color:var(--ink-soft); z-index:99996; font-weight:700; }
+#status-bar span { color:var(--blue-dark); }
 
 /* PARTY MODE */
-@keyframes party-bg { 0%{background-color:#0a0a0a} 16%{background-color:#0a0a20} 32%{background-color:#200a0a} 48%{background-color:#0a200a} 64%{background-color:#1a0a1a} 80%{background-color:#0a1a1a} 100%{background-color:#0a0a0a} }
-body.party-mode { animation:party-bg 0.5s infinite; }
-
-/* PULSE BORDER */
-@keyframes pulse-border { 0%,100%{box-shadow:0 0 20px rgba(57,255,20,0.4)} 50%{box-shadow:0 0 40px rgba(57,255,20,0.8),0 0 80px rgba(57,255,20,0.3)} }
-.window { animation:pulse-border 3s infinite; }
+@keyframes party-bg { 0%{background-color:#eaf6ff} 25%{background-color:#ffe6f4} 50%{background-color:#f1e0ff} 75%{background-color:#e0fff1} 100%{background-color:#eaf6ff} }
+body.party-mode { animation:party-bg 0.8s infinite; }
 
 /* HEADER GLOW */
-.chatzone-header { color:var(--acid); font-family:'Black Han Sans',sans-serif; font-size:11px; text-shadow:0 0 6px var(--acid); white-space:nowrap; }
+.chatzone-header { color:var(--blue-dark); font-family:'Baloo 2',sans-serif; font-size:13px; white-space:nowrap; }
 </style>
 </head>
 <body>
 
-<div id="os-overlay"><div id="os-overlay-inner">⚡ CHATZONE ⚡<br><span style="font-size:18px;color:#888;">Loading...</span></div></div>
+<div id="os-overlay"><div id="os-overlay-inner">🫧 BubbleBeat<br><span style="font-size:16px;color:var(--ink-soft);font-family:'Nunito',sans-serif;font-weight:700;">loading the vibe...</span></div></div>
 
 <!-- STATUS BAR -->
 <div id="status-bar">
-  <span>⚡ CHATZONE RAVE OS v7.1</span>
+  <span>🫧 BubbleBeat v2.0</span>
   <span id="sb-room">LOBBY</span>
   <span id="sb-user"></span>
   <span id="sb-time"></span>
@@ -244,75 +263,59 @@ body.party-mode { animation:party-bg 0.5s infinite; }
 <!-- LOGIN -->
 <div class="window" id="login-window">
   <div class="title-bar" id="login-handle">
-    <span class="title-bar-text">⚡ LOG IN TO CHATZONE</span>
+    <span class="title-bar-text">🫧 LOG IN TO BUBBLEBEAT</span>
   </div>
-  <div class="win-content" style="display:flex;flex-direction:column;gap:10px;padding:15px;">
-    <p>Welcome to the zone. New username = new account.</p>
-    <div style="display:flex;justify-content:space-between;align-items:center;"><label>USERNAME:</label><input type="text" id="login-user" style="width:160px;"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;"><label>PASSWORD:</label><input type="password" id="login-pass" style="width:160px;"></div>
-    <p id="login-error" style="color:#ff3300;margin:0;display:none;"></p>
-    <div style="text-align:center;margin-top:5px;"><button class="win-btn" id="btn-login-submit" style="width:140px;font-size:13px;padding:6px;">▶ ENTER THE ZONE</button></div>
+  <div class="win-content" style="display:flex;flex-direction:column;gap:10px;padding:16px;">
+    <p>Welcome back! New username = new account, just like the good ol' days.</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;"><label>USERNAME:</label><input type="text" id="login-user" style="width:170px;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;"><label>PASSWORD:</label><input type="password" id="login-pass" style="width:170px;"></div>
+    <p id="login-error" style="color:#c43d2a;margin:0;display:none;font-weight:700;font-size:11px;"></p>
+    <div style="text-align:center;margin-top:5px;"><button class="win-btn" id="btn-login-submit" style="width:150px;font-size:13px;padding:8px;">▶ Enter the Zone</button></div>
   </div>
 </div>
 
 <!-- DESKTOP -->
 <div class="desktop">
   <div class="desktop-icon" ondblclick="openWindow('chat-window')">
-    <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_pnp-0.png" alt="Chat">
-    <span>ChatZone</span>
+    <div class="icon-bubble">💬</div>
+    <span>BubbleChat</span>
   </div>
-  <div class="desktop-icon" ondblclick="openWindow('radio-window')">
-    <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-1.png" alt="Music">
-    <span>Radio</span>
+  <div class="desktop-icon" ondblclick="openWindow('visualizer-window')">
+    <div class="icon-bubble">🎨</div>
+    <span>Visualizer</span>
   </div>
   <div class="desktop-icon" onclick="attemptAdminLogin()">
-    <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Admin">
+    <div class="icon-bubble">🛠️</div>
     <span>Admin</span>
   </div>
 </div>
 
-<!-- RADIO WINDOW -->
-<div class="window" id="radio-window">
-  <div class="title-bar" id="radio-handle">
-    <span class="title-bar-text">🎵 CHATAMP GLOBAL RADIO</span>
-    <div class="title-bar-controls"><button onclick="closeWindow('radio-window')">✕</button></div>
+<!-- VISUALIZER WINDOW -->
+<div class="window" id="visualizer-window">
+  <div class="title-bar hot" id="visualizer-handle">
+    <span class="title-bar-text">🎨 BUBBLEBEAT VISUALIZER</span>
+    <div class="title-bar-controls"><button onclick="closeWindow('visualizer-window')">✕</button></div>
   </div>
   <div class="win-content">
-    <div class="radio-now-playing" id="radio-now-playing">♪ No song playing — add one to the queue!</div>
-    <div class="sc-frame-wrap">
-      <iframe id="sc-player" scrolling="no" frameborder="no" allow="autoplay" src="about:blank"></iframe>
+    <div class="viz-now-playing" id="viz-now-playing">Nothing playing yet — start a track from chat!</div>
+    <div class="viz-canvas-wrap"><canvas id="viz-canvas" width="360" height="180"></canvas></div>
+    <div class="viz-controls">
+      <label for="viz-style">Style:</label>
+      <select id="viz-style">
+        <option value="bars">📊 Bars</option>
+        <option value="wave">〰️ Wave</option>
+        <option value="circle">⭕ Orbit</option>
+      </select>
     </div>
-    <div class="volume-row">
-      <span style="color:var(--acid);">🔈</span>
-      <input type="range" id="volume-slider" min="0" max="100" value="80">
-      <span style="color:var(--acid);">🔊</span>
-      <span id="volume-label" style="width:28px;text-align:right;color:var(--acid);">80%</span>
-    </div>
-    <div class="vote-bar" id="vote-bar">
-      <b style="white-space:nowrap;color:var(--acid);">SKIP:</b>
-      <div class="vote-progress"><div class="vote-progress-fill" id="vote-fill" style="width:0%"></div></div>
-      <span id="vote-count" style="white-space:nowrap;font-size:10px;color:#aaa;">0/2</span>
-      <button class="win-btn" id="btn-voteskip" style="padding:2px 8px;">Vote Skip</button>
-      <button class="win-btn danger" id="btn-owner-skip" style="padding:2px 8px;display:none;">⏭ SKIP</button>
-    </div>
-    <div style="font-size:10px;color:var(--acid);margin-bottom:3px;text-shadow:0 0 4px var(--acid);">▼ QUEUE</div>
-    <div class="radio-queue" id="radio-queue-list">
-      <div style="padding:6px;color:#3a5a3a;font-size:11px;">Queue is empty.</div>
-    </div>
-    <div style="display:flex;gap:4px;margin-top:5px;">
-      <input type="text" id="radio-input" placeholder="SoundCloud link..." style="flex-grow:1;font-size:11px;">
-      <button id="btn-add-queue" class="win-btn">+ QUEUE</button>
-    </div>
-    <p style="font-size:9px;color:#3a5a3a;margin:3px 0 0 0;">Submitter can skip their own track. Others vote to skip.</p>
   </div>
 </div>
 
 <!-- CHAT WINDOW -->
 <div class="window" id="chat-window">
   <div class="title-bar" id="chat-handle">
-    <span class="title-bar-text chatzone-header" id="window-title">⚡ CHATZONE v7.1</span>
+    <span class="title-bar-text chatzone-header" id="window-title">🫧 BUBBLEBEAT</span>
     <div class="title-bar-controls">
-      <span id="display-username" style="font-size:10px;margin-right:8px;"></span>
+      <span id="display-username" style="font-size:10px;margin-right:8px;color:var(--blue-dark);"></span>
       <button onclick="logout()">LOG OUT</button>
     </div>
   </div>
@@ -321,24 +324,32 @@ body.party-mode { animation:party-bg 0.5s infinite; }
       <div class="sidebar">
         <div class="sidebar-header">ROOMS</div>
         <ul class="room-list" id="room-list-ui"></ul>
-        <button id="btn-create-room" class="win-btn" style="margin:3px;font-size:10px;">+ NEW ROOM</button>
+        <button id="btn-create-room" class="win-btn" style="margin:5px;font-size:10px;">+ NEW ROOM</button>
       </div>
       <div class="chat-area">
         <div class="room-tools" id="room-tools">
-          <b style="color:#ff3300;font-size:10px;">MOD▶</b>
-          <button id="btn-lock-room" class="win-btn" style="font-size:10px;padding:2px 6px;">🔒 Lock</button>
-          <button id="btn-unlock-room" class="win-btn" style="font-size:10px;padding:2px 6px;">🔓 Unlock</button>
-          <button id="btn-ban-user" class="win-btn danger" style="font-size:10px;padding:2px 6px;">Ban</button>
-          <button id="btn-unban-user" class="win-btn" style="font-size:10px;padding:2px 6px;">Unban</button>
-          <button id="btn-wipe-chat" class="win-btn danger" style="font-size:10px;padding:2px 6px;">Wipe</button>
-          <button id="btn-delete-room" class="win-btn danger" style="font-size:10px;padding:2px 6px;">Delete</button>
+          <b style="color:#c43d2a;font-size:10px;">MOD▶</b>
+          <button id="btn-lock-room" class="win-btn" style="font-size:10px;padding:3px 7px;">🔒 Lock</button>
+          <button id="btn-unlock-room" class="win-btn" style="font-size:10px;padding:3px 7px;">🔓 Unlock</button>
+          <button id="btn-ban-user" class="win-btn danger" style="font-size:10px;padding:3px 7px;">Ban</button>
+          <button id="btn-unban-user" class="win-btn" style="font-size:10px;padding:3px 7px;">Unban</button>
+          <button id="btn-wipe-chat" class="win-btn danger" style="font-size:10px;padding:3px 7px;">Wipe</button>
+          <button id="btn-delete-room" class="win-btn danger" style="font-size:10px;padding:3px 7px;">Delete</button>
         </div>
         <div id="chat-box" class="chat-box"></div>
+        <div class="now-playing-bar">
+          <span class="np-icon">🎧</span>
+          <span class="np-title" id="now-playing-title">nothing playing — tap a track to listen</span>
+          <audio id="global-audio-player" controls></audio>
+          <button id="btn-open-viz" class="win-btn hot" title="Open Visualizer" style="padding:4px 8px;">🎨</button>
+        </div>
         <div class="chat-input-row">
           <input type="file" id="image-input" accept="image/*" style="display:none;">
-          <button id="btn-upload-img" class="win-btn" title="Send Image" style="padding:4px 8px;">🖼️</button>
+          <input type="file" id="audio-input" accept="audio/*" style="display:none;">
+          <button id="btn-upload-img" class="win-btn" title="Send Image" style="padding:6px 10px;">🖼️</button>
+          <button id="btn-upload-audio" class="win-btn" title="Share an MP3" style="padding:6px 10px;">🎵</button>
           <input type="text" id="message-input" placeholder="Message... /msg User text for PM" autocomplete="off">
-          <button id="send-btn" class="win-btn" style="padding:4px 12px;">SEND</button>
+          <button id="send-btn" class="win-btn" style="padding:6px 14px;">SEND</button>
         </div>
       </div>
     </div>
@@ -348,21 +359,21 @@ body.party-mode { animation:party-bg 0.5s infinite; }
 <!-- ADMIN PANEL -->
 <div class="window" id="admin-panel">
   <div class="title-bar hot" id="admin-handle">
-    <span class="title-bar-text">⚡ ADMIN CONTROL CENTER ⚡</span>
+    <span class="title-bar-text">🛠️ ADMIN CONTROL CENTER</span>
     <div class="title-bar-controls"><button onclick="closeWindow('admin-panel')">✕</button></div>
   </div>
-  <div class="win-content" style="display:flex;flex-direction:column;gap:8px;max-height:80vh;overflow-y:auto;">
+  <div class="win-content" style="display:flex;flex-direction:column;gap:9px;max-height:80vh;overflow-y:auto;">
 
     <!-- PERSONA -->
     <fieldset>
       <legend>★ YOUR PERSONA</legend>
       <div class="admin-grid">
-        <div><div class="color-label">NAME COLOR</div><input type="color" id="admin-color" value="#ff00ff"></div>
+        <div><div class="color-label">NAME COLOR</div><input type="color" id="admin-color" value="#ff6fa8"></div>
         <div><div class="color-label">NAME EFFECT</div>
           <select id="admin-effect" style="width:100%;">
             <option value="none">Normal</option>
             <option value="rainbow">🌈 Rainbow</option>
-            <option value="glow">💚 Neon Glow</option>
+            <option value="glow">💙 Glow</option>
             <option value="fire">🔥 Fire</option>
             <option value="glitch">👾 Glitch</option>
             <option value="matrix">🟩 Matrix</option>
@@ -376,19 +387,19 @@ body.party-mode { animation:party-bg 0.5s infinite; }
       <legend>🎯 TARGET USER</legend>
       <div style="display:flex;gap:4px;margin-bottom:5px;">
         <input type="text" id="target-user" placeholder="username" style="flex-grow:1;">
-        <button class="win-btn" id="btn-fetch-target" style="font-size:10px;padding:2px 6px;">SELECT</button>
+        <button class="win-btn" id="btn-fetch-target" style="font-size:10px;padding:3px 7px;">SELECT</button>
       </div>
       <div class="admin-grid">
         <div>
           <div class="color-label">FORCE THEIR COLOR</div>
-          <div style="display:flex;gap:4px;"><input type="color" id="target-color" value="#ff0000"><button class="win-btn danger" id="btn-set-color" style="font-size:10px;padding:2px 6px;">SET</button></div>
+          <div style="display:flex;gap:4px;"><input type="color" id="target-color" value="#ff6fa8"><button class="win-btn danger" id="btn-set-color" style="font-size:10px;padding:3px 7px;">SET</button></div>
         </div>
         <div>
           <div class="color-label">FORCE THEIR EFFECT</div>
           <select id="target-effect" style="width:100%;">
             <option value="none">Normal</option>
             <option value="rainbow">🌈 Rainbow</option>
-            <option value="glow">💚 Neon Glow</option>
+            <option value="glow">💙 Glow</option>
             <option value="fire">🔥 Fire</option>
             <option value="glitch">👾 Glitch</option>
             <option value="matrix">🟩 Matrix</option>
@@ -396,30 +407,30 @@ body.party-mode { animation:party-bg 0.5s infinite; }
         </div>
       </div>
       <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;">
-        <button class="win-btn danger" id="btn-force-effect" style="font-size:10px;padding:2px 6px;flex-grow:1;">Force Effect</button>
-        <button class="win-btn danger" id="btn-kick-user" style="font-size:10px;padding:2px 6px;flex-grow:1;">🚫 Kick User</button>
-        <button class="win-btn danger" id="btn-mute-user" style="font-size:10px;padding:2px 6px;flex-grow:1;">🔇 Mute User</button>
+        <button class="win-btn danger" id="btn-force-effect" style="font-size:10px;padding:3px 7px;flex-grow:1;">Force Effect</button>
+        <button class="win-btn danger" id="btn-kick-user" style="font-size:10px;padding:3px 7px;flex-grow:1;">🚫 Kick User</button>
+        <button class="win-btn danger" id="btn-mute-user" style="font-size:10px;padding:3px 7px;flex-grow:1;">🔇 Mute User</button>
       </div>
       <div style="margin-top:4px;">
-        <input type="text" id="admin-pm-text" placeholder="Send PM as SYSTEM..." style="width:100%;margin-bottom:3px;">
+        <input type="text" id="admin-pm-text" placeholder="Send PM as SYSTEM..." style="width:100%;margin-bottom:4px;">
         <button class="win-btn hot" id="btn-system-pm" style="width:100%;font-size:10px;">📨 Send SYSTEM PM</button>
       </div>
     </fieldset>
 
     <!-- GLOBAL CHAOS -->
     <fieldset>
-      <legend>💀 GLOBAL CHAOS</legend>
+      <legend>🎉 GLOBAL CHAOS</legend>
       <input type="text" id="admin-broadcast" placeholder="Alert message..." style="width:100%;margin-bottom:5px;">
-      <button id="btn-broadcast" class="win-btn danger" style="width:100%;font-weight:bold;margin-bottom:5px;">📢 SEND ALERT POPUP</button>
+      <button id="btn-broadcast" class="win-btn danger" style="width:100%;font-weight:800;margin-bottom:5px;">📢 SEND ALERT POPUP</button>
       <div class="admin-grid">
-        <button id="btn-earthquake" class="win-btn" style="padding:5px;">🌍 Earthquake</button>
-        <button id="btn-party-mode" class="win-btn hot" style="padding:5px;">🎉 Party Mode</button>
-        <button id="btn-strobe" class="win-btn hot" style="padding:5px;">⚡ Strobe</button>
-        <button id="btn-matrix-rain" class="win-btn" style="padding:5px;">🟩 Matrix Rain</button>
-        <button id="btn-flip" class="win-btn" style="padding:5px;">🙃 Flip Screen</button>
-        <button id="btn-glitch-all" class="win-btn hot" style="padding:5px;">👾 Glitch All</button>
-        <button id="btn-admin-wipe" class="win-btn danger" style="padding:5px;">💣 Nuke Servers</button>
-        <button id="btn-stop-chaos" class="win-btn" style="padding:5px;border-color:#aaa;color:#aaa;">✅ Stop Effects</button>
+        <button id="btn-earthquake" class="win-btn" style="padding:6px;">🌍 Earthquake</button>
+        <button id="btn-party-mode" class="win-btn hot" style="padding:6px;">🎉 Party Mode</button>
+        <button id="btn-strobe" class="win-btn hot" style="padding:6px;">✨ Sparkle Flash</button>
+        <button id="btn-matrix-rain" class="win-btn" style="padding:6px;">🟩 Matrix Rain</button>
+        <button id="btn-flip" class="win-btn" style="padding:6px;">🙃 Flip Screen</button>
+        <button id="btn-glitch-all" class="win-btn hot" style="padding:6px;">👾 Glitch All</button>
+        <button id="btn-admin-wipe" class="win-btn danger" style="padding:6px;">💣 Nuke Servers</button>
+        <button id="btn-stop-chaos" class="win-btn" style="padding:6px;border-color:#cfd9e3;color:#7a8a9c;">✅ Stop Effects</button>
       </div>
     </fieldset>
 
@@ -442,18 +453,19 @@ body.party-mode { animation:party-bg 0.5s infinite; }
   <div class="win-content" style="text-align:center;padding:10px;">
     <div style="font-size:40px;margin-bottom:5px;">⚠️</div>
     <div id="alert-message"></div>
-    <button class="win-btn" onclick="closeWindow('alert-window')" style="margin-top:10px;width:80px;">OK</button>
+    <button class="win-btn" onclick="closeWindow('alert-window')" style="margin-top:10px;width:90px;">OK</button>
   </div>
 </div>
 
 <!-- MATRIX RAIN CANVAS (hidden by default) -->
-<canvas id="matrix-canvas" style="display:none;position:fixed;top:0;left:0;z-index:999996;pointer-events:none;opacity:0.7;"></canvas>
+<canvas id="matrix-canvas" style="display:none;position:fixed;top:0;left:0;z-index:999996;pointer-events:none;opacity:0.6;"></canvas>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc,
          arrayUnion, arrayRemove, query, where, orderBy, limit, onSnapshot,
-         serverTimestamp, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+         serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
@@ -466,14 +478,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
+const storage = getStorage(app);
 const messagesCol   = collection(db, "messages");
 const roomsCol      = collection(db, "rooms");
 const usersCol      = collection(db, "users");
-// FIX: store radio queue and state inside "messages" collection with a special type
-// to avoid permission issues with "system" collection
-const radioQueueCol = collection(db, "radioQueue");
-// Use a document in "rooms" collection for radioState (we know that collection has full r/w)
-const radioStateDoc = doc(db, "rooms", "__radioState__");
 
 // ── State ────────────────────────────────────────────────────────────────
 let myUsername   = "";
@@ -485,17 +493,29 @@ let isAdmin      = false;
 let myOverrideColor  = null;
 let myOverrideEffect = null;
 
-// Radio
-let radioQueue        = [];
-let radioState        = null;
-let myVotedSkip       = false;
-let currentPlayingUrl = "";
-let advanceLock       = false;
+// Audio / visualizer
+let audioCtx = null;
+let analyserNode = null;
+const globalAudioEl = document.getElementById('global-audio-player');
 
 // Chaos
 let partyInterval = null;
 let strobeTimeout = null;
 let matrixRunning = false;
+
+// ── Floating bubble background ──────────────────────────────────────────
+(function spawnBubbles(){
+  const sizes=[40,60,30,80,50,35,70,45,55];
+  sizes.forEach(s=>{
+    const b=document.createElement('div');
+    b.className='bg-bubble';
+    b.style.width=s+'px'; b.style.height=s+'px';
+    b.style.left=(Math.random()*100)+'vw';
+    b.style.animationDuration=(18+Math.random()*14)+'s';
+    b.style.animationDelay=(Math.random()*12)+'s';
+    document.body.appendChild(b);
+  });
+})();
 
 // ── Clock ────────────────────────────────────────────────────────────────
 setInterval(()=>{
@@ -522,7 +542,7 @@ function makeDraggable(winId, handleId) {
     };
   };
 }
-['chat-window','admin-panel','alert-window','login-window','radio-window'].forEach(id=>{
+['chat-window','admin-panel','alert-window','login-window','visualizer-window'].forEach(id=>{
   const handleId = id.replace('-window','-handle').replace('-panel','-handle');
   makeDraggable(id, handleId);
 });
@@ -541,18 +561,18 @@ async function attemptLogin() {
       if (snap.data().password!==p) { errEl.innerText="Wrong password!"; errEl.style.display='block'; return; }
       finalizeLogin(snap.data().username, p, snap.data());
     } else {
-      await setDoc(ref, { username:u, password:p, color:"#39FF14", effect:"none" });
-      finalizeLogin(u, p, {color:"#39FF14", effect:"none"});
+      await setDoc(ref, { username:u, password:p, color:"#3fa9f5", effect:"none" });
+      finalizeLogin(u, p, {color:"#3fa9f5", effect:"none"});
     }
   } catch(e) { console.error(e); errEl.innerText="Error: "+e.message; errEl.style.display='block'; }
 }
 
 function finalizeLogin(username, password, userData) {
   myUsername = username;
-  myOverrideColor  = userData.color  || "#39FF14";
+  myOverrideColor  = userData.color  || "#3fa9f5";
   myOverrideEffect = userData.effect || "none";
-  localStorage.setItem('cz_user', username);
-  localStorage.setItem('cz_pass', password);
+  localStorage.setItem('bb_user', username);
+  localStorage.setItem('bb_pass', password);
   document.getElementById('display-username').innerText = "[ "+myUsername+" ]";
   document.getElementById('sb-user').innerText = "USER: "+myUsername;
   document.getElementById('os-overlay').style.display='none';
@@ -560,18 +580,18 @@ function finalizeLogin(username, password, userData) {
   openWindow('chat-window');
   ensureLobbyExists();
   loadChatForRoom();
-  initRadio();
   listenForAdminCommands();
 }
 
-window.logout = ()=>{ localStorage.removeItem('cz_user'); localStorage.removeItem('cz_pass'); location.reload(); };
+window.logout = ()=>{ localStorage.removeItem('bb_user'); localStorage.removeItem('bb_pass'); location.reload(); };
 document.getElementById('btn-login-submit').onclick = attemptLogin;
 document.getElementById('login-user').addEventListener('keypress',e=>{if(e.key==='Enter')attemptLogin();});
 document.getElementById('login-pass').addEventListener('keypress',e=>{if(e.key==='Enter')attemptLogin();});
 
 window.onload = ()=>{
-  const u=localStorage.getItem('cz_user'), p=localStorage.getItem('cz_pass');
+  const u=localStorage.getItem('bb_user'), p=localStorage.getItem('bb_pass');
   if(u&&p){ document.getElementById('login-user').value=u; document.getElementById('login-pass').value=p; attemptLogin(); }
+  startVizLoop();
 };
 
 window.attemptAdminLogin = ()=>{
@@ -582,7 +602,6 @@ window.attemptAdminLogin = ()=>{
 
 // ── Listen for admin commands targeting this user ───────────────────────
 function listenForAdminCommands() {
-  // Watch our own user doc for forced color/effect overrides
   const myRef = doc(usersCol, myUsername.toLowerCase());
   onSnapshot(myRef, snap=>{
     if (!snap.exists()) return;
@@ -590,8 +609,6 @@ function listenForAdminCommands() {
     if (d.color)  myOverrideColor  = d.color;
     if (d.effect) myOverrideEffect = d.effect;
   });
-
-  // Listen for global "system" messages in current room for chaos effects
 }
 
 // ── Rooms ─────────────────────────────────────────────────────────────────
@@ -604,7 +621,6 @@ onSnapshot(roomsCol, snap=>{
   allRooms=[];
   const ul=document.getElementById('room-list-ui'); ul.innerHTML="";
   snap.forEach(d=>{
-    if(d.id==="__radioState__") return; // skip our radio state doc
     const r={...d.data(),id:d.id}; allRooms.push(r);
     const li=document.createElement('li');
     li.className='room-item'+(r.id===currentRoomId?' active':'');
@@ -634,7 +650,7 @@ function attemptJoinRoom(room) {
     if(prompt(`'${room.name}' password:`)!==room.password){alert("Wrong password.");return;}
   }
   currentRoomId=room.id; currentRoomDoc=room;
-  document.getElementById('window-title').innerText=`⚡ CHATZONE - [${room.name.toUpperCase()}]`;
+  document.getElementById('window-title').innerText=`🫧 BUBBLEBEAT - [${room.name.toUpperCase()}]`;
   document.getElementById('sb-room').innerText="ROOM: "+room.name.toUpperCase();
   document.querySelectorAll('.room-item').forEach(el=>el.classList.remove('active'));
   updateRoomTools(); loadChatForRoom();
@@ -658,30 +674,40 @@ function loadChatForRoom(){
     const box=document.getElementById('chat-box'); box.innerHTML='';
     snap.forEach(d=>{
       const data=d.data();
-      // Handle system chaos events
-      if(data.msgType==='system'){
-        handleChaosEvent(data); return;
-      }
-      // PM filter
+      if(data.msgType==='system'){ handleChaosEvent(data); return; }
       if(data.to&&data.to.toLowerCase()!==myUsername.toLowerCase()&&data.username.toLowerCase()!==myUsername.toLowerCase()) return;
       const time=data.createdAt?data.createdAt.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):"--:--";
       const div=document.createElement('div');
       div.className=data.to?'message pm-message':'message';
 
-      // Use overridden color/effect if admin set them, otherwise use what was sent
-      let color=data.color||"#39FF14";
+      let color=data.color||"#3fa9f5";
       let effect=data.effect||"none";
       const eff=effect&&effect!=='none'?`effect-${effect}`:'';
       const nameHtml=`<span class="${eff}" style="color:${color};--eff-color:${color};">${esc(data.username)}</span>`;
 
       let body=esc(data.text||"");
-      if(data.msgType==='image'&&data.imageUrl) body=`<img src="${data.imageUrl}" style="max-width:280px;border:1px solid var(--acid);margin-top:3px;display:block;">`;
+      if(data.msgType==='image'&&data.imageUrl) body=`<img src="${data.imageUrl}" style="max-width:280px;border:1px solid var(--border);border-radius:10px;margin-top:3px;display:block;">`;
+      if(data.msgType==='audio'&&data.audioUrl){
+        body=`<div class="audio-msg-card" data-url="${esc(data.audioUrl)}" data-title="${esc(data.audioTitle||'track')}" data-by="${esc(data.username)}">
+          <button class="btn-play-track win-btn" title="Play">▶</button>
+          <span class="audio-msg-title">${esc(data.audioTitle||'track')}</span>
+          <span class="audio-msg-tag">MP3</span>
+        </div>`;
+      }
 
-      const prefix=data.to?`<span style="color:var(--acid2);">[PM]</span> ${nameHtml} ▶ <span style="color:#aaa;">${esc(data.to)}</span>: `:`${nameHtml}: `;
+      const prefix=data.to?`<span style="color:var(--purple);">[PM]</span> ${nameHtml} ▶ <span style="color:var(--ink-soft);">${esc(data.to)}</span>: `:`${nameHtml}: `;
       div.innerHTML=`<span class="timestamp">[${time}]</span> ${prefix}${body}`;
       box.appendChild(div);
     });
     box.scrollTop=box.scrollHeight;
+
+    // wire up play buttons for any audio cards just rendered
+    box.querySelectorAll('.btn-play-track').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const card=btn.closest('.audio-msg-card');
+        playTrack(card.dataset.url, card.dataset.title, card.dataset.by);
+      });
+    });
   });
 }
 
@@ -691,7 +717,7 @@ async function sendMessage(){
   let to=null;
   if(text.startsWith("/msg ")){const pts=text.split(" ");if(pts.length>2){to=pts[1];text=pts.slice(2).join(" ");}}
   const uname=isAdmin?"★"+myUsername:myUsername;
-  const color=isAdmin?document.getElementById('admin-color').value:myOverrideColor||"#39FF14";
+  const color=isAdmin?document.getElementById('admin-color').value:myOverrideColor||"#3fa9f5";
   const effect=isAdmin?document.getElementById('admin-effect').value:myOverrideEffect||"none";
   try {
     await addDoc(messagesCol,{username:uname,text,room:currentRoomId,to,isAdmin,msgType:'chat',color,effect,createdAt:serverTimestamp()});
@@ -712,7 +738,7 @@ document.getElementById('image-input').addEventListener('change',function(){
       const c=document.createElement('canvas'); const W=300,s=W/img.width;
       c.width=W; c.height=img.height*s; c.getContext('2d').drawImage(img,0,0,W,img.height*s);
       try{
-        const color=isAdmin?document.getElementById('admin-color').value:myOverrideColor||"#39FF14";
+        const color=isAdmin?document.getElementById('admin-color').value:myOverrideColor||"#3fa9f5";
         const effect=isAdmin?document.getElementById('admin-effect').value:myOverrideEffect||"none";
         await addDoc(messagesCol,{username:isAdmin?"★"+myUsername:myUsername,text:"",imageUrl:c.toDataURL('image/jpeg',0.8),room:currentRoomId,isAdmin,msgType:'image',color,effect,createdAt:serverTimestamp()});
       }catch(e){console.error(e);}
@@ -720,10 +746,60 @@ document.getElementById('image-input').addEventListener('change',function(){
   }; reader.readAsDataURL(file); this.value='';
 });
 
+// ── MP3 Upload (Firebase Storage) ───────────────────────────────────────────
+document.getElementById('btn-upload-audio').onclick=()=>document.getElementById('audio-input').click();
+document.getElementById('audio-input').addEventListener('change', function(){
+  const file=this.files[0]; if(!file) return;
+  if(!myUsername){ alert("Log in first!"); this.value=''; return; }
+  if(!file.type.startsWith('audio/')){ alert("Please choose an audio file (mp3, etc)."); this.value=''; return; }
+  const MAX_BYTES = 20*1024*1024; // 20MB cap
+  if(file.size>MAX_BYTES){ alert("That file is too big — please keep MP3s under 20MB."); this.value=''; return; }
+
+  const btn=document.getElementById('btn-upload-audio');
+  btn.disabled=true; btn.innerText='⏳';
+  const path=`audio/${Date.now()}_${myUsername.toLowerCase()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g,'_')}`;
+  const fileRef=storageRef(storage, path);
+  const task=uploadBytesResumable(fileRef, file);
+  task.on('state_changed',
+    snap=>{ const pct=Math.round((snap.bytesTransferred/snap.totalBytes)*100); btn.innerText=pct+'%'; },
+    err=>{ console.error(err); alert("Upload failed: "+err.message); btn.disabled=false; btn.innerText='🎵'; this.value=''; },
+    async()=>{
+      try{
+        const url=await getDownloadURL(fileRef);
+        const color=isAdmin?document.getElementById('admin-color').value:myOverrideColor||"#3fa9f5";
+        const effect=isAdmin?document.getElementById('admin-effect').value:myOverrideEffect||"none";
+        const title=file.name.replace(/\.[^/.]+$/,'');
+        await addDoc(messagesCol,{username:isAdmin?"★"+myUsername:myUsername,text:"",audioUrl:url,audioTitle:title,room:currentRoomId,isAdmin,msgType:'audio',color,effect,createdAt:serverTimestamp()});
+      }catch(e){ console.error(e); alert("Upload finished but posting failed: "+e.message); }
+      finally{ btn.disabled=false; btn.innerText='🎵'; document.getElementById('audio-input').value=''; }
+    }
+  );
+});
+
+// ── Shared audio playback + Web Audio graph for the visualizer ─────────────
+function ensureAudioGraph(){
+  if(audioCtx) return;
+  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  const source = audioCtx.createMediaElementSource(globalAudioEl);
+  analyserNode = audioCtx.createAnalyser();
+  analyserNode.fftSize = 256;
+  source.connect(analyserNode);
+  analyserNode.connect(audioCtx.destination);
+}
+function playTrack(url, title, by){
+  ensureAudioGraph();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  globalAudioEl.src=url;
+  globalAudioEl.play().catch(e=>console.error('play failed',e));
+  document.getElementById('now-playing-title').innerText='🎵 '+title;
+  document.getElementById('viz-now-playing').innerText='🎵 '+title+(by?(' — shared by '+by.replace(/^★/,'')):'');
+}
+document.getElementById('btn-open-viz').addEventListener('click',()=>openWindow('visualizer-window'));
+
 // ── CHAOS EVENT HANDLER ────────────────────────────────────────────────────
 function handleChaosEvent(data){
   const age=data.createdAt?(Date.now()-data.createdAt.toMillis()):9999999;
-  if(age>15000) return; // ignore old events
+  if(age>15000) return;
   switch(data.action){
     case 'earthquake':
       document.body.classList.add('earthquake');
@@ -746,7 +822,7 @@ function handleChaosEvent(data){
       stopAllChaos(); break;
     case 'system_msg':
       const div=document.createElement('div'); div.className='message sys-msg';
-      div.innerHTML=`<span style="color:var(--hot);">★ SYSTEM:</span> ${esc(data.text)}`;
+      div.innerHTML=`<span style="color:var(--purple);">★ SYSTEM:</span> ${esc(data.text)}`;
       document.getElementById('chat-box').appendChild(div);
       document.getElementById('chat-box').scrollTop=9999; break;
   }
@@ -758,18 +834,16 @@ function startParty(dur){
   clearInterval(partyInterval);
   partyInterval=setInterval(()=>{
     document.querySelectorAll('.window').forEach(w=>{
-      w.style.borderColor=`hsl(${Math.random()*360},100%,60%)`;
+      w.style.borderColor=`hsl(${Math.random()*360},85%,75%)`;
     });
-  },200);
+  },220);
   setTimeout(()=>{ document.body.classList.remove('party-mode'); clearInterval(partyInterval); document.querySelectorAll('.window').forEach(w=>w.style.borderColor=''); }, dur);
 }
-
 function startStrobe(dur){
   document.body.classList.add('strobe-effect');
   clearTimeout(strobeTimeout);
   strobeTimeout=setTimeout(()=>document.body.classList.remove('strobe-effect'),dur);
 }
-
 function startMatrixRain(dur){
   const canvas=document.getElementById('matrix-canvas');
   canvas.style.display='block';
@@ -780,8 +854,8 @@ function startMatrixRain(dur){
   matrixRunning=true;
   function draw(){
     if(!matrixRunning){ctx.clearRect(0,0,canvas.width,canvas.height);canvas.style.display='none';return;}
-    ctx.fillStyle='rgba(0,0,0,0.07)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle='#39FF14'; ctx.font='14px Share Tech Mono';
+    ctx.fillStyle='rgba(10,20,15,0.08)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#4fd9ae'; ctx.font='14px monospace';
     drops.forEach((y,i)=>{
       const ch=String.fromCharCode(0x30A0+Math.random()*96);
       ctx.fillText(ch,i*16,y*16);
@@ -793,7 +867,6 @@ function startMatrixRain(dur){
   draw();
   setTimeout(()=>{ matrixRunning=false; },dur);
 }
-
 function stopAllChaos(){
   document.body.classList.remove('earthquake','party-mode','strobe-effect');
   document.body.style.animation='';
@@ -807,53 +880,38 @@ function stopAllChaos(){
 async function sysCmd(action, extra={}){
   await addDoc(messagesCol,{room:currentRoomId,msgType:'system',action,...extra,createdAt:serverTimestamp()});
 }
-
-// Broadcast alert
 document.getElementById('btn-broadcast').onclick=()=>{
   const t=document.getElementById('admin-broadcast').value.trim(); if(!t) return;
   sysCmd('broadcast',{text:t}); document.getElementById('admin-broadcast').value='';
 };
-// Earthquake
 document.getElementById('btn-earthquake').onclick=()=>sysCmd('earthquake');
-// Party
 document.getElementById('btn-party-mode').onclick=()=>sysCmd('party',{duration:10000});
-// Strobe
 document.getElementById('btn-strobe').onclick=()=>sysCmd('strobe',{duration:3000});
-// Matrix
 document.getElementById('btn-matrix-rain').onclick=()=>sysCmd('matrix',{duration:10000});
-// Flip
 document.getElementById('btn-flip').onclick=()=>sysCmd('flip');
-// Glitch all
 document.getElementById('btn-glitch-all').onclick=()=>sysCmd('glitch_all');
-// Stop chaos
 document.getElementById('btn-stop-chaos').onclick=()=>sysCmd('stop_chaos');
-// Nuke
 document.getElementById('btn-admin-wipe').onclick=async()=>{
   if(!confirm("NUKE ALL CHATS?")) return;
   const s=await getDocs(messagesCol); s.forEach(d=>deleteDoc(d.ref));
-  sysCmd('broadcast',{text:"💀 SYSTEM: All chats have been wiped by Admin."});
+  sysCmd('broadcast',{text:"💥 SYSTEM: All chats have been wiped by Admin."});
 };
-// Post as SYSTEM in chat
 document.getElementById('btn-system-chat').onclick=()=>{
   const t=document.getElementById('admin-chat-msg').value.trim(); if(!t) return;
   sysCmd('system_msg',{text:t}); document.getElementById('admin-chat-msg').value='';
 };
-
-// Target user: force color
 document.getElementById('btn-set-color').onclick=async()=>{
   const target=document.getElementById('target-user').value.trim().toLowerCase(); if(!target) return;
   const color=document.getElementById('target-color').value;
   try{ await updateDoc(doc(usersCol,target),{color}); alert("Done! Their messages will use "+color); }
   catch(e){ alert("User not found or error: "+e.message); }
 };
-// Target user: force effect
 document.getElementById('btn-force-effect').onclick=async()=>{
   const target=document.getElementById('target-user').value.trim().toLowerCase(); if(!target) return;
   const effect=document.getElementById('target-effect').value;
   try{ await updateDoc(doc(usersCol,target),{effect}); alert("Effect set to "+effect+" for "+target); }
   catch(e){ alert("Error: "+e.message); }
 };
-// Kick (send them a system PM telling them they've been kicked, then lock them out)
 document.getElementById('btn-kick-user').onclick=async()=>{
   const target=document.getElementById('target-user').value.trim(); if(!target) return;
   if(!confirm("Kick "+target+"?")) return;
@@ -862,7 +920,6 @@ document.getElementById('btn-kick-user').onclick=async()=>{
     sysCmd('system_msg',{text:`🚫 ${target} was kicked by Admin.`});
   }catch(e){alert("Error: "+e.message);}
 };
-// Mute
 document.getElementById('btn-mute-user').onclick=async()=>{
   const target=document.getElementById('target-user').value.trim(); if(!target) return;
   if(!confirm("Mute "+target+" for 5 mins?")) return;
@@ -872,188 +929,101 @@ document.getElementById('btn-mute-user').onclick=async()=>{
     sysCmd('system_msg',{text:`🔇 ${target} has been muted for 5 minutes.`});
   }catch(e){alert("Error: "+e.message);}
 };
-// System PM
 document.getElementById('btn-system-pm').onclick=async()=>{
   const target=document.getElementById('target-user').value.trim(); if(!target) return;
   const text=document.getElementById('admin-pm-text').value.trim(); if(!text) return;
-  await addDoc(messagesCol,{username:"★SYSTEM",text,room:currentRoomId,to:target,isAdmin:true,msgType:'chat',color:"#ff00ff",effect:"glow",createdAt:serverTimestamp()});
+  await addDoc(messagesCol,{username:"★SYSTEM",text,room:currentRoomId,to:target,isAdmin:true,msgType:'chat',color:"#b07cff",effect:"glow",createdAt:serverTimestamp()});
   document.getElementById('admin-pm-text').value='';
 };
 
 // ══════════════════════════════════════════════════════════════════════════
-// RADIO QUEUE SYSTEM — Fixed: use radioQueue collection (known to work)
-// State stored in rooms/__radioState__ (rooms collection has open perms)
+// VISUALIZER — draws live frequency/wave data from whatever track is playing
 // ══════════════════════════════════════════════════════════════════════════
-
-function initRadio(){
-  // Volume UI (cosmetic label only, SoundCloud player has own controls)
-  const vol=document.getElementById('volume-slider');
-  vol.addEventListener('input',()=>{
-    const v=parseInt(vol.value);
-    document.getElementById('volume-label').innerText=v+'%';
-  });
-
-  document.getElementById('btn-add-queue').addEventListener('click',addToQueue);
-  document.getElementById('radio-input').addEventListener('keypress',e=>{if(e.key==='Enter')addToQueue();});
-  document.getElementById('btn-voteskip').addEventListener('click',castVoteSkip);
-  document.getElementById('btn-owner-skip').addEventListener('click',()=>advanceQueue());
-
-  // Listen to radio state (stored in rooms/__radioState__)
-  onSnapshot(radioStateDoc, snap=>{
-    if(snap.exists()&&snap.data().isRadioState){
-      radioState=snap.data();
-    } else {
-      radioState=null;
+let vizRunning=false;
+function startVizLoop(){
+  if(vizRunning) return; vizRunning=true;
+  const canvas=document.getElementById('viz-canvas');
+  const ctx=canvas.getContext('2d');
+  function draw(){
+    requestAnimationFrame(draw);
+    if(document.getElementById('visualizer-window').style.display!=='block') return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(!analyserNode || globalAudioEl.paused){
+      ctx.fillStyle='rgba(180,200,225,0.6)';
+      ctx.font='13px Nunito, sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText('🎵 play a track from chat to see the magic', canvas.width/2, canvas.height/2);
+      return;
     }
-    myVotedSkip=radioState?.votedUsers?.includes(myUsername.toLowerCase())??false;
-
-    // Load iframe if URL changed
-    const newUrl=radioState?.url||null;
-    if(newUrl && newUrl!==currentPlayingUrl){
-      currentPlayingUrl=newUrl; loadIframe(newUrl);
-    } else if(!newUrl && currentPlayingUrl){
-      currentPlayingUrl=""; document.getElementById('sc-player').src="about:blank";
-    }
-
-    updateRadioUI();
-
-    // Vote threshold check
-    if(radioState?.currentId && radioState.votedUsers){
-      const thr=Math.max(2,Math.ceil((radioState.listenerCount||2)/2));
-      if(radioState.votedUsers.length>=thr) advanceQueue();
-    }
-  });
-
-  // Listen to queue
-  onSnapshot(query(radioQueueCol,orderBy("addedAt","asc")), snap=>{
-    radioQueue=[];
-    snap.forEach(d=>radioQueue.push({id:d.id,...d.data()}));
-    renderQueueUI();
-    // Auto-start if nothing playing
-    if((!radioState||!radioState.currentId)&&radioQueue.length>0&&!advanceLock){
-      playItem(radioQueue[0]);
-    }
-  });
+    const style=document.getElementById('viz-style').value;
+    const bufferLength=analyserNode.frequencyBinCount;
+    const dataArray=new Uint8Array(bufferLength);
+    if(style==='wave'){ analyserNode.getByteTimeDomainData(dataArray); drawWave(ctx,canvas,dataArray); }
+    else if(style==='circle'){ analyserNode.getByteFrequencyData(dataArray); drawCircle(ctx,canvas,dataArray); }
+    else { analyserNode.getByteFrequencyData(dataArray); drawBars(ctx,canvas,dataArray); }
+  }
+  draw();
 }
-
-function loadIframe(url){
-  const src="https://w.soundcloud.com/player/?url="+encodeURIComponent(url)
-    +"&color=%2339FF14&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false";
-  document.getElementById('sc-player').src=src;
-}
-
-async function addToQueue(){
-  if(!myUsername){alert("Log in first!");return;}
-  const raw=document.getElementById('radio-input').value.trim();
-  if(!raw.includes('soundcloud.com')){alert("Paste a SoundCloud link.");return;}
-  let url=raw.split('?')[0];
-  // Get title via noembed (CORS-friendly)
-  let title=url;
-  try{
-    const r=await fetch("https://noembed.com/embed?url="+encodeURIComponent(url));
-    if(r.ok){const j=await r.json();if(j.title)title=j.title;}
-  }catch(e){}
-
-  const btn=document.getElementById('btn-add-queue');
-  btn.disabled=true; btn.innerText="Adding...";
-  try{
-    await addDoc(radioQueueCol,{
-      url, title,
-      submitter:myUsername.toLowerCase(),
-      submitterDisplay:myUsername,
-      addedAt:serverTimestamp()
-    });
-    document.getElementById('radio-input').value='';
-  }catch(e){
-    console.error("addToQueue:",e);
-    alert("Failed to queue: "+e.message);
-  }finally{
-    btn.disabled=false; btn.innerText="+ QUEUE";
+function drawBars(ctx,canvas,data){
+  const barCount=48;
+  const step=Math.floor(data.length/barCount)||1;
+  const w=canvas.width/barCount;
+  for(let i=0;i<barCount;i++){
+    const v=data[i*step]/255;
+    const h=Math.max(2,v*canvas.height*0.85);
+    const x=i*w;
+    const grad=ctx.createLinearGradient(0,canvas.height-h,0,canvas.height);
+    grad.addColorStop(0,'#ff6fa8');
+    grad.addColorStop(1,'#3fa9f5');
+    ctx.fillStyle=grad;
+    const bw=w*0.7;
+    roundRectTop(ctx, x+w*0.15, canvas.height-h, bw, h, 4);
+    ctx.fill();
+    ctx.globalAlpha=0.16;
+    ctx.fillRect(x+w*0.15, canvas.height-2, bw, Math.min(20,h*0.25));
+    ctx.globalAlpha=1;
   }
 }
-
-async function playItem(item){
-  if(!item||advanceLock) return;
-  advanceLock=true;
-  try{
-    await setDoc(radioStateDoc,{
-      isRadioState:true, // marker so we know this doc is radio state
-      currentId:item.id, url:item.url, title:item.title,
-      submitter:item.submitter, submitterDisplay:item.submitterDisplay,
-      votedUsers:[], listenerCount:2, startedAt:serverTimestamp()
-    });
-  }catch(e){console.error("playItem:",e); alert("Radio error: "+e.message);}
-  setTimeout(()=>advanceLock=false,2000);
+function roundRectTop(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x,y+h);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h);
+  ctx.closePath();
 }
-
-async function advanceQueue(){
-  if(advanceLock) return;
-  if(!radioState?.currentId) return;
-  advanceLock=true;
-  const doneId=radioState.currentId;
-  try{await deleteDoc(doc(radioQueueCol,doneId));}catch(e){}
-  const next=radioQueue.find(i=>i.id!==doneId);
-  if(next){
-    try{
-      await setDoc(radioStateDoc,{
-        isRadioState:true, currentId:next.id, url:next.url, title:next.title,
-        submitter:next.submitter, submitterDisplay:next.submitterDisplay,
-        votedUsers:[], listenerCount:2, startedAt:serverTimestamp()
-      });
-    }catch(e){console.error("advance:",e);}
-  }else{
-    try{await setDoc(radioStateDoc,{isRadioState:true,currentId:null,url:null,title:null,submitter:null,votedUsers:[],listenerCount:2});}catch(e){}
+function drawWave(ctx,canvas,data){
+  ctx.lineWidth=3;
+  ctx.strokeStyle='#b07cff';
+  ctx.beginPath();
+  const slice=canvas.width/data.length;
+  let x=0;
+  for(let i=0;i<data.length;i++){
+    const v=data[i]/128.0;
+    const y=v*canvas.height/2;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    x+=slice;
   }
-  setTimeout(()=>advanceLock=false,2000);
+  ctx.stroke();
 }
-
-async function castVoteSkip(){
-  if(!radioState?.currentId) return;
-  if(myVotedSkip) return;
-  if(radioState.submitter===myUsername.toLowerCase()){advanceQueue();return;}
-  try{await updateDoc(radioStateDoc,{votedUsers:arrayUnion(myUsername.toLowerCase())});}catch(e){console.error(e);}
-}
-
-function updateRadioUI(){
-  const nowEl=document.getElementById('radio-now-playing');
-  const voteBar=document.getElementById('vote-bar');
-  const voteBtn=document.getElementById('btn-voteskip');
-  const skipBtn=document.getElementById('btn-owner-skip');
-  const fill=document.getElementById('vote-fill');
-  const countEl=document.getElementById('vote-count');
-
-  if(!radioState?.currentId){
-    nowEl.innerHTML='♪ No song playing — add one to the queue!';
-    voteBar.style.display='none'; renderQueueUI(); return;
+function drawCircle(ctx,canvas,data){
+  const cx=canvas.width/2, cy=canvas.height/2, baseR=36;
+  const n=64;
+  const step=Math.floor(data.length/n)||1;
+  for(let i=0;i<n;i++){
+    const v=data[i*step]/255;
+    const angle=(i/n)*Math.PI*2;
+    const r2=baseR+v*70;
+    const x1=cx+Math.cos(angle)*baseR, y1=cy+Math.sin(angle)*baseR;
+    const x2=cx+Math.cos(angle)*r2, y2=cy+Math.sin(angle)*r2;
+    ctx.strokeStyle=`hsl(${200+i*2.2},85%,72%)`;
+    ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
   }
-  const st=radioState;
-  const isOwner=st.submitter===myUsername.toLowerCase();
-  const votes=st.votedUsers?.length??0;
-  const thr=Math.max(2,Math.ceil((st.listenerCount||2)/2));
-  const pct=Math.min(100,Math.round(votes/thr*100));
-
-  nowEl.innerHTML=`♪ NOW PLAYING: <b style="color:var(--acid2);">${esc(st.title||st.url)}</b><br><span style="color:#3a8a3a;font-size:10px;">queued by ${esc(st.submitterDisplay||st.submitter)}</span>`;
-  fill.style.width=pct+'%'; countEl.innerText=`${votes}/${thr}`;
-  voteBar.style.display='flex';
-  skipBtn.style.display=isOwner?'inline-block':'none';
-  voteBtn.style.display=isOwner?'none':'inline-block';
-  voteBtn.disabled=myVotedSkip; voteBtn.innerText=myVotedSkip?'Voted ✓':'Vote Skip';
-  renderQueueUI();
-}
-
-function renderQueueUI(){
-  const el=document.getElementById('radio-queue-list');
-  if(!radioQueue.length){el.innerHTML='<div style="padding:6px;color:#3a5a3a;font-size:11px;">Queue is empty.</div>';return;}
-  const curId=radioState?.currentId??null; el.innerHTML='';
-  radioQueue.forEach((item,idx)=>{
-    const isNow=item.id===curId;
-    const div=document.createElement('div');
-    div.className='queue-item'+(isNow?' now-playing-item':'');
-    div.innerHTML=`<span style="min-width:18px;font-size:11px;">${isNow?'▶':(idx+1)+'.'}</span>
-      <span class="queue-title" title="${esc(item.title)}">${esc(item.title||item.url)}</span>
-      <span class="queue-sub">${esc(item.submitterDisplay||item.submitter)}</span>`;
-    el.appendChild(div);
-  });
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  ctx.beginPath(); ctx.arc(cx,cy,baseR-6,0,Math.PI*2); ctx.fill();
 }
 
 // ── Utility ────────────────────────────────────────────────────────────────
