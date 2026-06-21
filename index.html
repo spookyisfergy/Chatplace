@@ -12,6 +12,7 @@
         .desktop { display: flex; flex-direction: column; gap: 20px; padding: 20px; width: 100px; }
         .desktop-icon { text-align: center; cursor: pointer; color: white; font-size: 11px; width: 64px; }
         .desktop-icon img { width: 32px; height: 32px; margin-bottom: 5px; image-rendering: pixelated; }
+        .desktop-icon span { display: inline-block; padding: 1px 2px; }
         .desktop-icon:active span { background-color: #000080; border: 1px dotted white; }
 
         /* Window Styling */
@@ -28,7 +29,7 @@
         #chat-window { top: 40px; left: 100px; width: 650px; }
         #admin-panel { top: 100px; left: 200px; width: 350px; }
         #alert-window { top: 200px; left: 300px; width: 400px; z-index: 9999; }
-        #radio-window { top: 50px; left: 760px; width: 350px; }
+        #radio-window { top: 50px; left: 760px; width: 380px; }
 
         /* Chat Layout */
         .main-layout { display: flex; gap: 5px; height: 350px; }
@@ -49,6 +50,7 @@
         input[type="text"], input[type="password"], select { padding: 4px; border: 2px inset #fff; background-color: #fff; font-family: inherit; }
         button.win-btn { padding: 4px 12px; background-color: #d4d0c8; border: 2px solid; border-color: #fff #404040 #404040 #fff; font-family: inherit; cursor: pointer; }
         button.win-btn:active { border-color: #404040 #fff #fff #404040; padding: 5px 11px 3px 13px; }
+        button.win-btn:disabled { color: #808080; cursor: default; }
 
         /* Effects */
         @keyframes rainbow { 0% { color: red; } 16% { color: orange; } 33% { color: #ccaa00; } 50% { color: green; } 66% { color: blue; } 83% { color: purple; } 100% { color: red; } }
@@ -62,6 +64,24 @@
 
         /* Login Screen Override */
         #os-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #008080; z-index: 99998; display: block; }
+
+        /* Radio Window Styles */
+        .radio-now-playing { background: #000; color: #00ff00; padding: 6px 8px; border: 2px inset #fff; margin-bottom: 5px; font-family: "Courier New", monospace; font-size: 11px; min-height: 32px; }
+        .radio-queue { background: #fff; border: 2px inset #fff; max-height: 130px; overflow-y: auto; margin-bottom: 5px; }
+        .queue-item { display: flex; align-items: center; gap: 4px; padding: 3px 5px; border-bottom: 1px solid #d4d0c8; font-size: 11px; }
+        .queue-item:last-child { border-bottom: none; }
+        .queue-item.now-playing-item { background: #000080; color: #fff; font-weight: bold; }
+        .queue-item .queue-title { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .queue-item .queue-submitter { color: #808080; font-size: 10px; white-space: nowrap; }
+        .queue-item.now-playing-item .queue-submitter { color: #a0c8ff; }
+        .vote-bar { background: #e4e0d8; border: 1px inset #fff; padding: 4px; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .vote-progress { flex-grow: 1; background: #fff; border: 1px inset #fff; height: 12px; position: relative; }
+        .vote-progress-fill { background: #000080; height: 100%; transition: width 0.3s; }
+        .radio-player-frame { background: #000; border: 2px inset #fff; margin-bottom: 5px; }
+        .volume-row { display: flex; align-items: center; gap: 6px; background: #e4e0d8; padding: 4px; border: 1px inset #fff; margin-bottom: 5px; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 14px; background: #fff; border: 2px inset #fff; outline: none; cursor: pointer; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: #d4d0c8; border: 2px solid; border-color: #fff #404040 #404040 #fff; cursor: pointer; }
+        .sc-iframe { width: 100%; height: 130px; border: none; display: block; }
     </style>
 </head>
 <body>
@@ -82,6 +102,7 @@
     </div>
 </div>
 
+<!-- Desktop Icons -->
 <div class="desktop">
     <div class="desktop-icon" ondblclick="openWindow('chat-window')">
         <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_pnp-0.png" alt="Chat">
@@ -97,25 +118,57 @@
     </div>
 </div>
 
+<!-- Radio Window -->
 <div class="window" id="radio-window">
     <div class="title-bar" id="radio-handle">
         <span class="title-bar-text">🎵 ChatAmp Global Radio</span>
         <div class="title-bar-controls"><button onclick="closeWindow('radio-window')">X</button></div>
     </div>
     <div class="win-content">
-        <div style="background: #000; padding: 5px; border: 2px inset #fff; margin-bottom: 5px;">
-            <iframe id="sc-player" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" 
-            src="">
-            </iframe>
+        <!-- Now Playing Display -->
+        <div class="radio-now-playing" id="radio-now-playing">
+            ♪ No song playing — add one to the queue!
         </div>
-        <div style="display: flex; gap: 5px;">
-            <input type="text" id="radio-input" placeholder="Paste SoundCloud Link Here..." style="flex-grow: 1;">
-            <button id="btn-set-radio" class="win-btn">Set Station</button>
+
+        <!-- Embedded SoundCloud Player -->
+        <div class="radio-player-frame">
+            <iframe id="sc-player" class="sc-iframe" scrolling="no" frameborder="no" allow="autoplay"
+                src="about:blank"></iframe>
         </div>
-        <p style="font-size: 9px; color: #666; margin: 3px 0 0 0;">Press Play to tune into the server's live radio station!</p>
+
+        <!-- Volume Control -->
+        <div class="volume-row">
+            <span>🔈</span>
+            <input type="range" id="volume-slider" min="0" max="100" value="80" style="flex-grow:1;">
+            <span>🔊</span>
+            <span id="volume-label" style="width:28px; text-align:right;">80%</span>
+        </div>
+
+        <!-- Vote Skip Bar -->
+        <div class="vote-bar" id="vote-bar" style="display:none;">
+            <span style="white-space:nowrap; font-weight:bold;">Skip Vote:</span>
+            <div class="vote-progress"><div class="vote-progress-fill" id="vote-progress-fill" style="width:0%"></div></div>
+            <span id="vote-count-label" style="white-space:nowrap; font-size:11px;">0/0</span>
+            <button class="win-btn" id="btn-voteskip" style="padding: 2px 8px; font-size: 11px;">Vote Skip</button>
+            <button class="win-btn" id="btn-owner-skip" style="padding: 2px 8px; font-size: 11px; display:none; color:red;">Skip</button>
+        </div>
+
+        <!-- Queue List -->
+        <div style="font-weight: bold; margin-bottom: 2px; font-size: 11px;">Queue:</div>
+        <div class="radio-queue" id="radio-queue-list">
+            <div style="padding:6px; color:#808080; font-size:11px;">Queue is empty.</div>
+        </div>
+
+        <!-- Add to Queue -->
+        <div style="display: flex; gap: 5px; margin-top: 4px;">
+            <input type="text" id="radio-input" placeholder="Paste SoundCloud link to queue..." style="flex-grow: 1; font-size: 11px;">
+            <button id="btn-add-queue" class="win-btn">+ Queue</button>
+        </div>
+        <p style="font-size: 9px; color: #666; margin: 3px 0 0 0;">Songs play in order. Vote to skip the current track. The submitter can skip or pause their own song.</p>
     </div>
 </div>
 
+<!-- Chat Window -->
 <div class="window" id="chat-window">
     <div class="title-bar" id="chat-handle">
         <span class="title-bar-text" id="window-title">🌐 ChatZone v7.1</span>
@@ -157,6 +210,7 @@
     </div>
 </div>
 
+<!-- Admin Panel -->
 <div class="window" id="admin-panel">
     <div class="title-bar" id="admin-handle" style="background: linear-gradient(90deg, #800000, #ff0000);">
         <span class="title-bar-text">⚠️ Admin Control Center</span>
@@ -180,6 +234,7 @@
     </div>
 </div>
 
+<!-- Alert Window -->
 <div class="window" id="alert-window">
     <div class="title-bar" id="alert-handle" style="background: linear-gradient(90deg, #800000, #ff0000);"><span class="title-bar-text">System Message</span><div class="title-bar-controls"><button onclick="closeWindow('alert-window')">X</button></div></div>
     <div class="win-content"><span class="alert-icon" style="font-size:32px; float:left;">⚠️</span><div id="alert-message" style="font-size: 14px; font-weight: bold; text-align: center; padding: 20px; color: red;"></div><div style="text-align: center;"><button class="win-btn" onclick="closeWindow('alert-window')">OK</button></div></div>
@@ -187,7 +242,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, query, where, orderBy, limit, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, query, where, orderBy, limit, onSnapshot, serverTimestamp, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
@@ -203,90 +258,87 @@
     const messagesCollection = collection(db, "messages");
     const roomsCollection = collection(db, "rooms");
     const usersCollection = collection(db, "users");
+    const radioQueueCollection = collection(db, "radioQueue");
+    const radioStateRef = doc(db, 'system', 'radioState');
 
-    // --- State & Setup ---
+    // --- State ---
     let myUsername = "";
     let currentRoomId = "Lobby";
-    let currentRoomDoc = null; 
+    let currentRoomDoc = null;
     let allRooms = [];
     let unsubscribeChat = null;
     let isAdmin = false;
 
-    // --- Window Dragging Logic (FIXED Z-INDEX) ---
-    let zIndexCounter = 100000; // Starts higher than the login overlay (99998)
-    
+    // Radio state
+    let radioQueue = [];           // ordered queue from Firestore
+    let currentRadioState = null;  // { currentId, submitter, url, title, votedUsers:[], paused }
+    let userCount = 1;             // estimate of online users for vote threshold
+    let myVotedSkip = false;
+    let scWidget = null;           // SoundCloud Widget API instance
+    let widgetReady = false;
+    let localVolume = 80;
+
+    // --- Window Management ---
+    let zIndexCounter = 100000;
     window.openWindow = (id) => { document.getElementById(id).style.display = 'block'; bringToFront(document.getElementById(id)); };
     window.closeWindow = (id) => { document.getElementById(id).style.display = 'none'; };
-    
     function bringToFront(el) { zIndexCounter++; el.style.zIndex = zIndexCounter; }
 
     function makeDraggable(winId, handleId) {
         const win = document.getElementById(winId);
         const handle = document.getElementById(handleId);
-        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        let pos1=0,pos2=0,pos3=0,pos4=0;
         win.onmousedown = () => bringToFront(win);
         handle.onmousedown = (e) => {
-            e.preventDefault(); pos3 = e.clientX; pos4 = e.clientY;
-            document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+            e.preventDefault(); pos3=e.clientX; pos4=e.clientY;
+            document.onmouseup = () => { document.onmouseup=null; document.onmousemove=null; };
             document.onmousemove = (e) => {
-                pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY; pos3 = e.clientX; pos4 = e.clientY;
-                win.style.top = (win.offsetTop - pos2) + "px"; win.style.left = (win.offsetLeft - pos1) + "px";
+                pos1=pos3-e.clientX; pos2=pos4-e.clientY; pos3=e.clientX; pos4=e.clientY;
+                win.style.top=(win.offsetTop-pos2)+"px"; win.style.left=(win.offsetLeft-pos1)+"px";
             };
         };
     }
-    
-    makeDraggable('chat-window', 'chat-handle'); makeDraggable('admin-panel', 'admin-handle'); 
-    makeDraggable('alert-window', 'alert-handle'); makeDraggable('login-window', 'login-handle');
-    makeDraggable('radio-window', 'radio-handle');
+    makeDraggable('chat-window','chat-handle');
+    makeDraggable('admin-panel','admin-handle');
+    makeDraggable('alert-window','alert-handle');
+    makeDraggable('login-window','login-handle');
+    makeDraggable('radio-window','radio-handle');
 
-    // --- Authentication Logic ---
+    // --- Auth ---
     async function attemptLogin() {
         const err = document.getElementById('login-error');
         err.style.display = 'none';
-        
         let u = document.getElementById('login-user').value.trim();
         let p = document.getElementById('login-pass').value.trim();
-        
-        if (!u || !p) { err.innerText = "Need username and password!"; err.style.display = 'block'; return; }
-        
+        if (!u || !p) { err.innerText="Need username and password!"; err.style.display='block'; return; }
         let safeId = u.toLowerCase();
-        
         try {
             const userRef = doc(usersCollection, safeId);
             const userSnap = await getDoc(userRef);
-            
             if (userSnap.exists()) {
-                if (userSnap.data().password === p) {
-                    finalizeLogin(userSnap.data().username, p);
-                } else {
-                    err.innerText = "Incorrect Password!"; err.style.display = 'block';
-                }
+                if (userSnap.data().password === p) { finalizeLogin(userSnap.data().username, p); }
+                else { err.innerText="Incorrect Password!"; err.style.display='block'; }
             } else {
                 await setDoc(userRef, { username: u, password: p });
                 finalizeLogin(u, p);
             }
-        } catch(e) { console.error(e); err.innerText = "Database error. Check console."; err.style.display = 'block'; }
+        } catch(e) { console.error(e); err.innerText="Database error."; err.style.display='block'; }
     }
 
     function finalizeLogin(username, password) {
         myUsername = username;
         localStorage.setItem('cz_user', username);
         localStorage.setItem('cz_pass', password);
-        
         document.getElementById('display-username').innerText = myUsername;
         document.getElementById('os-overlay').style.display = 'none';
         document.getElementById('login-window').style.display = 'none';
         openWindow('chat-window');
         ensureLobbyExists();
+        initRadio();
     }
 
-    window.logout = () => {
-        localStorage.removeItem('cz_user'); localStorage.removeItem('cz_pass');
-        location.reload();
-    }
-
+    window.logout = () => { localStorage.removeItem('cz_user'); localStorage.removeItem('cz_pass'); location.reload(); };
     document.getElementById('btn-login-submit').onclick = attemptLogin;
-
     window.onload = async () => {
         let savedU = localStorage.getItem('cz_user');
         let savedP = localStorage.getItem('cz_pass');
@@ -299,180 +351,377 @@
 
     window.attemptAdminLogin = () => {
         if(isAdmin) { openWindow('admin-panel'); return; }
-        if (prompt("Enter Admin Password:") === "KHEMIST") { isAdmin = true; alert("Access Granted."); openWindow('admin-panel'); } 
+        if (prompt("Enter Admin Password:") === "KHEMIST") { isAdmin=true; alert("Access Granted."); openWindow('admin-panel'); }
         else { alert("Access Denied."); }
     };
 
-    // --- BAN LOGIC ---
+    // --- Ban Logic ---
     function isBanned(room) {
-        let currentNameLower = myUsername.toLowerCase();
-        return (room.banned && room.banned.includes(currentNameLower));
+        let n = myUsername.toLowerCase();
+        return (room.banned && room.banned.includes(n));
     }
 
-    // --- Rooms Manager ---
-    function ensureLobbyExists() { setDoc(doc(roomsCollection, "Lobby"), { name: "Lobby", creator: "System", locked: false, password: "", banned: [] }, { merge: true }); }
+    // --- Rooms ---
+    function ensureLobbyExists() { setDoc(doc(roomsCollection,"Lobby"),{name:"Lobby",creator:"System",locked:false,password:"",banned:[]},{merge:true}); }
 
     onSnapshot(roomsCollection, (snapshot) => {
-        allRooms = [];
+        allRooms=[];
         const uiList = document.getElementById('room-list-ui');
-        uiList.innerHTML = "";
-
+        uiList.innerHTML="";
         snapshot.forEach(docSnap => {
-            let r = docSnap.data(); r.id = docSnap.id; allRooms.push(r);
-            let li = document.createElement('li');
-            li.className = `room-item ${r.id === currentRoomId ? 'active' : ''}`;
-            li.innerHTML = `<span>${escapeHTML(r.name)}</span> <span>${r.locked ? '🔒' : ''}</span>`;
-            li.onclick = () => attemptJoinRoom(r);
+            let r=docSnap.data(); r.id=docSnap.id; allRooms.push(r);
+            let li=document.createElement('li');
+            li.className=`room-item ${r.id===currentRoomId?'active':''}`;
+            li.innerHTML=`<span>${escapeHTML(r.name)}</span><span>${r.locked?'🔒':''}</span>`;
+            li.onclick=()=>attemptJoinRoom(r);
             uiList.appendChild(li);
         });
-
-        currentRoomDoc = allRooms.find(r => r.id === currentRoomId) || null;
+        currentRoomDoc=allRooms.find(r=>r.id===currentRoomId)||null;
         updateRoomToolsUI();
-
-        if (currentRoomDoc && currentRoomDoc.id !== "Lobby" && isBanned(currentRoomDoc)) {
+        if(currentRoomDoc && currentRoomDoc.id!=="Lobby" && isBanned(currentRoomDoc)) {
             alert("You have been banned from this room.");
-            attemptJoinRoom(allRooms.find(r => r.id === "Lobby"));
+            attemptJoinRoom(allRooms.find(r=>r.id==="Lobby"));
         }
     });
 
     document.getElementById('btn-create-room').onclick = async () => {
-        let rName = prompt("Enter new room name:"); if (!rName) return;
-        let rId = rName.replace(/[^a-zA-Z0-9]/g, ''); if (rId === "") return;
-        await setDoc(doc(roomsCollection, rId), { name: rName, creator: myUsername.toLowerCase(), locked: false, password: "", banned: [] });
-        attemptJoinRoom({ id: rId, name: rName, locked: false, password: "", banned: [] });
+        let rName=prompt("Enter new room name:"); if(!rName) return;
+        let rId=rName.replace(/[^a-zA-Z0-9]/g,''); if(rId==="") return;
+        await setDoc(doc(roomsCollection,rId),{name:rName,creator:myUsername.toLowerCase(),locked:false,password:"",banned:[]});
+        attemptJoinRoom({id:rId,name:rName,locked:false,password:"",banned:[]});
     };
 
     function attemptJoinRoom(room) {
         if(!room) return;
-        if (isBanned(room)) { alert("You are permanently banned from this room."); return; }
-        if (room.locked && room.id !== currentRoomId) {
-            if (prompt(`Room '${room.name}' is locked. Password:`) !== room.password) { alert("Incorrect password."); return; }
+        if(isBanned(room)){alert("You are permanently banned from this room.");return;}
+        if(room.locked && room.id!==currentRoomId){
+            if(prompt(`Room '${room.name}' is locked. Password:`)!==room.password){alert("Incorrect password.");return;}
         }
-        currentRoomId = room.id; currentRoomDoc = room;
-        document.getElementById('window-title').innerText = `🌐 ChatZone v7.1 - [${room.name}]`;
-        document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
+        currentRoomId=room.id; currentRoomDoc=room;
+        document.getElementById('window-title').innerText=`🌐 ChatZone v7.1 - [${room.name}]`;
+        document.querySelectorAll('.room-item').forEach(el=>el.classList.remove('active'));
         updateRoomToolsUI(); loadChatForRoom();
     }
 
     function updateRoomToolsUI() {
-        const toolsDiv = document.getElementById('room-tools');
-        toolsDiv.style.display = (currentRoomDoc && currentRoomDoc.creator === myUsername.toLowerCase() && currentRoomDoc.id !== "Lobby") ? 'flex' : 'none';
+        const toolsDiv=document.getElementById('room-tools');
+        toolsDiv.style.display=(currentRoomDoc && currentRoomDoc.creator===myUsername.toLowerCase() && currentRoomDoc.id!=="Lobby")?'flex':'none';
     }
 
     // Room Mod Tools
-    document.getElementById('btn-lock-room').onclick = async () => { let pwd = prompt("Enter password to lock room:"); if (pwd) await updateDoc(doc(roomsCollection, currentRoomId), { locked: true, password: pwd }); };
-    document.getElementById('btn-unlock-room').onclick = async () => { await updateDoc(doc(roomsCollection, currentRoomId), { locked: false, password: "" }); };
-    document.getElementById('btn-ban-user').onclick = async () => { let target = prompt("Enter EXACT username to ban:"); if (target) await updateDoc(doc(roomsCollection, currentRoomId), { banned: arrayUnion(target.toLowerCase()) }); };
-    document.getElementById('btn-unban-user').onclick = async () => { let target = prompt("Enter EXACT username to unban:"); if (target) await updateDoc(doc(roomsCollection, currentRoomId), { banned: arrayRemove(target.toLowerCase()) }); };
-    document.getElementById('btn-wipe-chat').onclick = async () => { if(confirm("Permanently delete all messages in this room?")) { const q = query(messagesCollection, where("room", "==", currentRoomId)); const snap = await getDocs(q); snap.forEach(d => deleteDoc(d.ref)); } };
-    document.getElementById('btn-delete-room').onclick = async () => { if(confirm("Delete this room entirely?")) { await deleteDoc(doc(roomsCollection, currentRoomId)); attemptJoinRoom(allRooms.find(r => r.id === "Lobby")); } };
+    document.getElementById('btn-lock-room').onclick=async()=>{let pwd=prompt("Password to lock:");if(pwd)await updateDoc(doc(roomsCollection,currentRoomId),{locked:true,password:pwd});};
+    document.getElementById('btn-unlock-room').onclick=async()=>{await updateDoc(doc(roomsCollection,currentRoomId),{locked:false,password:""});};
+    document.getElementById('btn-ban-user').onclick=async()=>{let t=prompt("EXACT username to ban:");if(t)await updateDoc(doc(roomsCollection,currentRoomId),{banned:arrayUnion(t.toLowerCase())});};
+    document.getElementById('btn-unban-user').onclick=async()=>{let t=prompt("EXACT username to unban:");if(t)await updateDoc(doc(roomsCollection,currentRoomId),{banned:arrayRemove(t.toLowerCase())});};
+    document.getElementById('btn-wipe-chat').onclick=async()=>{if(confirm("Permanently delete all messages in this room?")){const q2=query(messagesCollection,where("room","==",currentRoomId));const snap=await getDocs(q2);snap.forEach(d=>deleteDoc(d.ref));}};
+    document.getElementById('btn-delete-room').onclick=async()=>{if(confirm("Delete this room?")){await deleteDoc(doc(roomsCollection,currentRoomId));attemptJoinRoom(allRooms.find(r=>r.id==="Lobby"));}};
 
-    // --- Chat Logic ---
+    // --- Chat ---
     function loadChatForRoom() {
-        if (unsubscribeChat) unsubscribeChat();
-        const q = query(messagesCollection, where("room", "==", currentRoomId), orderBy("createdAt", "asc"), limit(75));
-        
-        unsubscribeChat = onSnapshot(q, (snapshot) => {
-            const chatBox = document.getElementById('chat-box'); chatBox.innerHTML = '';
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                
-                if (data.msgType === 'system') {
-                    if (data.action === 'earthquake' && data.createdAt && (Date.now() - data.createdAt.toMillis() < 5000)) {
-                        document.body.classList.add('earthquake'); setTimeout(() => document.body.classList.remove('earthquake'), 2000);
+        if(unsubscribeChat) unsubscribeChat();
+        const q=query(messagesCollection,where("room","==",currentRoomId),orderBy("createdAt","asc"),limit(75));
+        unsubscribeChat=onSnapshot(q,(snapshot)=>{
+            const chatBox=document.getElementById('chat-box'); chatBox.innerHTML='';
+            snapshot.forEach((docSnap)=>{
+                const data=docSnap.data();
+                if(data.msgType==='system'){
+                    if(data.action==='earthquake'&&data.createdAt&&(Date.now()-data.createdAt.toMillis()<5000)){
+                        document.body.classList.add('earthquake'); setTimeout(()=>document.body.classList.remove('earthquake'),2000);
                     }
-                    if (data.action === 'broadcast' && data.createdAt && (Date.now() - data.createdAt.toMillis() < 10000)) {
-                        document.getElementById('alert-message').innerText = data.text; openWindow('alert-window');
+                    if(data.action==='broadcast'&&data.createdAt&&(Date.now()-data.createdAt.toMillis()<10000)){
+                        document.getElementById('alert-message').innerText=data.text; openWindow('alert-window');
                     }
-                    return; 
+                    return;
                 }
-
-                if (data.to && data.to.toLowerCase() !== myUsername.toLowerCase() && data.username.toLowerCase() !== myUsername.toLowerCase()) return;
-
-                let timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "??:??";
-                const msgDiv = document.createElement('div'); msgDiv.className = data.to ? 'message pm-message' : 'message';
-                
-                let effectClass = data.effect && data.effect !== 'none' ? `effect-${data.effect}` : "";
-                let colorHex = data.color || (data.isAdmin ? "red" : "#0000ff");
-                const nameDisplay = `<span class="username ${effectClass}" style="color:${colorHex}; --eff-color:${colorHex};">&lt;${escapeHTML(data.username)}&gt;</span>`;
-
-                let messageBody = escapeHTML(data.text);
-                if (data.msgType === 'image' && data.imageUrl) messageBody = `<br><img src="${data.imageUrl}" style="max-width: 100%; border: 2px inset #fff; margin-top: 5px;">`;
-
-                msgDiv.innerHTML = data.to ? `<span class="timestamp">[${timeStr}]</span> <b>[PM]</b> ${nameDisplay} to &lt;${escapeHTML(data.to)}&gt;: ${messageBody}` : `<span class="timestamp">[${timeStr}]</span> ${nameDisplay}: ${messageBody}`;
+                if(data.to && data.to.toLowerCase()!==myUsername.toLowerCase() && data.username.toLowerCase()!==myUsername.toLowerCase()) return;
+                let timeStr=data.createdAt?data.createdAt.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):"??:??";
+                const msgDiv=document.createElement('div'); msgDiv.className=data.to?'message pm-message':'message';
+                let effectClass=data.effect&&data.effect!=='none'?`effect-${data.effect}`:"";
+                let colorHex=data.color||(data.isAdmin?"red":"#0000ff");
+                const nameDisplay=`<span class="username ${effectClass}" style="color:${colorHex}; --eff-color:${colorHex};">&lt;${escapeHTML(data.username)}&gt;</span>`;
+                let messageBody=escapeHTML(data.text);
+                if(data.msgType==='image'&&data.imageUrl) messageBody=`<br><img src="${data.imageUrl}" style="max-width:100%;border:2px inset #fff;margin-top:5px;">`;
+                msgDiv.innerHTML=data.to?`<span class="timestamp">[${timeStr}]</span> <b>[PM]</b> ${nameDisplay} to &lt;${escapeHTML(data.to)}&gt;: ${messageBody}`:`<span class="timestamp">[${timeStr}]</span> ${nameDisplay}: ${messageBody}`;
                 chatBox.appendChild(msgDiv);
             });
-            chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.scrollTop=chatBox.scrollHeight;
         });
     }
 
     async function sendMessage() {
-        let text = document.getElementById('message-input').value.trim(); if (!text) return;
-        if (/pedo|pedophile|p3do|nonce|child\s?porn|jailbait/i.test(text)) text = "NOPE";
-
-        let target = null;
-        if (text.startsWith("/msg ")) { const parts = text.split(" "); if (parts.length > 2) { target = parts[1]; text = parts.slice(2).join(" "); } }
-
-        let finalName = isAdmin ? ("★" + myUsername) : myUsername;
+        let text=document.getElementById('message-input').value.trim(); if(!text) return;
+        if(/pedo|pedophile|p3do|nonce|child\s?porn|jailbait/i.test(text)) text="NOPE";
+        let target=null;
+        if(text.startsWith("/msg ")){const parts=text.split(" ");if(parts.length>2){target=parts[1];text=parts.slice(2).join(" ");}}
+        let finalName=isAdmin?("★"+myUsername):myUsername;
         try {
-            await addDoc(messagesCollection, { username: finalName, text: text, room: currentRoomId, to: target, isAdmin: isAdmin, msgType: 'chat', color: isAdmin ? document.getElementById('admin-color').value : "#0000ff", effect: isAdmin ? document.getElementById('admin-effect').value : "none", createdAt: serverTimestamp() });
-            document.getElementById('message-input').value = ""; document.getElementById('message-input').focus();
-        } catch (error) { console.error("Send Error:", error); }
+            await addDoc(messagesCollection,{username:finalName,text:text,room:currentRoomId,to:target,isAdmin:isAdmin,msgType:'chat',color:isAdmin?document.getElementById('admin-color').value:"#0000ff",effect:isAdmin?document.getElementById('admin-effect').value:"none",createdAt:serverTimestamp()});
+            document.getElementById('message-input').value=""; document.getElementById('message-input').focus();
+        } catch(error){console.error("Send Error:",error);}
     }
 
-    document.getElementById('send-btn').addEventListener('click', sendMessage);
-    document.getElementById('message-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    document.getElementById('send-btn').addEventListener('click',sendMessage);
+    document.getElementById('message-input').addEventListener('keypress',(e)=>{if(e.key==='Enter')sendMessage();});
 
-    // --- Image Logic ---
-    document.getElementById('btn-upload-img').onclick = () => document.getElementById('image-input').click();
-    document.getElementById('image-input').addEventListener('change', function() {
-        const file = this.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const img = new Image();
-            img.onload = async function() {
-                const canvas = document.createElement('canvas'); const MAX_WIDTH = 300; const scaleSize = MAX_WIDTH / img.width;
-                canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
-                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    // --- Image ---
+    document.getElementById('btn-upload-img').onclick=()=>document.getElementById('image-input').click();
+    document.getElementById('image-input').addEventListener('change',function(){
+        const file=this.files[0]; if(!file) return;
+        const reader=new FileReader();
+        reader.onload=function(event){
+            const img=new Image();
+            img.onload=async function(){
+                const canvas=document.createElement('canvas'); const MAX_WIDTH=300; const scaleSize=MAX_WIDTH/img.width;
+                canvas.width=MAX_WIDTH; canvas.height=img.height*scaleSize;
+                const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,canvas.width,canvas.height);
                 try {
-                    await addDoc(messagesCollection, { username: isAdmin ? ("★" + myUsername) : myUsername, text: "", imageUrl: canvas.toDataURL('image/jpeg', 0.8), room: currentRoomId, isAdmin: isAdmin, msgType: 'image', color: isAdmin ? document.getElementById('admin-color').value : "#0000ff", effect: isAdmin ? document.getElementById('admin-effect').value : "none", createdAt: serverTimestamp() });
-                } catch (error) { console.error("Image Send Error:", error); }
-            }; img.src = event.target.result;
-        }; reader.readAsDataURL(file); this.value = '';
+                    await addDoc(messagesCollection,{username:isAdmin?("★"+myUsername):myUsername,text:"",imageUrl:canvas.toDataURL('image/jpeg',0.8),room:currentRoomId,isAdmin:isAdmin,msgType:'image',color:isAdmin?document.getElementById('admin-color').value:"#0000ff",effect:isAdmin?document.getElementById('admin-effect').value:"none",createdAt:serverTimestamp()});
+                } catch(error){console.error("Image Send Error:",error);}
+            }; img.src=event.target.result;
+        }; reader.readAsDataURL(file); this.value='';
     });
 
-    // --- ChatAmp Synchronized Radio (FIXED AUTOPLAY) ---
-    const radioDocRef = doc(db, 'system', 'radio');
-    
-    // Listen for global radio changes
-    onSnapshot(radioDocRef, (docSnap) => {
-        if(docSnap.exists()) {
-            let encodedUrl = encodeURIComponent(docSnap.data().url);
-            // auto_play is set to FALSE so it doesn't scare the user. They must hit play!
-            document.getElementById('sc-player').src = `https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23000080&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+    // =====================================================================
+    // RADIO QUEUE SYSTEM
+    // =====================================================================
+
+    // Load SoundCloud Widget API script
+    function loadSCWidgetAPI() {
+        return new Promise((resolve) => {
+            if (window.SC) { resolve(); return; }
+            const s = document.createElement('script');
+            s.src = 'https://w.soundcloud.com/player/api.js';
+            s.onload = resolve;
+            document.head.appendChild(s);
+        });
+    }
+
+    async function initRadio() {
+        await loadSCWidgetAPI();
+
+        // Initialize SC Widget
+        const iframe = document.getElementById('sc-player');
+        // Set a default blank src so Widget API can bind
+        iframe.src = 'https://w.soundcloud.com/player/?url=https%3A//soundcloud.com&auto_play=false&hide_related=true&show_comments=false';
+
+        setTimeout(() => {
+            scWidget = window.SC.Widget(iframe);
+            scWidget.bind(window.SC.Widget.Events.READY, () => {
+                widgetReady = true;
+                scWidget.setVolume(localVolume);
+                // When a track finishes, advance queue
+                scWidget.bind(window.SC.Widget.Events.FINISH, () => {
+                    advanceQueue();
+                });
+            });
+        }, 800);
+
+        // Listen for radioState changes (what's currently playing + votes)
+        onSnapshot(radioStateRef, (snap) => {
+            if (snap.exists()) {
+                currentRadioState = snap.data();
+                myVotedSkip = currentRadioState.votedUsers && currentRadioState.votedUsers.includes(myUsername.toLowerCase());
+                updateRadioPlayerUI();
+            } else {
+                currentRadioState = null;
+                updateRadioPlayerUI();
+            }
+        });
+
+        // Listen for queue changes
+        const queueQuery = query(radioQueueCollection, orderBy("addedAt", "asc"));
+        onSnapshot(queueQuery, (snap) => {
+            radioQueue = [];
+            snap.forEach(d => { radioQueue.push({ id: d.id, ...d.data() }); });
+            renderQueueUI();
+
+            // If nothing is currently playing and queue has items, start playing
+            if (!currentRadioState || !currentRadioState.currentId) {
+                if (radioQueue.length > 0) {
+                    playQueueItem(radioQueue[0]);
+                }
+            }
+        });
+
+        // Volume slider
+        const volSlider = document.getElementById('volume-slider');
+        volSlider.addEventListener('input', () => {
+            localVolume = parseInt(volSlider.value);
+            document.getElementById('volume-label').innerText = localVolume + '%';
+            if (widgetReady && scWidget) scWidget.setVolume(localVolume);
+        });
+
+        // Add to queue button
+        document.getElementById('btn-add-queue').addEventListener('click', addToQueue);
+        document.getElementById('radio-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addToQueue(); });
+
+        // Vote skip button
+        document.getElementById('btn-voteskip').addEventListener('click', castVoteSkip);
+
+        // Owner skip button
+        document.getElementById('btn-owner-skip').addEventListener('click', () => { advanceQueue(); });
+    }
+
+    async function addToQueue() {
+        if (!myUsername) { alert("Log in first!"); return; }
+        const url = document.getElementById('radio-input').value.trim();
+        if (!url.includes('soundcloud.com')) { alert("Please paste a valid SoundCloud link."); return; }
+
+        // Fetch track title via oEmbed
+        let title = url;
+        try {
+            const resp = await fetch(`https://soundcloud.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+            if (resp.ok) {
+                const data = await resp.json();
+                title = data.title || url;
+            }
+        } catch(e) { /* fallback to URL */ }
+
+        await addDoc(radioQueueCollection, {
+            url: url,
+            title: title,
+            submitter: myUsername.toLowerCase(),
+            submitterDisplay: myUsername,
+            addedAt: serverTimestamp()
+        });
+        document.getElementById('radio-input').value = '';
+    }
+
+    async function playQueueItem(item) {
+        if (!item) return;
+        // Set Firestore state
+        await setDoc(radioStateRef, {
+            currentId: item.id,
+            url: item.url,
+            title: item.title,
+            submitter: item.submitter,
+            submitterDisplay: item.submitterDisplay,
+            votedUsers: [],
+            paused: false,
+            startedAt: serverTimestamp()
+        });
+        // Load into widget
+        loadTrackInWidget(item.url);
+    }
+
+    function loadTrackInWidget(url) {
+        if (!widgetReady || !scWidget) {
+            // Widget not ready yet, retry after a moment
+            setTimeout(() => loadTrackInWidget(url), 1000);
+            return;
         }
-    });
+        const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false`;
+        document.getElementById('sc-player').src = embedUrl;
 
-    // Submit new radio station
-    document.getElementById('btn-set-radio').addEventListener('click', async () => {
-        const scUrl = document.getElementById('radio-input').value.trim();
-        if(scUrl.includes('soundcloud.com')) {
-            await updateDoc(radioDocRef, { url: scUrl });
-            document.getElementById('radio-input').value = "";
-            sendSystemCommand('broadcast', `${myUsername} just changed the global radio station!`);
-        } else {
-            alert("Please paste a valid SoundCloud link.");
+        // Re-bind widget after src change
+        setTimeout(() => {
+            scWidget = window.SC.Widget(document.getElementById('sc-player'));
+            scWidget.bind(window.SC.Widget.Events.READY, () => {
+                widgetReady = true;
+                scWidget.setVolume(localVolume);
+                scWidget.bind(window.SC.Widget.Events.FINISH, () => { advanceQueue(); });
+                scWidget.play();
+            });
+        }, 800);
+    }
+
+    async function advanceQueue() {
+        if (!currentRadioState || !currentRadioState.currentId) return;
+        const currentId = currentRadioState.currentId;
+
+        // Remove the finished/skipped item from queue
+        try { await deleteDoc(doc(radioQueueCollection, currentId)); } catch(e) {}
+
+        // Clear the state so the next item auto-starts via onSnapshot
+        await setDoc(radioStateRef, { currentId: null, url: null, title: null, submitter: null, votedUsers: [], paused: false });
+    }
+
+    async function castVoteSkip() {
+        if (!currentRadioState || !currentRadioState.currentId) return;
+        if (myVotedSkip) return;
+        if (currentRadioState.submitter === myUsername.toLowerCase()) {
+            // Submitter just skips directly
+            await advanceQueue(); return;
         }
-    });
+        // Add vote
+        await updateDoc(radioStateRef, { votedUsers: arrayUnion(myUsername.toLowerCase()) });
+    }
 
-    // --- Admin System Commands ---
-    async function sendSystemCommand(action, text = "") { await addDoc(messagesCollection, { room: currentRoomId, msgType: 'system', action: action, text: text, createdAt: serverTimestamp() }); }
-    document.getElementById('btn-broadcast').addEventListener('click', () => { const txt = document.getElementById('admin-broadcast').value.trim(); if(txt) { sendSystemCommand('broadcast', txt); document.getElementById('admin-broadcast').value = ""; } });
-    document.getElementById('btn-earthquake').addEventListener('click', () => sendSystemCommand('earthquake'));
-    document.getElementById('btn-admin-wipe').addEventListener('click', async () => { if(confirm("DANGER: Wipe all chats?")) { const snap = await getDocs(messagesCollection); snap.forEach(d => deleteDoc(d.ref)); sendSystemCommand('broadcast', "SYSTEM: All chatrooms have been wiped."); } });
+    function getVoteThreshold() {
+        // Majority of estimated active users, minimum 2
+        return Math.max(2, Math.ceil(userCount / 2));
+    }
 
-    function escapeHTML(str) { if (!str) return ""; return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+    function updateRadioPlayerUI() {
+        const nowPlayingEl = document.getElementById('radio-now-playing');
+        const voteBar = document.getElementById('vote-bar');
+        const voteBtn = document.getElementById('btn-voteskip');
+        const ownerSkipBtn = document.getElementById('btn-owner-skip');
+        const voteFill = document.getElementById('vote-progress-fill');
+        const voteCountLabel = document.getElementById('vote-count-label');
 
+        if (!currentRadioState || !currentRadioState.currentId) {
+            nowPlayingEl.innerHTML = '♪ No song playing — add one to the queue!';
+            voteBar.style.display = 'none';
+            return;
+        }
+
+        const st = currentRadioState;
+        nowPlayingEl.innerHTML = `♪ NOW PLAYING: <b>${escapeHTML(st.title || st.url)}</b><br><span style="color:#00aa00; font-size:10px;">queued by ${escapeHTML(st.submitterDisplay || st.submitter)}</span>`;
+
+        const votes = st.votedUsers ? st.votedUsers.length : 0;
+        const threshold = getVoteThreshold();
+        const pct = Math.min(100, Math.round((votes / threshold) * 100));
+        voteFill.style.width = pct + '%';
+        voteCountLabel.innerText = `${votes}/${threshold}`;
+        voteBar.style.display = 'flex';
+
+        // Submitter controls
+        const isSubmitter = (st.submitter === myUsername.toLowerCase());
+        ownerSkipBtn.style.display = isSubmitter ? 'inline-block' : 'none';
+        voteBtn.style.display = isSubmitter ? 'none' : 'inline-block';
+        voteBtn.disabled = myVotedSkip;
+        voteBtn.innerText = myVotedSkip ? 'Voted ✓' : 'Vote Skip';
+
+        // Auto-advance if vote threshold met
+        if (votes >= threshold) {
+            advanceQueue();
+        }
+
+        renderQueueUI();
+    }
+
+    function renderQueueUI() {
+        const listEl = document.getElementById('radio-queue-list');
+        if (radioQueue.length === 0) {
+            listEl.innerHTML = '<div style="padding:6px; color:#808080; font-size:11px;">Queue is empty.</div>';
+            return;
+        }
+        const currentId = currentRadioState ? currentRadioState.currentId : null;
+        listEl.innerHTML = '';
+        radioQueue.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'queue-item' + (item.id === currentId ? ' now-playing-item' : '');
+            const pos = idx === 0 && item.id === currentId ? '▶' : `${idx + 1}.`;
+            div.innerHTML = `<span style="min-width:18px; font-size:11px;">${pos}</span>
+                <span class="queue-title" title="${escapeHTML(item.title)}">${escapeHTML(item.title || item.url)}</span>
+                <span class="queue-submitter">${escapeHTML(item.submitterDisplay || item.submitter)}</span>`;
+            listEl.appendChild(div);
+        });
+    }
+
+    // --- Admin Commands ---
+    async function sendSystemCommand(action, text="") {
+        await addDoc(messagesCollection,{room:currentRoomId,msgType:'system',action:action,text:text,createdAt:serverTimestamp()});
+    }
+    document.getElementById('btn-broadcast').addEventListener('click',()=>{const txt=document.getElementById('admin-broadcast').value.trim();if(txt){sendSystemCommand('broadcast',txt);document.getElementById('admin-broadcast').value="";}});
+    document.getElementById('btn-earthquake').addEventListener('click',()=>sendSystemCommand('earthquake'));
+    document.getElementById('btn-admin-wipe').addEventListener('click',async()=>{if(confirm("DANGER: Wipe all chats?")){const snap=await getDocs(messagesCollection);snap.forEach(d=>deleteDoc(d.ref));sendSystemCommand('broadcast',"SYSTEM: All chatrooms have been wiped.");}});
+
+    function escapeHTML(str) {
+        if(!str) return "";
+        return String(str).replace(/[&<>'"]/g,tag=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag]||tag));
+    }
 </script>
 </body>
 </html>
