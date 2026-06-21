@@ -1,733 +1,1065 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ ChatZone OS Professional ⚡</title>
-    <style>
-        body { background-color: #008080; font-family: "MS Sans Serif", Geneva, sans-serif; font-size: 12px; color: #000; margin: 0; padding: 0; height: 100vh; overflow: hidden; position: relative; }
-        .desktop { display: flex; flex-direction: column; gap: 20px; padding: 20px; width: 100px; }
-        .desktop-icon { text-align: center; cursor: pointer; color: white; font-size: 11px; width: 64px; }
-        .desktop-icon img { width: 32px; height: 32px; margin-bottom: 5px; image-rendering: pixelated; }
-        .desktop-icon span { display: inline-block; padding: 1px 2px; }
-        .desktop-icon:active span { background-color: #000080; border: 1px dotted white; }
-        .window { position: absolute; background-color: #d4d0c8; border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); padding: 3px; display: none; z-index: 10; }
-        .title-bar { background: linear-gradient(90deg, #000080, #1084d0); color: white; padding: 3px 5px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: grab; user-select: none; }
-        .title-bar:active { cursor: grabbing; }
-        .title-bar-text { font-size: 12px; letter-spacing: 0.5px; pointer-events: none; }
-        .title-bar-controls button { padding: 1px 4px; font-size: 10px; font-weight: bold; background-color: #d4d0c8; border: 1px solid; border-color: #fff #404040 #404040 #fff; cursor: pointer; }
-        .title-bar-controls button:active { border-color: #404040 #fff #fff #404040; }
-        .win-content { padding: 5px; }
-        #login-window { top: 30%; left: 40%; width: 300px; display: block; z-index: 99999; }
-        #chat-window { top: 40px; left: 100px; width: 650px; }
-        #admin-panel { top: 100px; left: 200px; width: 350px; }
-        #alert-window { top: 200px; left: 300px; width: 400px; z-index: 9999; }
-        #radio-window { top: 50px; left: 760px; width: 380px; }
-        .main-layout { display: flex; gap: 5px; height: 350px; }
-        .sidebar { width: 150px; background: #fff; border: 2px inset #fff; display: flex; flex-direction: column; }
-        .room-list { flex-grow: 1; overflow-y: scroll; list-style: none; margin: 0; padding: 2px; }
-        .room-item { padding: 3px; cursor: pointer; display: flex; justify-content: space-between; }
-        .room-item:hover { background: #000080; color: #fff; }
-        .room-item.active { background: #1084d0; color: #fff; font-weight: bold; }
-        .chat-area { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
-        .room-tools { background: #e4e0d8; padding: 4px; border: 1px inset #fff; display: none; gap: 5px; flex-wrap: wrap; }
-        .chat-box { flex-grow: 1; background-color: #fff; border: 2px inset #fff; overflow-y: scroll; padding: 5px; font-family: "Courier New", Courier, monospace; }
-        .message { margin-bottom: 4px; line-height: 1.3; }
-        .timestamp { color: #808080; font-size: 10px; }
-        .pm-message { background-color: #ffffcc; border: 1px dashed #cccc00; padding: 2px; }
-        input[type="text"], input[type="password"], select { padding: 4px; border: 2px inset #fff; background-color: #fff; font-family: inherit; }
-        button.win-btn { padding: 4px 12px; background-color: #d4d0c8; border: 2px solid; border-color: #fff #404040 #404040 #fff; font-family: inherit; cursor: pointer; }
-        button.win-btn:active { border-color: #404040 #fff #fff #404040; padding: 5px 11px 3px 13px; }
-        button.win-btn:disabled { color: #808080; cursor: default; }
-        @keyframes rainbow { 0%{color:red}16%{color:orange}33%{color:#ccaa00}50%{color:green}66%{color:blue}83%{color:purple}100%{color:red} }
-        .effect-rainbow { animation: rainbow 2s infinite linear; font-weight: bold; text-shadow: 1px 1px #000; }
-        @keyframes matrix { 0%{color:var(--eff-color,#0f0);text-shadow:0 0 5px var(--eff-color,#0f0)}50%{color:#fff;text-shadow:0 0 20px var(--eff-color,#0f0)}100%{color:var(--eff-color,#0f0);text-shadow:0 0 5px var(--eff-color,#0f0)} }
-        .effect-glow { animation: matrix 1.5s infinite; font-weight: bold; background: #000; padding: 0 4px; }
-        @keyframes fire { 0%{color:var(--eff-color,#ffeb3b);text-shadow:0 -2px 4px #ff9800,0 -4px 6px #f44336}50%{color:#fff;text-shadow:0 -1px 2px #ff9800,0 -3px 5px #f44336}100%{color:var(--eff-color,#ffeb3b);text-shadow:0 -2px 4px #ff9800,0 -4px 6px #f44336} }
-        .effect-fire { animation: fire 0.8s infinite alternate; font-weight: bold; }
-        @keyframes shake { 0%{transform:translate(2px,1px)}20%{transform:translate(-3px,0)}40%{transform:translate(1px,-1px)}60%{transform:translate(-3px,1px)}80%{transform:translate(-1px,-1px)}100%{transform:translate(1px,-2px)} }
-        .earthquake { animation: shake 0.5s infinite; }
-        #os-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background:#008080; z-index:99998; display:block; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ CHATZONE RAVE OS ⚡</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --acid: #39FF14;
+  --acid2: #00ffcc;
+  --hot: #ff00ff;
+  --dark: #0a0a0a;
+  --panel: #111;
+  --panel2: #1a1a1a;
+  --border: #39FF14;
+  --text: #e0ffe0;
+  --win-bg: #0f0f0f;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--dark);
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(57,255,20,0.03) 40px, rgba(57,255,20,0.03) 80px);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  margin: 0; padding: 0;
+  height: 100vh; overflow: hidden; position: relative;
+}
 
-        /* Radio styles */
-        .radio-now-playing { background:#000; color:#00ff00; padding:6px 8px; border:2px inset #fff; margin-bottom:5px; font-family:"Courier New",monospace; font-size:11px; min-height:30px; line-height:1.4; }
-        .radio-queue { background:#fff; border:2px inset #fff; max-height:120px; overflow-y:auto; margin-bottom:5px; }
-        .queue-item { display:flex; align-items:center; gap:4px; padding:3px 5px; border-bottom:1px solid #d4d0c8; font-size:11px; }
-        .queue-item:last-child { border-bottom:none; }
-        .queue-item.now-playing-item { background:#000080; color:#fff; font-weight:bold; }
-        .queue-item .queue-title { flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .queue-item .queue-sub { color:#808080; font-size:10px; white-space:nowrap; }
-        .queue-item.now-playing-item .queue-sub { color:#a0c8ff; }
-        .vote-bar { background:#e4e0d8; border:1px inset #fff; padding:4px; margin-bottom:5px; display:none; align-items:center; gap:5px; flex-wrap:wrap; }
-        .vote-progress { flex-grow:1; background:#fff; border:1px inset #fff; height:12px; min-width:40px; }
-        .vote-progress-fill { background:#000080; height:100%; transition:width 0.3s; }
-        .volume-row { display:flex; align-items:center; gap:6px; background:#e4e0d8; padding:4px; border:1px inset #fff; margin-bottom:5px; }
-        input[type="range"] { -webkit-appearance:none; height:14px; background:#fff; border:2px inset #fff; outline:none; cursor:pointer; flex-grow:1; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; background:#d4d0c8; border:2px solid; border-color:#fff #404040 #404040 #fff; cursor:pointer; }
-        .sc-frame-wrap { background:#000; border:2px inset #fff; margin-bottom:5px; overflow:hidden; height:130px; }
-        .sc-frame-wrap iframe { width:100%; height:130px; border:none; display:block; }
-    </style>
+/* SCANLINES OVERLAY */
+body::after {
+  content:''; position:fixed; top:0;left:0;right:0;bottom:0;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 3px);
+  pointer-events:none; z-index:999997;
+}
+
+/* DESKTOP */
+.desktop { display:flex; flex-direction:column; gap:16px; padding:16px; width:90px; }
+.desktop-icon { text-align:center; cursor:pointer; color:var(--acid); font-size:10px; width:68px; font-family:'Share Tech Mono',monospace; }
+.desktop-icon img { width:32px; height:32px; margin-bottom:4px; image-rendering:pixelated; filter:hue-rotate(90deg) brightness(1.5) saturate(3); }
+.desktop-icon span { display:inline-block; padding:1px 2px; text-shadow:0 0 6px var(--acid); }
+.desktop-icon:hover span { background:var(--acid); color:#000; }
+.desktop-icon:active span { background:var(--hot); color:#000; }
+
+/* WINDOWS */
+.window {
+  position:absolute; display:none;
+  background:var(--win-bg);
+  border:2px solid var(--acid);
+  box-shadow:0 0 20px rgba(57,255,20,0.4), inset 0 0 10px rgba(0,0,0,0.8);
+  padding:2px; z-index:10;
+  font-family:'Share Tech Mono',monospace;
+}
+.title-bar {
+  background:linear-gradient(90deg, #0f3d00, #1a7a00, #0f3d00);
+  border-bottom:1px solid var(--acid);
+  color:var(--acid);
+  padding:4px 6px;
+  font-weight:bold;
+  display:flex; justify-content:space-between; align-items:center;
+  cursor:grab; user-select:none;
+  text-shadow:0 0 8px var(--acid);
+  font-family:'Black Han Sans',sans-serif;
+  letter-spacing:1px;
+}
+.title-bar:active { cursor:grabbing; }
+.title-bar-text { font-size:12px; pointer-events:none; }
+.title-bar-controls button {
+  padding:1px 6px; font-size:11px; font-weight:bold;
+  background:#0f0f0f; border:1px solid var(--acid);
+  color:var(--acid); cursor:pointer; font-family:inherit;
+}
+.title-bar-controls button:hover { background:var(--acid); color:#000; }
+.win-content { padding:6px; }
+
+/* TITLE BAR VARIANTS */
+.title-bar.red { background:linear-gradient(90deg,#3d0000,#7a0000,#3d0000); border-bottom-color:#ff3300; color:#ff3300; text-shadow:0 0 8px #ff3300; }
+.title-bar.red .title-bar-controls button { border-color:#ff3300; color:#ff3300; }
+.title-bar.hot { background:linear-gradient(90deg,#3d003d,#7a007a,#3d003d); border-bottom-color:var(--hot); color:var(--hot); text-shadow:0 0 8px var(--hot); }
+
+/* POSITIONS */
+#login-window { top:25%; left:38%; width:320px; display:block; z-index:99999; }
+#chat-window  { top:30px; left:90px; width:660px; }
+#admin-panel  { top:80px; left:200px; width:420px; }
+#alert-window { top:180px; left:280px; width:420px; z-index:9999; }
+#radio-window { top:30px; left:760px; width:390px; }
+
+/* OVERLAY */
+#os-overlay {
+  position:fixed; top:0;left:0; width:100vw; height:100vh;
+  background:#000; z-index:99998; display:block;
+}
+#os-overlay-inner {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  text-align:center; color:var(--acid);
+  font-family:'Black Han Sans',sans-serif;
+  font-size:48px; text-shadow:0 0 30px var(--acid), 0 0 60px var(--acid);
+  animation: pulseglow 1.5s infinite;
+}
+@keyframes pulseglow { 0%,100%{text-shadow:0 0 20px var(--acid),0 0 40px var(--acid)} 50%{text-shadow:0 0 40px var(--acid),0 0 80px var(--acid),0 0 120px var(--acid)} }
+
+/* INPUTS */
+input[type="text"], input[type="password"], select, textarea {
+  padding:4px 6px;
+  background:#050505; border:1px solid var(--acid);
+  color:var(--acid); font-family:'Share Tech Mono',monospace;
+  font-size:12px; outline:none;
+}
+input[type="text"]:focus, input[type="password"]:focus, select:focus { border-color:var(--acid2); box-shadow:0 0 6px var(--acid); }
+select option { background:#0a0a0a; }
+
+/* BUTTONS */
+button.win-btn {
+  padding:4px 10px;
+  background:#0a0a0a; border:1px solid var(--acid);
+  color:var(--acid); font-family:'Share Tech Mono',monospace;
+  font-size:11px; cursor:pointer;
+}
+button.win-btn:hover { background:var(--acid); color:#000; }
+button.win-btn:active { background:#1a8a00; }
+button.win-btn:disabled { opacity:0.4; cursor:default; }
+button.win-btn.danger { border-color:#ff3300; color:#ff3300; }
+button.win-btn.danger:hover { background:#ff3300; color:#000; }
+button.win-btn.hot { border-color:var(--hot); color:var(--hot); }
+button.win-btn.hot:hover { background:var(--hot); color:#000; }
+
+/* CHAT LAYOUT */
+.main-layout { display:flex; gap:5px; height:350px; }
+.sidebar { width:150px; background:#050505; border:1px solid var(--acid); display:flex; flex-direction:column; }
+.sidebar-header { background:#0f2d00; padding:3px 6px; border-bottom:1px solid var(--acid); color:var(--acid); font-weight:bold; font-size:11px; text-shadow:0 0 5px var(--acid); }
+.room-list { flex-grow:1; overflow-y:auto; list-style:none; margin:0; padding:2px; }
+.room-item { padding:4px 6px; cursor:pointer; display:flex; justify-content:space-between; border-bottom:1px solid #1a1a1a; font-size:11px; color:#aaa; }
+.room-item:hover { background:#0f2d00; color:var(--acid); }
+.room-item.active { background:#1a5a00; color:var(--acid); font-weight:bold; border-left:2px solid var(--acid); }
+.chat-area { flex-grow:1; display:flex; flex-direction:column; gap:4px; }
+.room-tools { background:#0a0a0a; padding:4px; border:1px solid #ff3300; display:none; gap:4px; flex-wrap:wrap; align-items:center; }
+.chat-box {
+  flex-grow:1;
+  background:#020202;
+  border:1px solid var(--acid);
+  overflow-y:auto; padding:6px;
+  font-family:'Share Tech Mono',monospace; font-size:11px;
+  line-height:1.5;
+}
+.message { margin-bottom:3px; }
+.timestamp { color:#3a5a3a; font-size:10px; }
+.pm-message { background:#0a0a15; border:1px dashed var(--acid2); padding:2px 4px; }
+.sys-msg { color:#666; font-style:italic; font-size:10px; }
+
+/* CHAT INPUT ROW */
+.chat-input-row { display:flex; gap:4px; }
+.chat-input-row input { flex-grow:1; }
+
+/* FIELDSET */
+fieldset { border:1px solid var(--acid); padding:6px; margin:0; }
+legend { color:var(--acid); font-size:11px; padding:0 4px; text-shadow:0 0 5px var(--acid); }
+
+/* RADIO */
+.radio-now-playing {
+  background:#000; color:var(--acid);
+  padding:6px 8px; border:1px solid var(--acid);
+  margin-bottom:5px; font-size:11px; min-height:32px; line-height:1.5;
+  text-shadow:0 0 4px var(--acid);
+}
+.radio-queue { background:#020202; border:1px solid #2a5a2a; max-height:120px; overflow-y:auto; margin-bottom:5px; }
+.queue-item { display:flex; align-items:center; gap:4px; padding:4px 6px; border-bottom:1px solid #1a1a1a; font-size:11px; color:#aaa; }
+.queue-item:last-child { border-bottom:none; }
+.queue-item.now-playing-item { background:#0f2d00; color:var(--acid); font-weight:bold; }
+.queue-title { flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.queue-sub { color:#3a5a3a; font-size:10px; white-space:nowrap; }
+.queue-item.now-playing-item .queue-sub { color:#5aaa5a; }
+.vote-bar { background:#0a0a0a; border:1px solid #2a5a2a; padding:5px; margin-bottom:5px; display:none; align-items:center; gap:5px; flex-wrap:wrap; }
+.vote-progress { flex-grow:1; background:#050505; border:1px solid #2a4a2a; height:10px; min-width:40px; }
+.vote-progress-fill { background:var(--acid); height:100%; transition:width 0.4s; box-shadow:0 0 6px var(--acid); }
+.volume-row { display:flex; align-items:center; gap:6px; background:#0a0a0a; padding:5px; border:1px solid #2a5a2a; margin-bottom:5px; }
+input[type="range"] { -webkit-appearance:none; height:8px; background:#050505; border:1px solid var(--acid); outline:none; cursor:pointer; flex-grow:1; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--acid); border:none; cursor:pointer; box-shadow:0 0 6px var(--acid); }
+.sc-frame-wrap { background:#000; border:1px solid var(--acid); margin-bottom:5px; overflow:hidden; height:130px; box-shadow:0 0 10px rgba(57,255,20,0.2); }
+.sc-frame-wrap iframe { width:100%; height:130px; border:none; display:block; }
+
+/* EFFECTS */
+@keyframes rainbow { 0%{color:red}14%{color:orange}28%{color:#ffff00}42%{color:#39FF14}56%{color:#00ffff}70%{color:#0080ff}85%{color:#ff00ff}100%{color:red} }
+.effect-rainbow { animation:rainbow 1.5s infinite linear; font-weight:bold; }
+@keyframes neon { 0%,100%{color:var(--eff-color,#39FF14);text-shadow:0 0 4px var(--eff-color,#39FF14),0 0 10px var(--eff-color,#39FF14)} 50%{color:#fff;text-shadow:0 0 10px var(--eff-color,#39FF14),0 0 30px var(--eff-color,#39FF14),0 0 60px var(--eff-color,#39FF14)} }
+.effect-glow { animation:neon 1.2s infinite; font-weight:bold; }
+@keyframes fire { 0%{color:#ffeb3b;text-shadow:0 -2px 4px #ff9800,0 -4px 8px #f44336,0 -8px 16px #ff0000} 50%{color:#fff;text-shadow:0 -2px 8px #ffeb3b,0 -6px 16px #ff9800} 100%{color:#ffeb3b;text-shadow:0 -2px 4px #ff9800,0 -4px 8px #f44336} }
+.effect-fire { animation:fire 0.6s infinite alternate; font-weight:bold; }
+@keyframes glitch { 0%,100%{transform:none;text-shadow:2px 0 #ff00ff,-2px 0 #00ffff} 25%{transform:skew(-2deg);text-shadow:-4px 0 #ff00ff,4px 0 #00ffff} 50%{transform:skew(1deg);text-shadow:3px 0 #00ffff,-3px 0 #ff00ff} 75%{transform:none;text-shadow:-2px 0 #ff00ff,2px 0 #00ffff} }
+.effect-glitch { animation:glitch 0.4s infinite; font-weight:bold; }
+@keyframes shake { 0%{transform:translate(2px,1px)}20%{transform:translate(-3px,0)}40%{transform:translate(1px,-2px)}60%{transform:translate(-2px,2px)}80%{transform:translate(-1px,-1px)}100%{transform:translate(1px,-2px)} }
+.earthquake { animation:shake 0.4s infinite; }
+@keyframes strobe { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+.strobe-effect { animation:strobe 0.12s infinite; }
+@keyframes matrix-rain { 0%{color:#39FF14;text-shadow:0 0 5px #39FF14} 100%{color:#003300;text-shadow:none} }
+.effect-matrix { animation:matrix-rain 0.5s infinite alternate; font-family:'Share Tech Mono',monospace; }
+@keyframes invert-flash { 0%,100%{filter:none} 50%{filter:invert(1)} }
+
+/* ADMIN COLOR ROW */
+.admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:4px; }
+.color-label { font-size:10px; color:#888; margin-bottom:2px; }
+
+/* SCROLLBARS */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:#050505; }
+::-webkit-scrollbar-thumb { background:var(--acid); }
+::-webkit-scrollbar-thumb:hover { background:var(--acid2); }
+
+/* LOGIN */
+#login-window .win-content p { color:#888; margin:0 0 10px 0; font-size:11px; }
+#login-window label { color:var(--acid); font-size:11px; }
+
+/* ALERT */
+#alert-message { color:var(--hot); font-size:14px; font-weight:bold; text-align:center; padding:16px; text-shadow:0 0 10px var(--hot); font-family:'Black Han Sans',sans-serif; }
+
+/* STATUS BAR */
+#status-bar { position:fixed; bottom:0; left:0; right:0; height:20px; background:#050505; border-top:1px solid var(--acid); display:flex; align-items:center; padding:0 10px; gap:20px; font-size:10px; color:#3a8a3a; z-index:99996; }
+#status-bar span { color:var(--acid); }
+
+/* PARTY MODE */
+@keyframes party-bg { 0%{background-color:#0a0a0a} 16%{background-color:#0a0a20} 32%{background-color:#200a0a} 48%{background-color:#0a200a} 64%{background-color:#1a0a1a} 80%{background-color:#0a1a1a} 100%{background-color:#0a0a0a} }
+body.party-mode { animation:party-bg 0.5s infinite; }
+
+/* PULSE BORDER */
+@keyframes pulse-border { 0%,100%{box-shadow:0 0 20px rgba(57,255,20,0.4)} 50%{box-shadow:0 0 40px rgba(57,255,20,0.8),0 0 80px rgba(57,255,20,0.3)} }
+.window { animation:pulse-border 3s infinite; }
+
+/* HEADER GLOW */
+.chatzone-header { color:var(--acid); font-family:'Black Han Sans',sans-serif; font-size:11px; text-shadow:0 0 6px var(--acid); white-space:nowrap; }
+</style>
 </head>
 <body>
 
-<div id="os-overlay"></div>
+<div id="os-overlay"><div id="os-overlay-inner">⚡ CHATZONE ⚡<br><span style="font-size:18px;color:#888;">Loading...</span></div></div>
 
-<div class="window" id="login-window">
-    <div class="title-bar" id="login-handle">
-        <span class="title-bar-text">🔑 Log In to ChatZone OS</span>
-    </div>
-    <div class="win-content" style="display:flex;flex-direction:column;gap:10px;padding:15px;">
-        <p style="margin:0;">Welcome. Enter a username. If it doesn't exist, it will be created for you.</p>
-        <div style="display:flex;justify-content:space-between;"><b>Username:</b> <input type="text" id="login-user" style="width:150px;"></div>
-        <div style="display:flex;justify-content:space-between;"><b>Password:</b> <input type="password" id="login-pass" style="width:150px;"></div>
-        <p id="login-error" style="color:red;margin:0;font-weight:bold;display:none;"></p>
-        <div style="text-align:center;margin-top:10px;">
-            <button class="win-btn" id="btn-login-submit" style="width:100px;font-weight:bold;">Enter Server</button>
-        </div>
-    </div>
+<!-- STATUS BAR -->
+<div id="status-bar">
+  <span>⚡ CHATZONE RAVE OS v7.1</span>
+  <span id="sb-room">LOBBY</span>
+  <span id="sb-user"></span>
+  <span id="sb-time"></span>
 </div>
 
+<!-- LOGIN -->
+<div class="window" id="login-window">
+  <div class="title-bar" id="login-handle">
+    <span class="title-bar-text">⚡ LOG IN TO CHATZONE</span>
+  </div>
+  <div class="win-content" style="display:flex;flex-direction:column;gap:10px;padding:15px;">
+    <p>Welcome to the zone. New username = new account.</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;"><label>USERNAME:</label><input type="text" id="login-user" style="width:160px;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;"><label>PASSWORD:</label><input type="password" id="login-pass" style="width:160px;"></div>
+    <p id="login-error" style="color:#ff3300;margin:0;display:none;"></p>
+    <div style="text-align:center;margin-top:5px;"><button class="win-btn" id="btn-login-submit" style="width:140px;font-size:13px;padding:6px;">▶ ENTER THE ZONE</button></div>
+  </div>
+</div>
+
+<!-- DESKTOP -->
 <div class="desktop">
-    <div class="desktop-icon" ondblclick="openWindow('chat-window')">
-        <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_pnp-0.png" alt="Chat">
-        <span>ChatZone</span>
-    </div>
-    <div class="desktop-icon" ondblclick="openWindow('radio-window')">
-        <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-1.png" alt="Music">
-        <span>ChatAmp Radio</span>
-    </div>
-    <div class="desktop-icon" onclick="attemptAdminLogin()">
-        <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Admin">
-        <span>Admin Tools</span>
-    </div>
+  <div class="desktop-icon" ondblclick="openWindow('chat-window')">
+    <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_pnp-0.png" alt="Chat">
+    <span>ChatZone</span>
+  </div>
+  <div class="desktop-icon" ondblclick="openWindow('radio-window')">
+    <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-1.png" alt="Music">
+    <span>Radio</span>
+  </div>
+  <div class="desktop-icon" onclick="attemptAdminLogin()">
+    <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Admin">
+    <span>Admin</span>
+  </div>
 </div>
 
 <!-- RADIO WINDOW -->
 <div class="window" id="radio-window">
-    <div class="title-bar" id="radio-handle">
-        <span class="title-bar-text">🎵 ChatAmp Global Radio</span>
-        <div class="title-bar-controls"><button onclick="closeWindow('radio-window')">X</button></div>
+  <div class="title-bar" id="radio-handle">
+    <span class="title-bar-text">🎵 CHATAMP GLOBAL RADIO</span>
+    <div class="title-bar-controls"><button onclick="closeWindow('radio-window')">✕</button></div>
+  </div>
+  <div class="win-content">
+    <div class="radio-now-playing" id="radio-now-playing">♪ No song playing — add one to the queue!</div>
+    <div class="sc-frame-wrap">
+      <iframe id="sc-player" scrolling="no" frameborder="no" allow="autoplay" src="about:blank"></iframe>
     </div>
-    <div class="win-content">
-        <div class="radio-now-playing" id="radio-now-playing">♪ No song playing — add one to the queue!</div>
-        <div class="sc-frame-wrap">
-            <iframe id="sc-player" scrolling="no" frameborder="no" allow="autoplay" src="about:blank"></iframe>
-        </div>
-        <div class="volume-row">
-            <span>🔈</span>
-            <input type="range" id="volume-slider" min="0" max="100" value="80">
-            <span>🔊</span>
-            <span id="volume-label" style="width:28px;text-align:right;">80%</span>
-        </div>
-        <div class="vote-bar" id="vote-bar">
-            <b style="white-space:nowrap;">Skip Vote:</b>
-            <div class="vote-progress"><div class="vote-progress-fill" id="vote-fill" style="width:0%"></div></div>
-            <span id="vote-count" style="white-space:nowrap;font-size:11px;">0/2</span>
-            <button class="win-btn" id="btn-voteskip" style="padding:2px 8px;font-size:11px;">Vote Skip</button>
-            <button class="win-btn" id="btn-owner-skip" style="padding:2px 8px;font-size:11px;color:red;display:none;">⏭ Skip</button>
-        </div>
-        <div style="font-weight:bold;margin-bottom:2px;font-size:11px;">Queue:</div>
-        <div class="radio-queue" id="radio-queue-list">
-            <div style="padding:6px;color:#808080;font-size:11px;">Queue is empty.</div>
-        </div>
-        <div style="display:flex;gap:5px;margin-top:4px;">
-            <input type="text" id="radio-input" placeholder="Paste SoundCloud link to queue..." style="flex-grow:1;font-size:11px;">
-            <button id="btn-add-queue" class="win-btn">+ Queue</button>
-        </div>
-        <p style="font-size:9px;color:#666;margin:3px 0 0 0;">Submitters can skip/pause their own song. Others can vote to skip.</p>
+    <div class="volume-row">
+      <span style="color:var(--acid);">🔈</span>
+      <input type="range" id="volume-slider" min="0" max="100" value="80">
+      <span style="color:var(--acid);">🔊</span>
+      <span id="volume-label" style="width:28px;text-align:right;color:var(--acid);">80%</span>
     </div>
+    <div class="vote-bar" id="vote-bar">
+      <b style="white-space:nowrap;color:var(--acid);">SKIP:</b>
+      <div class="vote-progress"><div class="vote-progress-fill" id="vote-fill" style="width:0%"></div></div>
+      <span id="vote-count" style="white-space:nowrap;font-size:10px;color:#aaa;">0/2</span>
+      <button class="win-btn" id="btn-voteskip" style="padding:2px 8px;">Vote Skip</button>
+      <button class="win-btn danger" id="btn-owner-skip" style="padding:2px 8px;display:none;">⏭ SKIP</button>
+    </div>
+    <div style="font-size:10px;color:var(--acid);margin-bottom:3px;text-shadow:0 0 4px var(--acid);">▼ QUEUE</div>
+    <div class="radio-queue" id="radio-queue-list">
+      <div style="padding:6px;color:#3a5a3a;font-size:11px;">Queue is empty.</div>
+    </div>
+    <div style="display:flex;gap:4px;margin-top:5px;">
+      <input type="text" id="radio-input" placeholder="SoundCloud link..." style="flex-grow:1;font-size:11px;">
+      <button id="btn-add-queue" class="win-btn">+ QUEUE</button>
+    </div>
+    <p style="font-size:9px;color:#3a5a3a;margin:3px 0 0 0;">Submitter can skip their own track. Others vote to skip.</p>
+  </div>
 </div>
 
 <!-- CHAT WINDOW -->
 <div class="window" id="chat-window">
-    <div class="title-bar" id="chat-handle">
-        <span class="title-bar-text" id="window-title">🌐 ChatZone v7.1</span>
-        <div class="title-bar-controls"><button onclick="logout()">Log Out</button></div>
+  <div class="title-bar" id="chat-handle">
+    <span class="title-bar-text chatzone-header" id="window-title">⚡ CHATZONE v7.1</span>
+    <div class="title-bar-controls">
+      <span id="display-username" style="font-size:10px;margin-right:8px;"></span>
+      <button onclick="logout()">LOG OUT</button>
     </div>
-    <div class="win-content">
-        <div style="display:flex;gap:5px;margin-bottom:5px;background:#e4e0d8;padding:5px;border:1px inset #fff;align-items:center;">
-            <b>Logged in as:</b> <span id="display-username" style="font-weight:bold;color:#000080;"></span>
+  </div>
+  <div class="win-content">
+    <div class="main-layout">
+      <div class="sidebar">
+        <div class="sidebar-header">ROOMS</div>
+        <ul class="room-list" id="room-list-ui"></ul>
+        <button id="btn-create-room" class="win-btn" style="margin:3px;font-size:10px;">+ NEW ROOM</button>
+      </div>
+      <div class="chat-area">
+        <div class="room-tools" id="room-tools">
+          <b style="color:#ff3300;font-size:10px;">MOD▶</b>
+          <button id="btn-lock-room" class="win-btn" style="font-size:10px;padding:2px 6px;">🔒 Lock</button>
+          <button id="btn-unlock-room" class="win-btn" style="font-size:10px;padding:2px 6px;">🔓 Unlock</button>
+          <button id="btn-ban-user" class="win-btn danger" style="font-size:10px;padding:2px 6px;">Ban</button>
+          <button id="btn-unban-user" class="win-btn" style="font-size:10px;padding:2px 6px;">Unban</button>
+          <button id="btn-wipe-chat" class="win-btn danger" style="font-size:10px;padding:2px 6px;">Wipe</button>
+          <button id="btn-delete-room" class="win-btn danger" style="font-size:10px;padding:2px 6px;">Delete</button>
         </div>
-        <div class="main-layout">
-            <div class="sidebar">
-                <div style="background:#d4d0c8;padding:2px 5px;border-bottom:1px solid #808080;font-weight:bold;">Rooms</div>
-                <ul class="room-list" id="room-list-ui"></ul>
-                <button id="btn-create-room" class="win-btn" style="margin:2px;">+ New Room</button>
-            </div>
-            <div class="chat-area">
-                <div class="room-tools" id="room-tools">
-                    <b style="color:red">Mod:</b>
-                    <button id="btn-lock-room" class="win-btn">Lock</button>
-                    <button id="btn-unlock-room" class="win-btn">Unlock</button>
-                    <button id="btn-ban-user" class="win-btn">Ban</button>
-                    <button id="btn-unban-user" class="win-btn">Unban</button>
-                    <button id="btn-wipe-chat" class="win-btn">Wipe Chat</button>
-                    <button id="btn-delete-room" class="win-btn" style="color:red;">Delete Room</button>
-                </div>
-                <div id="chat-box" class="chat-box"></div>
-                <div style="display:flex;gap:5px;">
-                    <input type="file" id="image-input" accept="image/*" style="display:none;">
-                    <button id="btn-upload-img" class="win-btn" title="Send Image">🖼️</button>
-                    <input type="text" id="message-input" placeholder="Type message... (/msg User to PM)" style="flex-grow:1;" autocomplete="off">
-                    <button id="send-btn" class="win-btn">Send</button>
-                </div>
-            </div>
+        <div id="chat-box" class="chat-box"></div>
+        <div class="chat-input-row">
+          <input type="file" id="image-input" accept="image/*" style="display:none;">
+          <button id="btn-upload-img" class="win-btn" title="Send Image" style="padding:4px 8px;">🖼️</button>
+          <input type="text" id="message-input" placeholder="Message... /msg User text for PM" autocomplete="off">
+          <button id="send-btn" class="win-btn" style="padding:4px 12px;">SEND</button>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- ADMIN PANEL -->
 <div class="window" id="admin-panel">
-    <div class="title-bar" id="admin-handle" style="background:linear-gradient(90deg,#800000,#ff0000);">
-        <span class="title-bar-text">⚠️ Admin Control Center</span>
-        <div class="title-bar-controls"><button onclick="closeWindow('admin-panel')">X</button></div>
-    </div>
-    <div class="win-content" style="display:flex;flex-direction:column;gap:10px;">
-        <fieldset style="border:2px groove #fff;padding:5px;">
-            <legend>Your Persona</legend>
-            Name Color: <input type="color" id="admin-color" value="#0000ff"><br>
-            Name Effect: <select id="admin-effect"><option value="none">Normal</option><option value="rainbow">🌈 Rainbow</option><option value="glow">🟩 Glow</option><option value="fire">🔥 Fire</option></select>
-        </fieldset>
-        <fieldset style="border:2px groove #fff;padding:5px;">
-            <legend>Global Commands</legend>
-            <input type="text" id="admin-broadcast" placeholder="Global Alert..." style="width:100%;margin-bottom:5px;">
-            <button id="btn-broadcast" class="win-btn" style="width:100%;color:red;font-weight:bold;margin-bottom:5px;">Send Alert Popup</button>
-            <div style="display:flex;gap:5px;">
-                <button id="btn-earthquake" class="win-btn" style="flex-grow:1;">Earthquake</button>
-                <button id="btn-admin-wipe" class="win-btn" style="flex-grow:1;color:red;">Nuke Servers</button>
-            </div>
-        </fieldset>
-    </div>
+  <div class="title-bar hot" id="admin-handle">
+    <span class="title-bar-text">⚡ ADMIN CONTROL CENTER ⚡</span>
+    <div class="title-bar-controls"><button onclick="closeWindow('admin-panel')">✕</button></div>
+  </div>
+  <div class="win-content" style="display:flex;flex-direction:column;gap:8px;max-height:80vh;overflow-y:auto;">
+
+    <!-- PERSONA -->
+    <fieldset>
+      <legend>★ YOUR PERSONA</legend>
+      <div class="admin-grid">
+        <div><div class="color-label">NAME COLOR</div><input type="color" id="admin-color" value="#ff00ff"></div>
+        <div><div class="color-label">NAME EFFECT</div>
+          <select id="admin-effect" style="width:100%;">
+            <option value="none">Normal</option>
+            <option value="rainbow">🌈 Rainbow</option>
+            <option value="glow">💚 Neon Glow</option>
+            <option value="fire">🔥 Fire</option>
+            <option value="glitch">👾 Glitch</option>
+            <option value="matrix">🟩 Matrix</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- TARGET USER CONTROL -->
+    <fieldset>
+      <legend>🎯 TARGET USER</legend>
+      <div style="display:flex;gap:4px;margin-bottom:5px;">
+        <input type="text" id="target-user" placeholder="username" style="flex-grow:1;">
+        <button class="win-btn" id="btn-fetch-target" style="font-size:10px;padding:2px 6px;">SELECT</button>
+      </div>
+      <div class="admin-grid">
+        <div>
+          <div class="color-label">FORCE THEIR COLOR</div>
+          <div style="display:flex;gap:4px;"><input type="color" id="target-color" value="#ff0000"><button class="win-btn danger" id="btn-set-color" style="font-size:10px;padding:2px 6px;">SET</button></div>
+        </div>
+        <div>
+          <div class="color-label">FORCE THEIR EFFECT</div>
+          <select id="target-effect" style="width:100%;">
+            <option value="none">Normal</option>
+            <option value="rainbow">🌈 Rainbow</option>
+            <option value="glow">💚 Neon Glow</option>
+            <option value="fire">🔥 Fire</option>
+            <option value="glitch">👾 Glitch</option>
+            <option value="matrix">🟩 Matrix</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;">
+        <button class="win-btn danger" id="btn-force-effect" style="font-size:10px;padding:2px 6px;flex-grow:1;">Force Effect</button>
+        <button class="win-btn danger" id="btn-kick-user" style="font-size:10px;padding:2px 6px;flex-grow:1;">🚫 Kick User</button>
+        <button class="win-btn danger" id="btn-mute-user" style="font-size:10px;padding:2px 6px;flex-grow:1;">🔇 Mute User</button>
+      </div>
+      <div style="margin-top:4px;">
+        <input type="text" id="admin-pm-text" placeholder="Send PM as SYSTEM..." style="width:100%;margin-bottom:3px;">
+        <button class="win-btn hot" id="btn-system-pm" style="width:100%;font-size:10px;">📨 Send SYSTEM PM</button>
+      </div>
+    </fieldset>
+
+    <!-- GLOBAL CHAOS -->
+    <fieldset>
+      <legend>💀 GLOBAL CHAOS</legend>
+      <input type="text" id="admin-broadcast" placeholder="Alert message..." style="width:100%;margin-bottom:5px;">
+      <button id="btn-broadcast" class="win-btn danger" style="width:100%;font-weight:bold;margin-bottom:5px;">📢 SEND ALERT POPUP</button>
+      <div class="admin-grid">
+        <button id="btn-earthquake" class="win-btn" style="padding:5px;">🌍 Earthquake</button>
+        <button id="btn-party-mode" class="win-btn hot" style="padding:5px;">🎉 Party Mode</button>
+        <button id="btn-strobe" class="win-btn hot" style="padding:5px;">⚡ Strobe</button>
+        <button id="btn-matrix-rain" class="win-btn" style="padding:5px;">🟩 Matrix Rain</button>
+        <button id="btn-flip" class="win-btn" style="padding:5px;">🙃 Flip Screen</button>
+        <button id="btn-glitch-all" class="win-btn hot" style="padding:5px;">👾 Glitch All</button>
+        <button id="btn-admin-wipe" class="win-btn danger" style="padding:5px;">💣 Nuke Servers</button>
+        <button id="btn-stop-chaos" class="win-btn" style="padding:5px;border-color:#aaa;color:#aaa;">✅ Stop Effects</button>
+      </div>
+    </fieldset>
+
+    <!-- CUSTOM SYSTEM MESSAGE -->
+    <fieldset>
+      <legend>📡 SYSTEM BROADCAST</legend>
+      <textarea id="admin-chat-msg" rows="2" style="width:100%;resize:none;margin-bottom:4px;" placeholder="Announce as SYSTEM in chat..."></textarea>
+      <button class="win-btn" id="btn-system-chat" style="width:100%;">📣 POST AS SYSTEM</button>
+    </fieldset>
+
+  </div>
 </div>
 
 <!-- ALERT WINDOW -->
 <div class="window" id="alert-window">
-    <div class="title-bar" id="alert-handle" style="background:linear-gradient(90deg,#800000,#ff0000);">
-        <span class="title-bar-text">System Message</span>
-        <div class="title-bar-controls"><button onclick="closeWindow('alert-window')">X</button></div>
-    </div>
-    <div class="win-content">
-        <span style="font-size:32px;float:left;">⚠️</span>
-        <div id="alert-message" style="font-size:14px;font-weight:bold;text-align:center;padding:20px;color:red;"></div>
-        <div style="text-align:center;"><button class="win-btn" onclick="closeWindow('alert-window')">OK</button></div>
-    </div>
+  <div class="title-bar red" id="alert-handle">
+    <span class="title-bar-text">⚠ SYSTEM ALERT</span>
+    <div class="title-bar-controls"><button onclick="closeWindow('alert-window')">✕</button></div>
+  </div>
+  <div class="win-content" style="text-align:center;padding:10px;">
+    <div style="font-size:40px;margin-bottom:5px;">⚠️</div>
+    <div id="alert-message"></div>
+    <button class="win-btn" onclick="closeWindow('alert-window')" style="margin-top:10px;width:80px;">OK</button>
+  </div>
 </div>
+
+<!-- MATRIX RAIN CANVAS (hidden by default) -->
+<canvas id="matrix-canvas" style="display:none;position:fixed;top:0;left:0;z-index:999996;pointer-events:none;opacity:0.7;"></canvas>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc,
          arrayUnion, arrayRemove, query, where, orderBy, limit, onSnapshot,
-         serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+         serverTimestamp, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
-    authDomain: "omegle-c7bdb.firebaseapp.com",
-    projectId: "omegle-c7bdb",
-    storageBucket: "omegle-c7bdb.firebasestorage.app",
-    messagingSenderId: "470349324814",
-    appId: "1:470349324814:web:8271072b8d4cd0de01125f"
+  apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
+  authDomain: "omegle-c7bdb.firebaseapp.com",
+  projectId: "omegle-c7bdb",
+  storageBucket: "omegle-c7bdb.firebasestorage.app",
+  messagingSenderId: "470349324814",
+  appId: "1:470349324814:web:8271072b8d4cd0de01125f"
 };
 
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
-const messagesCol  = collection(db, "messages");
-const roomsCol     = collection(db, "rooms");
-const usersCol     = collection(db, "users");
+const messagesCol   = collection(db, "messages");
+const roomsCol      = collection(db, "rooms");
+const usersCol      = collection(db, "users");
+// FIX: store radio queue and state inside "messages" collection with a special type
+// to avoid permission issues with "system" collection
 const radioQueueCol = collection(db, "radioQueue");
-const radioStateDoc = doc(db, "system", "radioState");
+// Use a document in "rooms" collection for radioState (we know that collection has full r/w)
+const radioStateDoc = doc(db, "rooms", "__radioState__");
 
-// ── State ──────────────────────────────────────────────────────────────
+// ── State ────────────────────────────────────────────────────────────────
 let myUsername   = "";
 let currentRoomId = "Lobby";
 let currentRoomDoc = null;
 let allRooms     = [];
 let unsubChat    = null;
 let isAdmin      = false;
+let myOverrideColor  = null;
+let myOverrideEffect = null;
 
 // Radio
-let radioQueue        = [];  // [{id, url, title, submitter, submitterDisplay}]
-let radioState        = null; // Firestore radioState doc data
+let radioQueue        = [];
+let radioState        = null;
 let myVotedSkip       = false;
-let localVolume       = 80;
-let currentPlayingUrl = "";   // track what's in the iframe so we don't reload same url
-let advanceLock       = false; // prevent double-advance
+let currentPlayingUrl = "";
+let advanceLock       = false;
 
-// ── Window helpers ─────────────────────────────────────────────────────
+// Chaos
+let partyInterval = null;
+let strobeTimeout = null;
+let matrixRunning = false;
+
+// ── Clock ────────────────────────────────────────────────────────────────
+setInterval(()=>{
+  const now = new Date();
+  document.getElementById('sb-time').innerText = now.toLocaleTimeString();
+}, 1000);
+
+// ── Window helpers ───────────────────────────────────────────────────────
 let zTop = 100000;
 window.openWindow  = id => { const el=document.getElementById(id); el.style.display='block'; zTop++; el.style.zIndex=zTop; };
 window.closeWindow = id => document.getElementById(id).style.display='none';
 
 function makeDraggable(winId, handleId) {
-    const win=document.getElementById(winId), handle=document.getElementById(handleId);
-    let x1=0,y1=0,x2=0,y2=0;
-    win.onmousedown=()=>{ zTop++; win.style.zIndex=zTop; };
-    handle.onmousedown=e=>{
-        e.preventDefault(); x2=e.clientX; y2=e.clientY;
-        document.onmouseup=()=>{document.onmouseup=null;document.onmousemove=null;};
-        document.onmousemove=e=>{
-            x1=x2-e.clientX; y1=y2-e.clientY; x2=e.clientX; y2=e.clientY;
-            win.style.top=(win.offsetTop-y1)+"px"; win.style.left=(win.offsetLeft-x1)+"px";
-        };
+  const win=document.getElementById(winId), handle=document.getElementById(handleId);
+  if (!win||!handle) return;
+  let x1=0,y1=0,x2=0,y2=0;
+  win.onmousedown=()=>{ zTop++; win.style.zIndex=zTop; };
+  handle.onmousedown=e=>{
+    e.preventDefault(); x2=e.clientX; y2=e.clientY;
+    document.onmouseup=()=>{document.onmouseup=null;document.onmousemove=null;};
+    document.onmousemove=e=>{
+      x1=x2-e.clientX; y1=y2-e.clientY; x2=e.clientX; y2=e.clientY;
+      win.style.top=(win.offsetTop-y1)+"px"; win.style.left=(win.offsetLeft-x1)+"px";
     };
+  };
 }
-['chat-window','admin-panel','alert-window','login-window','radio-window'].forEach(id=>makeDraggable(id,id.replace('-window','-handle').replace('-panel','-handle')));
-
-// ── Auth ───────────────────────────────────────────────────────────────
-async function attemptLogin() {
-    const errEl = document.getElementById('login-error');
-    errEl.style.display = 'none';
-    const u = document.getElementById('login-user').value.trim();
-    const p = document.getElementById('login-pass').value.trim();
-    if (!u || !p) { errEl.innerText="Need username and password!"; errEl.style.display='block'; return; }
-    try {
-        const ref  = doc(usersCol, u.toLowerCase());
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-            if (snap.data().password !== p) { errEl.innerText="Incorrect Password!"; errEl.style.display='block'; return; }
-            finalizeLogin(snap.data().username, p);
-        } else {
-            await setDoc(ref, { username: u, password: p });
-            finalizeLogin(u, p);
-        }
-    } catch(e) { console.error(e); errEl.innerText="Database error: "+e.message; errEl.style.display='block'; }
-}
-
-function finalizeLogin(username, password) {
-    myUsername = username;
-    localStorage.setItem('cz_user', username);
-    localStorage.setItem('cz_pass', password);
-    document.getElementById('display-username').innerText = myUsername;
-    document.getElementById('os-overlay').style.display  = 'none';
-    document.getElementById('login-window').style.display= 'none';
-    openWindow('chat-window');
-    ensureLobbyExists();
-    // FIX: actually load chat after login
-    loadChatForRoom();
-    initRadio();
-}
-
-window.logout = () => { localStorage.removeItem('cz_user'); localStorage.removeItem('cz_pass'); location.reload(); };
-document.getElementById('btn-login-submit').onclick = attemptLogin;
-document.getElementById('login-user').addEventListener('keypress', e => { if(e.key==='Enter') attemptLogin(); });
-document.getElementById('login-pass').addEventListener('keypress', e => { if(e.key==='Enter') attemptLogin(); });
-
-window.onload = () => {
-    const u = localStorage.getItem('cz_user');
-    const p = localStorage.getItem('cz_pass');
-    if (u && p) {
-        document.getElementById('login-user').value = u;
-        document.getElementById('login-pass').value = p;
-        attemptLogin();
-    }
-};
-
-window.attemptAdminLogin = () => {
-    if (isAdmin) { openWindow('admin-panel'); return; }
-    if (prompt("Enter Admin Password:") === "KHEMIST") { isAdmin=true; alert("Access Granted."); openWindow('admin-panel'); }
-    else alert("Access Denied.");
-};
-
-// ── Rooms ──────────────────────────────────────────────────────────────
-function ensureLobbyExists() {
-    setDoc(doc(roomsCol,"Lobby"),{name:"Lobby",creator:"System",locked:false,password:"",banned:[]},{merge:true});
-}
-
-function isBanned(room) {
-    return room.banned && room.banned.includes(myUsername.toLowerCase());
-}
-
-onSnapshot(roomsCol, snap => {
-    allRooms = [];
-    const ul = document.getElementById('room-list-ui');
-    ul.innerHTML = "";
-    snap.forEach(d => {
-        const r = {...d.data(), id: d.id};
-        allRooms.push(r);
-        const li = document.createElement('li');
-        li.className = 'room-item' + (r.id===currentRoomId ? ' active':'');
-        li.innerHTML = `<span>${esc(r.name)}</span><span>${r.locked?'🔒':''}</span>`;
-        li.onclick = () => attemptJoinRoom(r);
-        ul.appendChild(li);
-    });
-    currentRoomDoc = allRooms.find(r=>r.id===currentRoomId)||null;
-    updateRoomTools();
-    if (currentRoomDoc && currentRoomDoc.id!=="Lobby" && isBanned(currentRoomDoc)) {
-        alert("You have been banned from this room.");
-        attemptJoinRoom(allRooms.find(r=>r.id==="Lobby"));
-    }
+['chat-window','admin-panel','alert-window','login-window','radio-window'].forEach(id=>{
+  const handleId = id.replace('-window','-handle').replace('-panel','-handle');
+  makeDraggable(id, handleId);
 });
 
-document.getElementById('btn-create-room').onclick = async () => {
-    const name = prompt("Room name:"); if(!name) return;
-    const id   = name.replace(/[^a-zA-Z0-9]/g,''); if(!id) return;
-    await setDoc(doc(roomsCol,id),{name,creator:myUsername.toLowerCase(),locked:false,password:"",banned:[]});
-    attemptJoinRoom({id,name,locked:false,password:"",banned:[]});
+// ── Auth ─────────────────────────────────────────────────────────────────
+async function attemptLogin() {
+  const errEl = document.getElementById('login-error');
+  errEl.style.display='none';
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value.trim();
+  if (!u||!p) { errEl.innerText="Need username and password!"; errEl.style.display='block'; return; }
+  try {
+    const ref  = doc(usersCol, u.toLowerCase());
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      if (snap.data().password!==p) { errEl.innerText="Wrong password!"; errEl.style.display='block'; return; }
+      finalizeLogin(snap.data().username, p, snap.data());
+    } else {
+      await setDoc(ref, { username:u, password:p, color:"#39FF14", effect:"none" });
+      finalizeLogin(u, p, {color:"#39FF14", effect:"none"});
+    }
+  } catch(e) { console.error(e); errEl.innerText="Error: "+e.message; errEl.style.display='block'; }
+}
+
+function finalizeLogin(username, password, userData) {
+  myUsername = username;
+  myOverrideColor  = userData.color  || "#39FF14";
+  myOverrideEffect = userData.effect || "none";
+  localStorage.setItem('cz_user', username);
+  localStorage.setItem('cz_pass', password);
+  document.getElementById('display-username').innerText = "[ "+myUsername+" ]";
+  document.getElementById('sb-user').innerText = "USER: "+myUsername;
+  document.getElementById('os-overlay').style.display='none';
+  document.getElementById('login-window').style.display='none';
+  openWindow('chat-window');
+  ensureLobbyExists();
+  loadChatForRoom();
+  initRadio();
+  listenForAdminCommands();
+}
+
+window.logout = ()=>{ localStorage.removeItem('cz_user'); localStorage.removeItem('cz_pass'); location.reload(); };
+document.getElementById('btn-login-submit').onclick = attemptLogin;
+document.getElementById('login-user').addEventListener('keypress',e=>{if(e.key==='Enter')attemptLogin();});
+document.getElementById('login-pass').addEventListener('keypress',e=>{if(e.key==='Enter')attemptLogin();});
+
+window.onload = ()=>{
+  const u=localStorage.getItem('cz_user'), p=localStorage.getItem('cz_pass');
+  if(u&&p){ document.getElementById('login-user').value=u; document.getElementById('login-pass').value=p; attemptLogin(); }
+};
+
+window.attemptAdminLogin = ()=>{
+  if(isAdmin){openWindow('admin-panel');return;}
+  if(prompt("Admin password:")==="KHEMIST"){ isAdmin=true; alert("Access granted. Welcome, Admin."); openWindow('admin-panel'); }
+  else alert("Denied.");
+};
+
+// ── Listen for admin commands targeting this user ───────────────────────
+function listenForAdminCommands() {
+  // Watch our own user doc for forced color/effect overrides
+  const myRef = doc(usersCol, myUsername.toLowerCase());
+  onSnapshot(myRef, snap=>{
+    if (!snap.exists()) return;
+    const d = snap.data();
+    if (d.color)  myOverrideColor  = d.color;
+    if (d.effect) myOverrideEffect = d.effect;
+  });
+
+  // Listen for global "system" messages in current room for chaos effects
+}
+
+// ── Rooms ─────────────────────────────────────────────────────────────────
+function ensureLobbyExists() {
+  setDoc(doc(roomsCol,"Lobby"),{name:"Lobby",creator:"System",locked:false,password:"",banned:[]},{merge:true});
+}
+function isBanned(room) { return room.banned && room.banned.includes(myUsername.toLowerCase()); }
+
+onSnapshot(roomsCol, snap=>{
+  allRooms=[];
+  const ul=document.getElementById('room-list-ui'); ul.innerHTML="";
+  snap.forEach(d=>{
+    if(d.id==="__radioState__") return; // skip our radio state doc
+    const r={...d.data(),id:d.id}; allRooms.push(r);
+    const li=document.createElement('li');
+    li.className='room-item'+(r.id===currentRoomId?' active':'');
+    li.innerHTML=`<span>${esc(r.name)}</span><span>${r.locked?'🔒':''}</span>`;
+    li.onclick=()=>attemptJoinRoom(r);
+    ul.appendChild(li);
+  });
+  currentRoomDoc=allRooms.find(r=>r.id===currentRoomId)||null;
+  updateRoomTools();
+  document.getElementById('sb-room').innerText="ROOM: "+currentRoomId.toUpperCase();
+  if(currentRoomDoc&&currentRoomDoc.id!=="Lobby"&&isBanned(currentRoomDoc)){
+    alert("You have been banned from this room."); attemptJoinRoom(allRooms.find(r=>r.id==="Lobby"));
+  }
+});
+
+document.getElementById('btn-create-room').onclick=async()=>{
+  const name=prompt("Room name:"); if(!name) return;
+  const id=name.replace(/[^a-zA-Z0-9]/g,''); if(!id) return;
+  await setDoc(doc(roomsCol,id),{name,creator:myUsername.toLowerCase(),locked:false,password:"",banned:[]});
+  attemptJoinRoom({id,name,locked:false,password:"",banned:[]});
 };
 
 function attemptJoinRoom(room) {
-    if (!room) return;
-    if (isBanned(room)) { alert("You are permanently banned from this room."); return; }
-    if (room.locked && room.id!==currentRoomId) {
-        if (prompt(`'${room.name}' is locked. Password:`) !== room.password) { alert("Incorrect password."); return; }
-    }
-    currentRoomId  = room.id;
-    currentRoomDoc = room;
-    document.getElementById('window-title').innerText = `🌐 ChatZone v7.1 - [${room.name}]`;
-    document.querySelectorAll('.room-item').forEach(el=>el.classList.remove('active'));
-    updateRoomTools();
-    loadChatForRoom();
+  if(!room) return;
+  if(isBanned(room)){alert("You are banned from this room.");return;}
+  if(room.locked&&room.id!==currentRoomId){
+    if(prompt(`'${room.name}' password:`)!==room.password){alert("Wrong password.");return;}
+  }
+  currentRoomId=room.id; currentRoomDoc=room;
+  document.getElementById('window-title').innerText=`⚡ CHATZONE - [${room.name.toUpperCase()}]`;
+  document.getElementById('sb-room').innerText="ROOM: "+room.name.toUpperCase();
+  document.querySelectorAll('.room-item').forEach(el=>el.classList.remove('active'));
+  updateRoomTools(); loadChatForRoom();
 }
-
-function updateRoomTools() {
-    const show = currentRoomDoc && currentRoomDoc.creator===myUsername.toLowerCase() && currentRoomDoc.id!=="Lobby";
-    document.getElementById('room-tools').style.display = show ? 'flex' : 'none';
+function updateRoomTools(){
+  const show=currentRoomDoc&&currentRoomDoc.creator===myUsername.toLowerCase()&&currentRoomDoc.id!=="Lobby";
+  document.getElementById('room-tools').style.display=show?'flex':'none';
 }
+document.getElementById('btn-lock-room').onclick=async()=>{const p=prompt("Set password:");if(p)await updateDoc(doc(roomsCol,currentRoomId),{locked:true,password:p});};
+document.getElementById('btn-unlock-room').onclick=async()=>{await updateDoc(doc(roomsCol,currentRoomId),{locked:false,password:""});};
+document.getElementById('btn-ban-user').onclick=async()=>{const t=prompt("EXACT username to ban:");if(t)await updateDoc(doc(roomsCol,currentRoomId),{banned:arrayUnion(t.toLowerCase())});};
+document.getElementById('btn-unban-user').onclick=async()=>{const t=prompt("EXACT username to unban:");if(t)await updateDoc(doc(roomsCol,currentRoomId),{banned:arrayRemove(t.toLowerCase())});};
+document.getElementById('btn-wipe-chat').onclick=async()=>{if(!confirm("Wipe all messages?"))return;const s=await getDocs(query(messagesCol,where("room","==",currentRoomId)));s.forEach(d=>deleteDoc(d.ref));};
+document.getElementById('btn-delete-room').onclick=async()=>{if(!confirm("Delete room?"))return;await deleteDoc(doc(roomsCol,currentRoomId));attemptJoinRoom(allRooms.find(r=>r.id==="Lobby"));};
 
-document.getElementById('btn-lock-room').onclick   = async()=>{ const p=prompt("Set password:"); if(p) await updateDoc(doc(roomsCol,currentRoomId),{locked:true,password:p}); };
-document.getElementById('btn-unlock-room').onclick = async()=>{ await updateDoc(doc(roomsCol,currentRoomId),{locked:false,password:""}); };
-document.getElementById('btn-ban-user').onclick    = async()=>{ const t=prompt("EXACT username to ban:"); if(t) await updateDoc(doc(roomsCol,currentRoomId),{banned:arrayUnion(t.toLowerCase())}); };
-document.getElementById('btn-unban-user').onclick  = async()=>{ const t=prompt("EXACT username to unban:"); if(t) await updateDoc(doc(roomsCol,currentRoomId),{banned:arrayRemove(t.toLowerCase())}); };
-document.getElementById('btn-wipe-chat').onclick   = async()=>{ if(!confirm("Delete all messages in this room?")) return; const s=await getDocs(query(messagesCol,where("room","==",currentRoomId))); s.forEach(d=>deleteDoc(d.ref)); };
-document.getElementById('btn-delete-room').onclick = async()=>{ if(!confirm("Delete this room?")) return; await deleteDoc(doc(roomsCol,currentRoomId)); attemptJoinRoom(allRooms.find(r=>r.id==="Lobby")); };
+// ── Chat ───────────────────────────────────────────────────────────────────
+function loadChatForRoom(){
+  if(unsubChat) unsubChat();
+  const q=query(messagesCol,where("room","==",currentRoomId),orderBy("createdAt","asc"),limit(75));
+  unsubChat=onSnapshot(q,snap=>{
+    const box=document.getElementById('chat-box'); box.innerHTML='';
+    snap.forEach(d=>{
+      const data=d.data();
+      // Handle system chaos events
+      if(data.msgType==='system'){
+        handleChaosEvent(data); return;
+      }
+      // PM filter
+      if(data.to&&data.to.toLowerCase()!==myUsername.toLowerCase()&&data.username.toLowerCase()!==myUsername.toLowerCase()) return;
+      const time=data.createdAt?data.createdAt.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):"--:--";
+      const div=document.createElement('div');
+      div.className=data.to?'message pm-message':'message';
 
-// ── Chat ───────────────────────────────────────────────────────────────
-function loadChatForRoom() {
-    if (unsubChat) unsubChat();
-    const q = query(messagesCol, where("room","==",currentRoomId), orderBy("createdAt","asc"), limit(75));
-    unsubChat = onSnapshot(q, snap => {
-        const box = document.getElementById('chat-box');
-        box.innerHTML = '';
-        snap.forEach(d => {
-            const data = d.data();
-            if (data.msgType === 'system') {
-                if (data.action==='earthquake' && data.createdAt && Date.now()-data.createdAt.toMillis()<5000) {
-                    document.body.classList.add('earthquake');
-                    setTimeout(()=>document.body.classList.remove('earthquake'),2000);
-                }
-                if (data.action==='broadcast' && data.createdAt && Date.now()-data.createdAt.toMillis()<10000) {
-                    document.getElementById('alert-message').innerText = data.text;
-                    openWindow('alert-window');
-                }
-                return;
-            }
-            if (data.to && data.to.toLowerCase()!==myUsername.toLowerCase() && data.username.toLowerCase()!==myUsername.toLowerCase()) return;
-            const time = data.createdAt ? data.createdAt.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : "??:??";
-            const div  = document.createElement('div');
-            div.className = data.to ? 'message pm-message' : 'message';
-            const eff   = data.effect && data.effect!=='none' ? `effect-${data.effect}` : '';
-            const color = data.color || (data.isAdmin?'red':'#0000ff');
-            const name  = `<span class="username ${eff}" style="color:${color};--eff-color:${color};">&lt;${esc(data.username)}&gt;</span>`;
-            let body = esc(data.text);
-            if (data.msgType==='image' && data.imageUrl) body = `<br><img src="${data.imageUrl}" style="max-width:100%;border:2px inset #fff;margin-top:5px;">`;
-            div.innerHTML = data.to
-                ? `<span class="timestamp">[${time}]</span> <b>[PM]</b> ${name} to &lt;${esc(data.to)}&gt;: ${body}`
-                : `<span class="timestamp">[${time}]</span> ${name}: ${body}`;
-            box.appendChild(div);
-        });
-        box.scrollTop = box.scrollHeight;
+      // Use overridden color/effect if admin set them, otherwise use what was sent
+      let color=data.color||"#39FF14";
+      let effect=data.effect||"none";
+      const eff=effect&&effect!=='none'?`effect-${effect}`:'';
+      const nameHtml=`<span class="${eff}" style="color:${color};--eff-color:${color};">${esc(data.username)}</span>`;
+
+      let body=esc(data.text||"");
+      if(data.msgType==='image'&&data.imageUrl) body=`<img src="${data.imageUrl}" style="max-width:280px;border:1px solid var(--acid);margin-top:3px;display:block;">`;
+
+      const prefix=data.to?`<span style="color:var(--acid2);">[PM]</span> ${nameHtml} ▶ <span style="color:#aaa;">${esc(data.to)}</span>: `:`${nameHtml}: `;
+      div.innerHTML=`<span class="timestamp">[${time}]</span> ${prefix}${body}`;
+      box.appendChild(div);
     });
+    box.scrollTop=box.scrollHeight;
+  });
 }
 
-async function sendMessage() {
-    let text = document.getElementById('message-input').value.trim();
-    if (!text) return;
-    if (/pedo|pedophile|p3do|nonce|child\s?porn|jailbait/i.test(text)) text = "NOPE";
-    let to = null;
-    if (text.startsWith("/msg ")) {
-        const parts = text.split(" ");
-        if (parts.length > 2) { to = parts[1]; text = parts.slice(2).join(" "); }
-    }
-    const uname = isAdmin ? "★"+myUsername : myUsername;
-    try {
-        await addDoc(messagesCol, {
-            username: uname, text, room: currentRoomId, to, isAdmin,
-            msgType: 'chat',
-            color:  isAdmin ? document.getElementById('admin-color').value : "#0000ff",
-            effect: isAdmin ? document.getElementById('admin-effect').value : "none",
-            createdAt: serverTimestamp()
-        });
-        document.getElementById('message-input').value = "";
-        document.getElementById('message-input').focus();
-    } catch(e) { console.error("sendMessage error:", e); alert("Send failed: "+e.message); }
+async function sendMessage(){
+  let text=document.getElementById('message-input').value.trim(); if(!text) return;
+  if(/pedo|pedophile|p3do|nonce|child\s?porn|jailbait/i.test(text)) text="NOPE";
+  let to=null;
+  if(text.startsWith("/msg ")){const pts=text.split(" ");if(pts.length>2){to=pts[1];text=pts.slice(2).join(" ");}}
+  const uname=isAdmin?"★"+myUsername:myUsername;
+  const color=isAdmin?document.getElementById('admin-color').value:myOverrideColor||"#39FF14";
+  const effect=isAdmin?document.getElementById('admin-effect').value:myOverrideEffect||"none";
+  try {
+    await addDoc(messagesCol,{username:uname,text,room:currentRoomId,to,isAdmin,msgType:'chat',color,effect,createdAt:serverTimestamp()});
+    document.getElementById('message-input').value=""; document.getElementById('message-input').focus();
+  } catch(e){ console.error("send:",e); alert("Send failed: "+e.message); }
 }
+document.getElementById('send-btn').addEventListener('click',sendMessage);
+document.getElementById('message-input').addEventListener('keypress',e=>{if(e.key==='Enter')sendMessage();});
 
-document.getElementById('send-btn').addEventListener('click', sendMessage);
-document.getElementById('message-input').addEventListener('keypress', e=>{ if(e.key==='Enter') sendMessage(); });
-
-// ── Image upload ───────────────────────────────────────────────────────
-document.getElementById('btn-upload-img').onclick = () => document.getElementById('image-input').click();
-document.getElementById('image-input').addEventListener('change', function() {
-    const file = this.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-        const img = new Image();
-        img.onload = async () => {
-            const canvas = document.createElement('canvas');
-            const W = 300, scale = W/img.width;
-            canvas.width=W; canvas.height=img.height*scale;
-            canvas.getContext('2d').drawImage(img,0,0,W,img.height*scale);
-            try {
-                await addDoc(messagesCol, {
-                    username: isAdmin?"★"+myUsername:myUsername, text:"",
-                    imageUrl: canvas.toDataURL('image/jpeg',0.8),
-                    room: currentRoomId, isAdmin, msgType:'image',
-                    color: isAdmin?document.getElementById('admin-color').value:"#0000ff",
-                    effect: isAdmin?document.getElementById('admin-effect').value:"none",
-                    createdAt: serverTimestamp()
-                });
-            } catch(e) { console.error("image send error:",e); }
-        };
-        img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-    this.value = '';
+// ── Image Upload ───────────────────────────────────────────────────────────
+document.getElementById('btn-upload-img').onclick=()=>document.getElementById('image-input').click();
+document.getElementById('image-input').addEventListener('change',function(){
+  const file=this.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=async()=>{
+      const c=document.createElement('canvas'); const W=300,s=W/img.width;
+      c.width=W; c.height=img.height*s; c.getContext('2d').drawImage(img,0,0,W,img.height*s);
+      try{
+        const color=isAdmin?document.getElementById('admin-color').value:myOverrideColor||"#39FF14";
+        const effect=isAdmin?document.getElementById('admin-effect').value:myOverrideEffect||"none";
+        await addDoc(messagesCol,{username:isAdmin?"★"+myUsername:myUsername,text:"",imageUrl:c.toDataURL('image/jpeg',0.8),room:currentRoomId,isAdmin,msgType:'image',color,effect,createdAt:serverTimestamp()});
+      }catch(e){console.error(e);}
+    }; img.src=ev.target.result;
+  }; reader.readAsDataURL(file); this.value='';
 });
 
-// ── Admin commands ─────────────────────────────────────────────────────
-async function sysCmd(action, text="") {
-    await addDoc(messagesCol, {room:currentRoomId, msgType:'system', action, text, createdAt:serverTimestamp()});
+// ── CHAOS EVENT HANDLER ────────────────────────────────────────────────────
+function handleChaosEvent(data){
+  const age=data.createdAt?(Date.now()-data.createdAt.toMillis()):9999999;
+  if(age>15000) return; // ignore old events
+  switch(data.action){
+    case 'earthquake':
+      document.body.classList.add('earthquake');
+      setTimeout(()=>document.body.classList.remove('earthquake'),3000); break;
+    case 'broadcast':
+      document.getElementById('alert-message').innerText=data.text; openWindow('alert-window'); break;
+    case 'party':
+      startParty(data.duration||8000); break;
+    case 'strobe':
+      startStrobe(data.duration||3000); break;
+    case 'matrix':
+      startMatrixRain(data.duration||8000); break;
+    case 'flip':
+      document.body.style.transform='rotate(180deg)';
+      setTimeout(()=>document.body.style.transform='',5000); break;
+    case 'glitch_all':
+      document.body.style.animation='glitch 0.3s infinite';
+      setTimeout(()=>document.body.style.animation='',4000); break;
+    case 'stop_chaos':
+      stopAllChaos(); break;
+    case 'system_msg':
+      const div=document.createElement('div'); div.className='message sys-msg';
+      div.innerHTML=`<span style="color:var(--hot);">★ SYSTEM:</span> ${esc(data.text)}`;
+      document.getElementById('chat-box').appendChild(div);
+      document.getElementById('chat-box').scrollTop=9999; break;
+  }
 }
-document.getElementById('btn-broadcast').onclick = () => { const t=document.getElementById('admin-broadcast').value.trim(); if(t){sysCmd('broadcast',t); document.getElementById('admin-broadcast').value="";} };
-document.getElementById('btn-earthquake').onclick = () => sysCmd('earthquake');
-document.getElementById('btn-admin-wipe').onclick = async () => {
-    if(!confirm("DANGER: Wipe ALL chats?")) return;
-    const snap = await getDocs(messagesCol);
-    snap.forEach(d=>deleteDoc(d.ref));
-    sysCmd('broadcast',"SYSTEM: All chatrooms have been wiped.");
+
+// ── CHAOS EFFECTS ─────────────────────────────────────────────────────────
+function startParty(dur){
+  document.body.classList.add('party-mode');
+  clearInterval(partyInterval);
+  partyInterval=setInterval(()=>{
+    document.querySelectorAll('.window').forEach(w=>{
+      w.style.borderColor=`hsl(${Math.random()*360},100%,60%)`;
+    });
+  },200);
+  setTimeout(()=>{ document.body.classList.remove('party-mode'); clearInterval(partyInterval); document.querySelectorAll('.window').forEach(w=>w.style.borderColor=''); }, dur);
+}
+
+function startStrobe(dur){
+  document.body.classList.add('strobe-effect');
+  clearTimeout(strobeTimeout);
+  strobeTimeout=setTimeout(()=>document.body.classList.remove('strobe-effect'),dur);
+}
+
+function startMatrixRain(dur){
+  const canvas=document.getElementById('matrix-canvas');
+  canvas.style.display='block';
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const ctx=canvas.getContext('2d');
+  const cols=Math.floor(canvas.width/16);
+  const drops=new Array(cols).fill(1);
+  matrixRunning=true;
+  function draw(){
+    if(!matrixRunning){ctx.clearRect(0,0,canvas.width,canvas.height);canvas.style.display='none';return;}
+    ctx.fillStyle='rgba(0,0,0,0.07)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#39FF14'; ctx.font='14px Share Tech Mono';
+    drops.forEach((y,i)=>{
+      const ch=String.fromCharCode(0x30A0+Math.random()*96);
+      ctx.fillText(ch,i*16,y*16);
+      if(y*16>canvas.height&&Math.random()>0.975) drops[i]=0;
+      drops[i]++;
+    });
+    if(matrixRunning) requestAnimationFrame(draw);
+  }
+  draw();
+  setTimeout(()=>{ matrixRunning=false; },dur);
+}
+
+function stopAllChaos(){
+  document.body.classList.remove('earthquake','party-mode','strobe-effect');
+  document.body.style.animation='';
+  document.body.style.transform='';
+  clearInterval(partyInterval); clearTimeout(strobeTimeout);
+  matrixRunning=false;
+  document.querySelectorAll('.window').forEach(w=>w.style.borderColor='');
+}
+
+// ── ADMIN ACTIONS ─────────────────────────────────────────────────────────
+async function sysCmd(action, extra={}){
+  await addDoc(messagesCol,{room:currentRoomId,msgType:'system',action,...extra,createdAt:serverTimestamp()});
+}
+
+// Broadcast alert
+document.getElementById('btn-broadcast').onclick=()=>{
+  const t=document.getElementById('admin-broadcast').value.trim(); if(!t) return;
+  sysCmd('broadcast',{text:t}); document.getElementById('admin-broadcast').value='';
+};
+// Earthquake
+document.getElementById('btn-earthquake').onclick=()=>sysCmd('earthquake');
+// Party
+document.getElementById('btn-party-mode').onclick=()=>sysCmd('party',{duration:10000});
+// Strobe
+document.getElementById('btn-strobe').onclick=()=>sysCmd('strobe',{duration:3000});
+// Matrix
+document.getElementById('btn-matrix-rain').onclick=()=>sysCmd('matrix',{duration:10000});
+// Flip
+document.getElementById('btn-flip').onclick=()=>sysCmd('flip');
+// Glitch all
+document.getElementById('btn-glitch-all').onclick=()=>sysCmd('glitch_all');
+// Stop chaos
+document.getElementById('btn-stop-chaos').onclick=()=>sysCmd('stop_chaos');
+// Nuke
+document.getElementById('btn-admin-wipe').onclick=async()=>{
+  if(!confirm("NUKE ALL CHATS?")) return;
+  const s=await getDocs(messagesCol); s.forEach(d=>deleteDoc(d.ref));
+  sysCmd('broadcast',{text:"💀 SYSTEM: All chats have been wiped by Admin."});
+};
+// Post as SYSTEM in chat
+document.getElementById('btn-system-chat').onclick=()=>{
+  const t=document.getElementById('admin-chat-msg').value.trim(); if(!t) return;
+  sysCmd('system_msg',{text:t}); document.getElementById('admin-chat-msg').value='';
 };
 
-// ══════════════════════════════════════════════════════════════════════
-// RADIO QUEUE SYSTEM
-// ══════════════════════════════════════════════════════════════════════
+// Target user: force color
+document.getElementById('btn-set-color').onclick=async()=>{
+  const target=document.getElementById('target-user').value.trim().toLowerCase(); if(!target) return;
+  const color=document.getElementById('target-color').value;
+  try{ await updateDoc(doc(usersCol,target),{color}); alert("Done! Their messages will use "+color); }
+  catch(e){ alert("User not found or error: "+e.message); }
+};
+// Target user: force effect
+document.getElementById('btn-force-effect').onclick=async()=>{
+  const target=document.getElementById('target-user').value.trim().toLowerCase(); if(!target) return;
+  const effect=document.getElementById('target-effect').value;
+  try{ await updateDoc(doc(usersCol,target),{effect}); alert("Effect set to "+effect+" for "+target); }
+  catch(e){ alert("Error: "+e.message); }
+};
+// Kick (send them a system PM telling them they've been kicked, then lock them out)
+document.getElementById('btn-kick-user').onclick=async()=>{
+  const target=document.getElementById('target-user').value.trim(); if(!target) return;
+  if(!confirm("Kick "+target+"?")) return;
+  try{
+    await updateDoc(doc(usersCol,target.toLowerCase()),{kicked:true});
+    sysCmd('system_msg',{text:`🚫 ${target} was kicked by Admin.`});
+  }catch(e){alert("Error: "+e.message);}
+};
+// Mute
+document.getElementById('btn-mute-user').onclick=async()=>{
+  const target=document.getElementById('target-user').value.trim(); if(!target) return;
+  if(!confirm("Mute "+target+" for 5 mins?")) return;
+  const until=Date.now()+(5*60*1000);
+  try{
+    await updateDoc(doc(usersCol,target.toLowerCase()),{mutedUntil:until});
+    sysCmd('system_msg',{text:`🔇 ${target} has been muted for 5 minutes.`});
+  }catch(e){alert("Error: "+e.message);}
+};
+// System PM
+document.getElementById('btn-system-pm').onclick=async()=>{
+  const target=document.getElementById('target-user').value.trim(); if(!target) return;
+  const text=document.getElementById('admin-pm-text').value.trim(); if(!text) return;
+  await addDoc(messagesCol,{username:"★SYSTEM",text,room:currentRoomId,to:target,isAdmin:true,msgType:'chat',color:"#ff00ff",effect:"glow",createdAt:serverTimestamp()});
+  document.getElementById('admin-pm-text').value='';
+};
 
-function initRadio() {
-    // Volume slider (local only)
-    const vol = document.getElementById('volume-slider');
-    vol.addEventListener('input', () => {
-        localVolume = parseInt(vol.value);
-        document.getElementById('volume-label').innerText = localVolume+'%';
-        // Update iframe src volume param isn't possible via URL; volume is cosmetic label only
-        // Users control with SoundCloud's own player UI
-    });
+// ══════════════════════════════════════════════════════════════════════════
+// RADIO QUEUE SYSTEM — Fixed: use radioQueue collection (known to work)
+// State stored in rooms/__radioState__ (rooms collection has open perms)
+// ══════════════════════════════════════════════════════════════════════════
 
-    // Add to queue
-    document.getElementById('btn-add-queue').addEventListener('click', addToQueue);
-    document.getElementById('radio-input').addEventListener('keypress', e=>{ if(e.key==='Enter') addToQueue(); });
+function initRadio(){
+  // Volume UI (cosmetic label only, SoundCloud player has own controls)
+  const vol=document.getElementById('volume-slider');
+  vol.addEventListener('input',()=>{
+    const v=parseInt(vol.value);
+    document.getElementById('volume-label').innerText=v+'%';
+  });
 
-    // Vote skip
-    document.getElementById('btn-voteskip').addEventListener('click', castVoteSkip);
+  document.getElementById('btn-add-queue').addEventListener('click',addToQueue);
+  document.getElementById('radio-input').addEventListener('keypress',e=>{if(e.key==='Enter')addToQueue();});
+  document.getElementById('btn-voteskip').addEventListener('click',castVoteSkip);
+  document.getElementById('btn-owner-skip').addEventListener('click',()=>advanceQueue());
 
-    // Owner skip
-    document.getElementById('btn-owner-skip').addEventListener('click', ()=>advanceQueue());
-
-    // Listen to radioState (what's playing, votes)
-    onSnapshot(radioStateDoc, snap => {
-        radioState   = snap.exists() ? snap.data() : null;
-        myVotedSkip  = radioState?.votedUsers?.includes(myUsername.toLowerCase()) ?? false;
-        updateRadioUI();
-
-        // If state says a URL is playing and it changed, reload iframe
-        if (radioState && radioState.url && radioState.url !== currentPlayingUrl) {
-            currentPlayingUrl = radioState.url;
-            loadIframe(radioState.url);
-        }
-        if (!radioState || !radioState.url) {
-            currentPlayingUrl = "";
-            document.getElementById('sc-player').src = "about:blank";
-        }
-
-        // Check vote threshold
-        if (radioState && radioState.currentId && radioState.votedUsers) {
-            const threshold = Math.max(2, Math.ceil((radioState.listenerCount||2)/2));
-            if (radioState.votedUsers.length >= threshold) advanceQueue();
-        }
-    });
-
-    // Listen to queue
-    onSnapshot(query(radioQueueCol, orderBy("addedAt","asc")), snap => {
-        radioQueue = [];
-        snap.forEach(d => radioQueue.push({id:d.id,...d.data()}));
-        renderQueueUI();
-
-        // Auto-start if nothing playing
-        if ((!radioState || !radioState.currentId) && radioQueue.length > 0 && !advanceLock) {
-            playItem(radioQueue[0]);
-        }
-    });
-}
-
-function loadIframe(url) {
-    const embedUrl = "https://w.soundcloud.com/player/?url="
-        + encodeURIComponent(url)
-        + "&color=%23000080&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false";
-    document.getElementById('sc-player').src = embedUrl;
-}
-
-async function addToQueue() {
-    if (!myUsername) { alert("Log in first!"); return; }
-    const raw = document.getElementById('radio-input').value.trim();
-    if (!raw.includes('soundcloud.com')) { alert("Please paste a valid SoundCloud link."); return; }
-
-    // Clean up the URL (remove query strings / extra paths beyond track)
-    let url = raw.split('?')[0];
-
-    // Get title — use a no-cors compatible approach via noembed.com (no CORS issues)
-    let title = url; // fallback
-    try {
-        const r = await fetch("https://noembed.com/embed?url=" + encodeURIComponent(url));
-        if (r.ok) {
-            const j = await r.json();
-            if (j.title) title = j.title;
-        }
-    } catch(e) { /* use URL as title */ }
-
-    const btn = document.getElementById('btn-add-queue');
-    btn.disabled = true; btn.innerText = "Adding...";
-    try {
-        await addDoc(radioQueueCol, {
-            url,
-            title,
-            submitter: myUsername.toLowerCase(),
-            submitterDisplay: myUsername,
-            addedAt: serverTimestamp()
-        });
-        document.getElementById('radio-input').value = '';
-    } catch(e) {
-        console.error("addToQueue error:", e);
-        alert("Failed to add to queue: " + e.message);
-    } finally {
-        btn.disabled = false; btn.innerText = "+ Queue";
-    }
-}
-
-async function playItem(item) {
-    if (!item || advanceLock) return;
-    advanceLock = true;
-    try {
-        await setDoc(radioStateDoc, {
-            currentId:       item.id,
-            url:             item.url,
-            title:           item.title,
-            submitter:       item.submitter,
-            submitterDisplay: item.submitterDisplay,
-            votedUsers:      [],
-            listenerCount:   2,
-            startedAt:       serverTimestamp()
-        });
-    } catch(e) { console.error("playItem error:", e); }
-    setTimeout(()=>{ advanceLock=false; }, 2000);
-}
-
-async function advanceQueue() {
-    if (advanceLock) return;
-    if (!radioState || !radioState.currentId) return;
-    advanceLock = true;
-
-    const doneId = radioState.currentId;
-
-    // Remove played item from queue
-    try { await deleteDoc(doc(radioQueueCol, doneId)); } catch(e) {}
-
-    // Find next item (after deletion the onSnapshot will fire, but let's proactively check)
-    const next = radioQueue.find(i => i.id !== doneId);
-
-    if (next) {
-        try {
-            await setDoc(radioStateDoc, {
-                currentId:        next.id,
-                url:              next.url,
-                title:            next.title,
-                submitter:        next.submitter,
-                submitterDisplay: next.submitterDisplay,
-                votedUsers:       [],
-                listenerCount:    2,
-                startedAt:        serverTimestamp()
-            });
-        } catch(e) { console.error("advance to next error:", e); }
+  // Listen to radio state (stored in rooms/__radioState__)
+  onSnapshot(radioStateDoc, snap=>{
+    if(snap.exists()&&snap.data().isRadioState){
+      radioState=snap.data();
     } else {
-        // Queue empty
-        try {
-            await setDoc(radioStateDoc, {
-                currentId: null, url: null, title: null,
-                submitter: null, submitterDisplay: null,
-                votedUsers: [], listenerCount: 2, startedAt: null
-            });
-        } catch(e) {}
+      radioState=null;
+    }
+    myVotedSkip=radioState?.votedUsers?.includes(myUsername.toLowerCase())??false;
+
+    // Load iframe if URL changed
+    const newUrl=radioState?.url||null;
+    if(newUrl && newUrl!==currentPlayingUrl){
+      currentPlayingUrl=newUrl; loadIframe(newUrl);
+    } else if(!newUrl && currentPlayingUrl){
+      currentPlayingUrl=""; document.getElementById('sc-player').src="about:blank";
     }
 
-    setTimeout(()=>{ advanceLock=false; }, 2000);
-}
+    updateRadioUI();
 
-async function castVoteSkip() {
-    if (!radioState?.currentId) return;
-    if (myVotedSkip) return;
-    if (radioState.submitter === myUsername.toLowerCase()) { advanceQueue(); return; }
-    try {
-        await updateDoc(radioStateDoc, { votedUsers: arrayUnion(myUsername.toLowerCase()) });
-    } catch(e) { console.error("vote error:",e); }
-}
-
-function updateRadioUI() {
-    const nowEl    = document.getElementById('radio-now-playing');
-    const voteBar  = document.getElementById('vote-bar');
-    const voteBtn  = document.getElementById('btn-voteskip');
-    const skipBtn  = document.getElementById('btn-owner-skip');
-    const fill     = document.getElementById('vote-fill');
-    const countEl  = document.getElementById('vote-count');
-
-    if (!radioState || !radioState.currentId) {
-        nowEl.innerHTML = '♪ No song playing — add one to the queue!';
-        voteBar.style.display = 'none';
-        renderQueueUI();
-        return;
+    // Vote threshold check
+    if(radioState?.currentId && radioState.votedUsers){
+      const thr=Math.max(2,Math.ceil((radioState.listenerCount||2)/2));
+      if(radioState.votedUsers.length>=thr) advanceQueue();
     }
+  });
 
-    const st       = radioState;
-    const isOwner  = st.submitter === myUsername.toLowerCase();
-    const votes    = st.votedUsers?.length ?? 0;
-    const total    = st.listenerCount ?? 2;
-    const threshold= Math.max(2, Math.ceil(total/2));
-    const pct      = Math.min(100, Math.round(votes/threshold*100));
-
-    nowEl.innerHTML = `♪ NOW PLAYING: <b>${esc(st.title||st.url)}</b><br><span style="color:#00aa00;font-size:10px;">queued by ${esc(st.submitterDisplay||st.submitter)}</span>`;
-
-    fill.style.width   = pct+'%';
-    countEl.innerText  = `${votes}/${threshold}`;
-    voteBar.style.display = 'flex';
-
-    skipBtn.style.display = isOwner ? 'inline-block' : 'none';
-    voteBtn.style.display = isOwner ? 'none' : 'inline-block';
-    voteBtn.disabled      = myVotedSkip;
-    voteBtn.innerText     = myVotedSkip ? 'Voted ✓' : 'Vote Skip';
-
+  // Listen to queue
+  onSnapshot(query(radioQueueCol,orderBy("addedAt","asc")), snap=>{
+    radioQueue=[];
+    snap.forEach(d=>radioQueue.push({id:d.id,...d.data()}));
     renderQueueUI();
-}
-
-function renderQueueUI() {
-    const el = document.getElementById('radio-queue-list');
-    if (!radioQueue.length) {
-        el.innerHTML = '<div style="padding:6px;color:#808080;font-size:11px;">Queue is empty.</div>';
-        return;
+    // Auto-start if nothing playing
+    if((!radioState||!radioState.currentId)&&radioQueue.length>0&&!advanceLock){
+      playItem(radioQueue[0]);
     }
-    const curId = radioState?.currentId ?? null;
-    el.innerHTML = '';
-    radioQueue.forEach((item, idx) => {
-        const isNow = item.id === curId;
-        const div   = document.createElement('div');
-        div.className = 'queue-item' + (isNow?' now-playing-item':'');
-        const pos   = isNow ? '▶' : (idx+1)+'.';
-        div.innerHTML = `
-            <span style="min-width:18px;font-size:11px;">${pos}</span>
-            <span class="queue-title" title="${esc(item.title)}">${esc(item.title||item.url)}</span>
-            <span class="queue-sub">${esc(item.submitterDisplay||item.submitter)}</span>`;
-        el.appendChild(div);
-    });
+  });
 }
 
-// ── Utility ────────────────────────────────────────────────────────────
-function esc(str) {
-    if (!str) return "";
-    return String(str).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+function loadIframe(url){
+  const src="https://w.soundcloud.com/player/?url="+encodeURIComponent(url)
+    +"&color=%2339FF14&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false";
+  document.getElementById('sc-player').src=src;
+}
+
+async function addToQueue(){
+  if(!myUsername){alert("Log in first!");return;}
+  const raw=document.getElementById('radio-input').value.trim();
+  if(!raw.includes('soundcloud.com')){alert("Paste a SoundCloud link.");return;}
+  let url=raw.split('?')[0];
+  // Get title via noembed (CORS-friendly)
+  let title=url;
+  try{
+    const r=await fetch("https://noembed.com/embed?url="+encodeURIComponent(url));
+    if(r.ok){const j=await r.json();if(j.title)title=j.title;}
+  }catch(e){}
+
+  const btn=document.getElementById('btn-add-queue');
+  btn.disabled=true; btn.innerText="Adding...";
+  try{
+    await addDoc(radioQueueCol,{
+      url, title,
+      submitter:myUsername.toLowerCase(),
+      submitterDisplay:myUsername,
+      addedAt:serverTimestamp()
+    });
+    document.getElementById('radio-input').value='';
+  }catch(e){
+    console.error("addToQueue:",e);
+    alert("Failed to queue: "+e.message);
+  }finally{
+    btn.disabled=false; btn.innerText="+ QUEUE";
+  }
+}
+
+async function playItem(item){
+  if(!item||advanceLock) return;
+  advanceLock=true;
+  try{
+    await setDoc(radioStateDoc,{
+      isRadioState:true, // marker so we know this doc is radio state
+      currentId:item.id, url:item.url, title:item.title,
+      submitter:item.submitter, submitterDisplay:item.submitterDisplay,
+      votedUsers:[], listenerCount:2, startedAt:serverTimestamp()
+    });
+  }catch(e){console.error("playItem:",e); alert("Radio error: "+e.message);}
+  setTimeout(()=>advanceLock=false,2000);
+}
+
+async function advanceQueue(){
+  if(advanceLock) return;
+  if(!radioState?.currentId) return;
+  advanceLock=true;
+  const doneId=radioState.currentId;
+  try{await deleteDoc(doc(radioQueueCol,doneId));}catch(e){}
+  const next=radioQueue.find(i=>i.id!==doneId);
+  if(next){
+    try{
+      await setDoc(radioStateDoc,{
+        isRadioState:true, currentId:next.id, url:next.url, title:next.title,
+        submitter:next.submitter, submitterDisplay:next.submitterDisplay,
+        votedUsers:[], listenerCount:2, startedAt:serverTimestamp()
+      });
+    }catch(e){console.error("advance:",e);}
+  }else{
+    try{await setDoc(radioStateDoc,{isRadioState:true,currentId:null,url:null,title:null,submitter:null,votedUsers:[],listenerCount:2});}catch(e){}
+  }
+  setTimeout(()=>advanceLock=false,2000);
+}
+
+async function castVoteSkip(){
+  if(!radioState?.currentId) return;
+  if(myVotedSkip) return;
+  if(radioState.submitter===myUsername.toLowerCase()){advanceQueue();return;}
+  try{await updateDoc(radioStateDoc,{votedUsers:arrayUnion(myUsername.toLowerCase())});}catch(e){console.error(e);}
+}
+
+function updateRadioUI(){
+  const nowEl=document.getElementById('radio-now-playing');
+  const voteBar=document.getElementById('vote-bar');
+  const voteBtn=document.getElementById('btn-voteskip');
+  const skipBtn=document.getElementById('btn-owner-skip');
+  const fill=document.getElementById('vote-fill');
+  const countEl=document.getElementById('vote-count');
+
+  if(!radioState?.currentId){
+    nowEl.innerHTML='♪ No song playing — add one to the queue!';
+    voteBar.style.display='none'; renderQueueUI(); return;
+  }
+  const st=radioState;
+  const isOwner=st.submitter===myUsername.toLowerCase();
+  const votes=st.votedUsers?.length??0;
+  const thr=Math.max(2,Math.ceil((st.listenerCount||2)/2));
+  const pct=Math.min(100,Math.round(votes/thr*100));
+
+  nowEl.innerHTML=`♪ NOW PLAYING: <b style="color:var(--acid2);">${esc(st.title||st.url)}</b><br><span style="color:#3a8a3a;font-size:10px;">queued by ${esc(st.submitterDisplay||st.submitter)}</span>`;
+  fill.style.width=pct+'%'; countEl.innerText=`${votes}/${thr}`;
+  voteBar.style.display='flex';
+  skipBtn.style.display=isOwner?'inline-block':'none';
+  voteBtn.style.display=isOwner?'none':'inline-block';
+  voteBtn.disabled=myVotedSkip; voteBtn.innerText=myVotedSkip?'Voted ✓':'Vote Skip';
+  renderQueueUI();
+}
+
+function renderQueueUI(){
+  const el=document.getElementById('radio-queue-list');
+  if(!radioQueue.length){el.innerHTML='<div style="padding:6px;color:#3a5a3a;font-size:11px;">Queue is empty.</div>';return;}
+  const curId=radioState?.currentId??null; el.innerHTML='';
+  radioQueue.forEach((item,idx)=>{
+    const isNow=item.id===curId;
+    const div=document.createElement('div');
+    div.className='queue-item'+(isNow?' now-playing-item':'');
+    div.innerHTML=`<span style="min-width:18px;font-size:11px;">${isNow?'▶':(idx+1)+'.'}</span>
+      <span class="queue-title" title="${esc(item.title)}">${esc(item.title||item.url)}</span>
+      <span class="queue-sub">${esc(item.submitterDisplay||item.submitter)}</span>`;
+    el.appendChild(div);
+  });
+}
+
+// ── Utility ────────────────────────────────────────────────────────────────
+function esc(s){
+  if(!s) return "";
+  return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
 </script>
 </body>
