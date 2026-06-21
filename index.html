@@ -1,3 +1,13 @@
+Ah, you just ran into the classic "Z-Index Trap" and the infamous "SoundCloud Jump Scare"!
+
+Here is exactly what went wrong behind the scenes:
+
+1. **The Ghost Keyboard Bug:** When you click a window in ChatZone OS, the code tries to "bring it to the front" by updating its layer order (Z-index). The base layer for windows was set to `100`, but the blue login background overlay was set to `99998`. The moment you clicked the login box to type, the code dropped the window to layer `101`—shoving it *behind* the invisible background shield! You were locked out of your own inputs.
+2. **The Sudden Music Bug:** Browsers have strict rules that block audio from auto-playing until a user interacts with the webpage. The ChatAmp app loaded the song in the background and was waiting. The second you clicked the screen (trying to type your username), the browser said, *"Ah! User interaction detected! Unleash the music!"* I have fixed both of these. I bumped the window layering to start at `100000` so it never gets trapped behind the background, and I disabled the aggressive auto-play on the radio so it only plays when a user explicitly hits the "Play" button. I also removed a bug that was resetting the radio station every time a new user refreshed the page.
+
+Here is the **V7.1 Patch**. You can copy and paste this completely over your `index.html`:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,20 +115,20 @@
     <div class="win-content">
         <div style="background: #000; padding: 5px; border: 2px inset #fff; margin-bottom: 5px;">
             <iframe id="sc-player" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" 
-            src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/293&color=%23000080&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+            src="">
             </iframe>
         </div>
         <div style="display: flex; gap: 5px;">
             <input type="text" id="radio-input" placeholder="Paste SoundCloud Link Here..." style="flex-grow: 1;">
             <button id="btn-set-radio" class="win-btn">Set Station</button>
         </div>
-        <p style="font-size: 9px; color: #666; margin: 3px 0 0 0;">Note: Browsers may require you to hit "Play" manually the first time.</p>
+        <p style="font-size: 9px; color: #666; margin: 3px 0 0 0;">Press Play to tune into the server's live radio station!</p>
     </div>
 </div>
 
 <div class="window" id="chat-window">
     <div class="title-bar" id="chat-handle">
-        <span class="title-bar-text" id="window-title">🌐 ChatZone v7.0</span>
+        <span class="title-bar-text" id="window-title">🌐 ChatZone v7.1</span>
         <div class="title-bar-controls"><button onclick="logout()">Log Out</button></div>
     </div>
     <div class="win-content">
@@ -212,10 +222,12 @@
     let unsubscribeChat = null;
     let isAdmin = false;
 
-    // --- Window Dragging Logic ---
+    // --- Window Dragging Logic (FIXED Z-INDEX) ---
+    let zIndexCounter = 100000; // Starts higher than the login overlay (99998)
+    
     window.openWindow = (id) => { document.getElementById(id).style.display = 'block'; bringToFront(document.getElementById(id)); };
     window.closeWindow = (id) => { document.getElementById(id).style.display = 'none'; };
-    let zIndexCounter = 100;
+    
     function bringToFront(el) { zIndexCounter++; el.style.zIndex = zIndexCounter; }
 
     function makeDraggable(winId, handleId) {
@@ -232,6 +244,7 @@
             };
         };
     }
+    
     makeDraggable('chat-window', 'chat-handle'); makeDraggable('admin-panel', 'admin-handle'); 
     makeDraggable('alert-window', 'alert-handle'); makeDraggable('login-window', 'login-handle');
     makeDraggable('radio-window', 'radio-handle');
@@ -253,14 +266,12 @@
             const userSnap = await getDoc(userRef);
             
             if (userSnap.exists()) {
-                // User exists, check password
                 if (userSnap.data().password === p) {
                     finalizeLogin(userSnap.data().username, p);
                 } else {
                     err.innerText = "Incorrect Password!"; err.style.display = 'block';
                 }
             } else {
-                // Register new user
                 await setDoc(userRef, { username: u, password: p });
                 finalizeLogin(u, p);
             }
@@ -286,7 +297,6 @@
 
     document.getElementById('btn-login-submit').onclick = attemptLogin;
 
-    // Check Auto-Login
     window.onload = async () => {
         let savedU = localStorage.getItem('cz_user');
         let savedP = localStorage.getItem('cz_pass');
@@ -349,7 +359,7 @@
             if (prompt(`Room '${room.name}' is locked. Password:`) !== room.password) { alert("Incorrect password."); return; }
         }
         currentRoomId = room.id; currentRoomDoc = room;
-        document.getElementById('window-title').innerText = `🌐 ChatZone v7.0 - [${room.name}]`;
+        document.getElementById('window-title').innerText = `🌐 ChatZone v7.1 - [${room.name}]`;
         document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
         updateRoomToolsUI(); loadChatForRoom();
     }
@@ -441,17 +451,15 @@
         }; reader.readAsDataURL(file); this.value = '';
     });
 
-    // --- ChatAmp Synchronized Radio ---
+    // --- ChatAmp Synchronized Radio (FIXED AUTOPLAY) ---
     const radioDocRef = doc(db, 'system', 'radio');
     
-    // Ensure the radio document exists initially
-    setDoc(radioDocRef, { url: "https://api.soundcloud.com/tracks/293" }, { merge: true });
-
     // Listen for global radio changes
     onSnapshot(radioDocRef, (docSnap) => {
         if(docSnap.exists()) {
             let encodedUrl = encodeURIComponent(docSnap.data().url);
-            document.getElementById('sc-player').src = `https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23000080&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+            // auto_play is set to FALSE so it doesn't scare the user. They must hit play!
+            document.getElementById('sc-player').src = `https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23000080&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
         }
     });
 
@@ -478,3 +486,5 @@
 </script>
 </body>
 </html>
+
+```
