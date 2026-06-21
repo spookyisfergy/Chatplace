@@ -1,490 +1,119 @@
-Ah, you just ran into the classic "Z-Index Trap" and the infamous "SoundCloud Jump Scare"!
-
-Here is exactly what went wrong behind the scenes:
-
-1. **The Ghost Keyboard Bug:** When you click a window in ChatZone OS, the code tries to "bring it to the front" by updating its layer order (Z-index). The base layer for windows was set to `100`, but the blue login background overlay was set to `99998`. The moment you clicked the login box to type, the code dropped the window to layer `101`—shoving it *behind* the invisible background shield! You were locked out of your own inputs.
-2. **The Sudden Music Bug:** Browsers have strict rules that block audio from auto-playing until a user interacts with the webpage. The ChatAmp app loaded the song in the background and was waiting. The second you clicked the screen (trying to type your username), the browser said, *"Ah! User interaction detected! Unleash the music!"* I have fixed both of these. I bumped the window layering to start at `100000` so it never gets trapped behind the background, and I disabled the aggressive auto-play on the radio so it only plays when a user explicitly hits the "Play" button. I also removed a bug that was resetting the radio station every time a new user refreshed the page.
-
-Here is the **V7.1 Patch**. You can copy and paste this completely over your `index.html`:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ ChatZone OS Professional ⚡</title>
+    <title>ChatZone OS v8.0</title>
     <style>
-        /* Retro 2000s OS Aesthetic */
-        body { background-color: #008080; font-family: "MS Sans Serif", Geneva, sans-serif; font-size: 12px; color: #000; margin: 0; padding: 0; height: 100vh; overflow: hidden; position: relative; }
-        
-        /* Desktop Grid */
-        .desktop { display: flex; flex-direction: column; gap: 20px; padding: 20px; width: 100px; }
-        .desktop-icon { text-align: center; cursor: pointer; color: white; font-size: 11px; width: 64px; }
-        .desktop-icon img { width: 32px; height: 32px; margin-bottom: 5px; image-rendering: pixelated; }
-        .desktop-icon:active span { background-color: #000080; border: 1px dotted white; }
-
-        /* Window Styling */
-        .window { position: absolute; background-color: #d4d0c8; border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); padding: 3px; display: none; z-index: 10; }
-        .title-bar { background: linear-gradient(90deg, #000080, #1084d0); color: white; padding: 3px 5px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: grab; user-select: none; }
-        .title-bar:active { cursor: grabbing; }
-        .title-bar-text { font-size: 12px; letter-spacing: 0.5px; pointer-events: none; }
-        .title-bar-controls button { padding: 1px 4px; font-size: 10px; font-weight: bold; background-color: #d4d0c8; border: 1px solid; border-color: #fff #404040 #404040 #fff; cursor: pointer; }
-        .title-bar-controls button:active { border-color: #404040 #fff #fff #404040; }
-        .win-content { padding: 5px; }
-
-        /* Specific Windows */
-        #login-window { top: 30%; left: 40%; width: 300px; display: block; z-index: 99999; }
-        #chat-window { top: 40px; left: 100px; width: 650px; }
-        #admin-panel { top: 100px; left: 200px; width: 350px; }
-        #alert-window { top: 200px; left: 300px; width: 400px; z-index: 9999; }
-        #radio-window { top: 50px; left: 760px; width: 350px; }
-
-        /* Chat Layout */
-        .main-layout { display: flex; gap: 5px; height: 350px; }
-        .sidebar { width: 150px; background: #fff; border: 2px inset #fff; display: flex; flex-direction: column; }
-        .room-list { flex-grow: 1; overflow-y: scroll; list-style: none; margin: 0; padding: 2px; }
-        .room-item { padding: 3px; cursor: pointer; display: flex; justify-content: space-between; }
-        .room-item:hover { background: #000080; color: #fff; }
-        .room-item.active { background: #1084d0; color: #fff; font-weight: bold; }
-        
-        .chat-area { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
-        .room-tools { background: #e4e0d8; padding: 4px; border: 1px inset #fff; display: none; gap: 5px; flex-wrap: wrap; }
-        .chat-box { flex-grow: 1; background-color: #fff; border: 2px inset #fff; overflow-y: scroll; padding: 5px; font-family: "Courier New", Courier, monospace; }
-        .message { margin-bottom: 4px; line-height: 1.3; }
-        .timestamp { color: #808080; font-size: 10px; }
-        .pm-message { background-color: #ffffcc; border: 1px dashed #cccc00; padding: 2px; }
-
-        /* Inputs & Buttons */
-        input[type="text"], input[type="password"], select { padding: 4px; border: 2px inset #fff; background-color: #fff; font-family: inherit; }
-        button.win-btn { padding: 4px 12px; background-color: #d4d0c8; border: 2px solid; border-color: #fff #404040 #404040 #fff; font-family: inherit; cursor: pointer; }
-        button.win-btn:active { border-color: #404040 #fff #fff #404040; padding: 5px 11px 3px 13px; }
-
-        /* Effects */
-        @keyframes rainbow { 0% { color: red; } 16% { color: orange; } 33% { color: #ccaa00; } 50% { color: green; } 66% { color: blue; } 83% { color: purple; } 100% { color: red; } }
-        .effect-rainbow { animation: rainbow 2s infinite linear; font-weight: bold; text-shadow: 1px 1px #000; }
-        @keyframes matrix { 0% { color: var(--eff-color, #0f0); text-shadow: 0 0 5px var(--eff-color, #0f0); } 50% { color: #fff; text-shadow: 0 0 20px var(--eff-color, #0f0); } 100% { color: var(--eff-color, #0f0); text-shadow: 0 0 5px var(--eff-color, #0f0); } }
-        .effect-glow { animation: matrix 1.5s infinite; font-weight: bold; background: #000; padding: 0 4px; }
-        @keyframes fire { 0% { color: var(--eff-color, #ffeb3b); text-shadow: 0 -2px 4px #ff9800, 0 -4px 6px #f44336; } 50% { color: #fff; text-shadow: 0 -1px 2px #ff9800, 0 -3px 5px #f44336; } 100% { color: var(--eff-color, #ffeb3b); text-shadow: 0 -2px 4px #ff9800, 0 -4px 6px #f44336; } }
-        .effect-fire { animation: fire 0.8s infinite alternate; font-weight: bold; }
-        @keyframes shake { 0% { transform: translate(2px, 1px); } 20% { transform: translate(-3px, 0px); } 40% { transform: translate(1px, -1px); } 60% { transform: translate(-3px, 1px); } 80% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -2px); } }
-        .earthquake { animation: shake 0.5s infinite; }
-
-        /* Login Screen Override */
-        #os-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #008080; z-index: 99998; display: block; }
+        body { background-color: #008080; font-family: "MS Sans Serif", sans-serif; font-size: 12px; margin: 0; height: 100vh; overflow: hidden; }
+        .window { position: absolute; background: #d4d0c8; border: 2px outset #fff; padding: 3px; display: none; z-index: 1000; }
+        .title-bar { background: #000080; color: white; padding: 2px 5px; font-weight: bold; cursor: move; }
+        .win-content { padding: 10px; }
+        #chat-box { height: 150px; background: #fff; border: 2px inset #fff; overflow-y: scroll; }
+        #member-list { height: 150px; background: #fff; border: 2px inset #fff; margin-top: 5px; }
+        .desktop-icon { width: 64px; text-align: center; color: white; cursor: pointer; margin: 20px; float: left; }
     </style>
 </head>
 <body>
 
-<div id="os-overlay"></div>
-<div class="window" id="login-window">
-    <div class="title-bar" id="login-handle">
-        <span class="title-bar-text">🔑 Log In to ChatZone OS</span>
-    </div>
-    <div class="win-content" style="display: flex; flex-direction: column; gap: 10px; padding: 15px;">
-        <p style="margin:0;">Welcome. Enter a username. If it doesn't exist, it will be created for you.</p>
-        <div style="display: flex; justify-content: space-between;"><b>Username:</b> <input type="text" id="login-user" style="width: 150px;"></div>
-        <div style="display: flex; justify-content: space-between;"><b>Password:</b> <input type="password" id="login-pass" style="width: 150px;"></div>
-        <p id="login-error" style="color:red; margin:0; font-weight:bold; display:none;"></p>
-        <div style="text-align: center; margin-top: 10px;">
-            <button class="win-btn" id="btn-login-submit" style="width: 100px; font-weight: bold;">Enter Server</button>
-        </div>
+<div id="login-window" class="window" style="display:block; top:30%; left:40%; z-index:9999;">
+    <div class="title-bar">Login</div>
+    <div class="win-content">
+        <input type="text" id="login-user" placeholder="Username"><br><br>
+        <button id="btn-login">Enter Server</button>
     </div>
 </div>
 
 <div class="desktop">
-    <div class="desktop-icon" ondblclick="openWindow('chat-window')">
-        <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_pnp-0.png" alt="Chat">
-        <span>ChatZone</span>
-    </div>
-    <div class="desktop-icon" ondblclick="openWindow('radio-window')">
-        <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-1.png" alt="Music">
-        <span>ChatAmp Radio</span>
-    </div>
-    <div class="desktop-icon" onclick="attemptAdminLogin()">
-        <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Admin">
-        <span>Admin Tools</span>
-    </div>
+    <div class="desktop-icon" onclick="document.getElementById('chat-window').style.display='block'"><span>Chat</span></div>
+    <div class="desktop-icon" onclick="document.getElementById('radio-window').style.display='block'"><span>Radio</span></div>
 </div>
 
-<div class="window" id="radio-window">
-    <div class="title-bar" id="radio-handle">
-        <span class="title-bar-text">🎵 ChatAmp Global Radio</span>
-        <div class="title-bar-controls"><button onclick="closeWindow('radio-window')">X</button></div>
-    </div>
+<div id="radio-window" class="window" style="top:50px; left:300px; width:320px;">
+    <div class="title-bar">ChatAmp Radio</div>
     <div class="win-content">
-        <div style="background: #000; padding: 5px; border: 2px inset #fff; margin-bottom: 5px;">
-            <iframe id="sc-player" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" 
-            src="">
-            </iframe>
-        </div>
-        <div style="display: flex; gap: 5px;">
-            <input type="text" id="radio-input" placeholder="Paste SoundCloud Link Here..." style="flex-grow: 1;">
-            <button id="btn-set-radio" class="win-btn">Set Station</button>
-        </div>
-        <p style="font-size: 9px; color: #666; margin: 3px 0 0 0;">Press Play to tune into the server's live radio station!</p>
+        <iframe id="sc-player" width="300" height="166" src=""></iframe>
+        <input type="text" id="radio-url" placeholder="SoundCloud Link">
+        <button id="btn-set-radio">Set</button>
+        <button id="btn-skip">Vote Skip</button>
+        <div id="skip-count">Votes: 0</div>
     </div>
 </div>
 
-<div class="window" id="chat-window">
-    <div class="title-bar" id="chat-handle">
-        <span class="title-bar-text" id="window-title">🌐 ChatZone v7.1</span>
-        <div class="title-bar-controls"><button onclick="logout()">Log Out</button></div>
-    </div>
+<div id="chat-window" class="window" style="top:100px; left:100px; width:400px;">
+    <div class="title-bar">ChatZone - Online Users</div>
     <div class="win-content">
-        <div style="display: flex; gap: 5px; margin-bottom: 5px; background: #e4e0d8; padding: 5px; border: 1px inset #fff; align-items: center;">
-            <b>Logged in as:</b> <span id="display-username" style="font-weight:bold; color:#000080;"></span>
-        </div>
-        
-        <div class="main-layout">
-            <div class="sidebar">
-                <div style="background: #d4d0c8; padding: 2px 5px; border-bottom: 1px solid #808080; font-weight: bold;">Rooms</div>
-                <ul class="room-list" id="room-list-ui"></ul>
-                <button id="btn-create-room" class="win-btn" style="margin: 2px;">+ New Room</button>
-            </div>
-
-            <div class="chat-area">
-                <div class="room-tools" id="room-tools">
-                    <b style="color:red">Mod:</b>
-                    <button id="btn-lock-room" class="win-btn">Lock</button>
-                    <button id="btn-unlock-room" class="win-btn">Unlock</button>
-                    <button id="btn-ban-user" class="win-btn">Ban</button>
-                    <button id="btn-unban-user" class="win-btn">Unban</button>
-                    <button id="btn-wipe-chat" class="win-btn">Wipe Chat</button>
-                    <button id="btn-delete-room" class="win-btn" style="color:red;">Delete Room</button>
-                </div>
-
-                <div id="chat-box" class="chat-box"></div>
-                
-                <div style="display: flex; gap: 5px;">
-                    <input type="file" id="image-input" accept="image/*" style="display: none;">
-                    <button id="btn-upload-img" class="win-btn" title="Send Image">🖼️</button>
-                    <input type="text" id="message-input" placeholder="Type message... (/msg User to PM)" style="flex-grow: 1;" autocomplete="off">
-                    <button id="send-btn" class="win-btn">Send</button>
-                </div>
-            </div>
-        </div>
+        <div id="chat-box"></div>
+        <div id="member-list"></div>
+        <input type="text" id="msg-input" style="width: 70%;">
+        <button id="send-btn">Send</button>
     </div>
-</div>
-
-<div class="window" id="admin-panel">
-    <div class="title-bar" id="admin-handle" style="background: linear-gradient(90deg, #800000, #ff0000);">
-        <span class="title-bar-text">⚠️ Admin Control Center</span>
-        <div class="title-bar-controls"><button onclick="closeWindow('admin-panel')">X</button></div>
-    </div>
-    <div class="win-content" style="display: flex; flex-direction: column; gap: 10px;">
-        <fieldset style="border: 2px groove #fff; padding: 5px;">
-            <legend>Your Persona</legend>
-            Name Color: <input type="color" id="admin-color" value="#0000ff"> <br>
-            Name Effect: <select id="admin-effect"><option value="none">Normal</option><option value="rainbow">🌈 Rainbow</option><option value="glow">🟩 Glow</option><option value="fire">🔥 Fire</option></select>
-        </fieldset>
-        <fieldset style="border: 2px groove #fff; padding: 5px;">
-            <legend>Global Commands</legend>
-            <input type="text" id="admin-broadcast" placeholder="Global Alert..." style="width: 100%; margin-bottom: 5px;">
-            <button id="btn-broadcast" class="win-btn" style="width: 100%; color: red; font-weight: bold; margin-bottom: 5px;">Send Alert Popup</button>
-            <div style="display: flex; gap: 5px;">
-                <button id="btn-earthquake" class="win-btn" style="flex-grow: 1;">Earthquake</button>
-                <button id="btn-admin-wipe" class="win-btn" style="flex-grow: 1; color: red;">Nuke Servers</button>
-            </div>
-        </fieldset>
-    </div>
-</div>
-
-<div class="window" id="alert-window">
-    <div class="title-bar" id="alert-handle" style="background: linear-gradient(90deg, #800000, #ff0000);"><span class="title-bar-text">System Message</span><div class="title-bar-controls"><button onclick="closeWindow('alert-window')">X</button></div></div>
-    <div class="win-content"><span class="alert-icon" style="font-size:32px; float:left;">⚠️</span><div id="alert-message" style="font-size: 14px; font-weight: bold; text-align: center; padding: 20px; color: red;"></div><div style="text-align: center;"><button class="win-btn" onclick="closeWindow('alert-window')">OK</button></div></div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, query, where, orderBy, limit, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
-        authDomain: "omegle-c7bdb.firebaseapp.com",
-        projectId: "omegle-c7bdb",
-        storageBucket: "omegle-c7bdb.firebasestorage.app",
-        messagingSenderId: "470349324814",
-        appId: "1:470349324814:web:8271072b8d4cd0de01125f"
-    };
+    const db = getFirestore(initializeApp({ apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw", projectId: "omegle-c7bdb" }));
+    let myUser = "";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const messagesCollection = collection(db, "messages");
-    const roomsCollection = collection(db, "rooms");
-    const usersCollection = collection(db, "users");
-
-    // --- State & Setup ---
-    let myUsername = "";
-    let currentRoomId = "Lobby";
-    let currentRoomDoc = null; 
-    let allRooms = [];
-    let unsubscribeChat = null;
-    let isAdmin = false;
-
-    // --- Window Dragging Logic (FIXED Z-INDEX) ---
-    let zIndexCounter = 100000; // Starts higher than the login overlay (99998)
-    
-    window.openWindow = (id) => { document.getElementById(id).style.display = 'block'; bringToFront(document.getElementById(id)); };
-    window.closeWindow = (id) => { document.getElementById(id).style.display = 'none'; };
-    
-    function bringToFront(el) { zIndexCounter++; el.style.zIndex = zIndexCounter; }
-
-    function makeDraggable(winId, handleId) {
-        const win = document.getElementById(winId);
-        const handle = document.getElementById(handleId);
-        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        win.onmousedown = () => bringToFront(win);
-        handle.onmousedown = (e) => {
-            e.preventDefault(); pos3 = e.clientX; pos4 = e.clientY;
-            document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
-            document.onmousemove = (e) => {
-                pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY; pos3 = e.clientX; pos4 = e.clientY;
-                win.style.top = (win.offsetTop - pos2) + "px"; win.style.left = (win.offsetLeft - pos1) + "px";
-            };
-        };
-    }
-    
-    makeDraggable('chat-window', 'chat-handle'); makeDraggable('admin-panel', 'admin-handle'); 
-    makeDraggable('alert-window', 'alert-handle'); makeDraggable('login-window', 'login-handle');
-    makeDraggable('radio-window', 'radio-handle');
-
-    // --- Authentication Logic ---
-    async function attemptLogin() {
-        const err = document.getElementById('login-error');
-        err.style.display = 'none';
-        
-        let u = document.getElementById('login-user').value.trim();
-        let p = document.getElementById('login-pass').value.trim();
-        
-        if (!u || !p) { err.innerText = "Need username and password!"; err.style.display = 'block'; return; }
-        
-        let safeId = u.toLowerCase();
-        
-        try {
-            const userRef = doc(usersCollection, safeId);
-            const userSnap = await getDoc(userRef);
-            
-            if (userSnap.exists()) {
-                if (userSnap.data().password === p) {
-                    finalizeLogin(userSnap.data().username, p);
-                } else {
-                    err.innerText = "Incorrect Password!"; err.style.display = 'block';
-                }
-            } else {
-                await setDoc(userRef, { username: u, password: p });
-                finalizeLogin(u, p);
-            }
-        } catch(e) { console.error(e); err.innerText = "Database error. Check console."; err.style.display = 'block'; }
-    }
-
-    function finalizeLogin(username, password) {
-        myUsername = username;
-        localStorage.setItem('cz_user', username);
-        localStorage.setItem('cz_pass', password);
-        
-        document.getElementById('display-username').innerText = myUsername;
-        document.getElementById('os-overlay').style.display = 'none';
+    // --- Authentication & Presence ---
+    document.getElementById('btn-login').onclick = async () => {
+        myUser = document.getElementById('login-user').value;
+        if (!myUser) return;
+        await setDoc(doc(db, "online_users", myUser), { name: myUser, lastSeen: serverTimestamp() });
         document.getElementById('login-window').style.display = 'none';
-        openWindow('chat-window');
-        ensureLobbyExists();
-    }
-
-    window.logout = () => {
-        localStorage.removeItem('cz_user'); localStorage.removeItem('cz_pass');
-        location.reload();
-    }
-
-    document.getElementById('btn-login-submit').onclick = attemptLogin;
-
-    window.onload = async () => {
-        let savedU = localStorage.getItem('cz_user');
-        let savedP = localStorage.getItem('cz_pass');
-        if (savedU && savedP) {
-            document.getElementById('login-user').value = savedU;
-            document.getElementById('login-pass').value = savedP;
-            attemptLogin();
-        }
-    };
-
-    window.attemptAdminLogin = () => {
-        if(isAdmin) { openWindow('admin-panel'); return; }
-        if (prompt("Enter Admin Password:") === "KHEMIST") { isAdmin = true; alert("Access Granted."); openWindow('admin-panel'); } 
-        else { alert("Access Denied."); }
-    };
-
-    // --- BAN LOGIC ---
-    function isBanned(room) {
-        let currentNameLower = myUsername.toLowerCase();
-        return (room.banned && room.banned.includes(currentNameLower));
-    }
-
-    // --- Rooms Manager ---
-    function ensureLobbyExists() { setDoc(doc(roomsCollection, "Lobby"), { name: "Lobby", creator: "System", locked: false, password: "", banned: [] }, { merge: true }); }
-
-    onSnapshot(roomsCollection, (snapshot) => {
-        allRooms = [];
-        const uiList = document.getElementById('room-list-ui');
-        uiList.innerHTML = "";
-
-        snapshot.forEach(docSnap => {
-            let r = docSnap.data(); r.id = docSnap.id; allRooms.push(r);
-            let li = document.createElement('li');
-            li.className = `room-item ${r.id === currentRoomId ? 'active' : ''}`;
-            li.innerHTML = `<span>${escapeHTML(r.name)}</span> <span>${r.locked ? '🔒' : ''}</span>`;
-            li.onclick = () => attemptJoinRoom(r);
-            uiList.appendChild(li);
-        });
-
-        currentRoomDoc = allRooms.find(r => r.id === currentRoomId) || null;
-        updateRoomToolsUI();
-
-        if (currentRoomDoc && currentRoomDoc.id !== "Lobby" && isBanned(currentRoomDoc)) {
-            alert("You have been banned from this room.");
-            attemptJoinRoom(allRooms.find(r => r.id === "Lobby"));
-        }
-    });
-
-    document.getElementById('btn-create-room').onclick = async () => {
-        let rName = prompt("Enter new room name:"); if (!rName) return;
-        let rId = rName.replace(/[^a-zA-Z0-9]/g, ''); if (rId === "") return;
-        await setDoc(doc(roomsCollection, rId), { name: rName, creator: myUsername.toLowerCase(), locked: false, password: "", banned: [] });
-        attemptJoinRoom({ id: rId, name: rName, locked: false, password: "", banned: [] });
-    };
-
-    function attemptJoinRoom(room) {
-        if(!room) return;
-        if (isBanned(room)) { alert("You are permanently banned from this room."); return; }
-        if (room.locked && room.id !== currentRoomId) {
-            if (prompt(`Room '${room.name}' is locked. Password:`) !== room.password) { alert("Incorrect password."); return; }
-        }
-        currentRoomId = room.id; currentRoomDoc = room;
-        document.getElementById('window-title').innerText = `🌐 ChatZone v7.1 - [${room.name}]`;
-        document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
-        updateRoomToolsUI(); loadChatForRoom();
-    }
-
-    function updateRoomToolsUI() {
-        const toolsDiv = document.getElementById('room-tools');
-        toolsDiv.style.display = (currentRoomDoc && currentRoomDoc.creator === myUsername.toLowerCase() && currentRoomDoc.id !== "Lobby") ? 'flex' : 'none';
-    }
-
-    // Room Mod Tools
-    document.getElementById('btn-lock-room').onclick = async () => { let pwd = prompt("Enter password to lock room:"); if (pwd) await updateDoc(doc(roomsCollection, currentRoomId), { locked: true, password: pwd }); };
-    document.getElementById('btn-unlock-room').onclick = async () => { await updateDoc(doc(roomsCollection, currentRoomId), { locked: false, password: "" }); };
-    document.getElementById('btn-ban-user').onclick = async () => { let target = prompt("Enter EXACT username to ban:"); if (target) await updateDoc(doc(roomsCollection, currentRoomId), { banned: arrayUnion(target.toLowerCase()) }); };
-    document.getElementById('btn-unban-user').onclick = async () => { let target = prompt("Enter EXACT username to unban:"); if (target) await updateDoc(doc(roomsCollection, currentRoomId), { banned: arrayRemove(target.toLowerCase()) }); };
-    document.getElementById('btn-wipe-chat').onclick = async () => { if(confirm("Permanently delete all messages in this room?")) { const q = query(messagesCollection, where("room", "==", currentRoomId)); const snap = await getDocs(q); snap.forEach(d => deleteDoc(d.ref)); } };
-    document.getElementById('btn-delete-room').onclick = async () => { if(confirm("Delete this room entirely?")) { await deleteDoc(doc(roomsCollection, currentRoomId)); attemptJoinRoom(allRooms.find(r => r.id === "Lobby")); } };
-
-    // --- Chat Logic ---
-    function loadChatForRoom() {
-        if (unsubscribeChat) unsubscribeChat();
-        const q = query(messagesCollection, where("room", "==", currentRoomId), orderBy("createdAt", "asc"), limit(75));
         
-        unsubscribeChat = onSnapshot(q, (snapshot) => {
-            const chatBox = document.getElementById('chat-box'); chatBox.innerHTML = '';
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                
-                if (data.msgType === 'system') {
-                    if (data.action === 'earthquake' && data.createdAt && (Date.now() - data.createdAt.toMillis() < 5000)) {
-                        document.body.classList.add('earthquake'); setTimeout(() => document.body.classList.remove('earthquake'), 2000);
-                    }
-                    if (data.action === 'broadcast' && data.createdAt && (Date.now() - data.createdAt.toMillis() < 10000)) {
-                        document.getElementById('alert-message').innerText = data.text; openWindow('alert-window');
-                    }
-                    return; 
-                }
+        // Remove user on close
+        window.onbeforeunload = () => deleteDoc(doc(db, "online_users", myUser));
+    };
 
-                if (data.to && data.to.toLowerCase() !== myUsername.toLowerCase() && data.username.toLowerCase() !== myUsername.toLowerCase()) return;
-
-                let timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "??:??";
-                const msgDiv = document.createElement('div'); msgDiv.className = data.to ? 'message pm-message' : 'message';
-                
-                let effectClass = data.effect && data.effect !== 'none' ? `effect-${data.effect}` : "";
-                let colorHex = data.color || (data.isAdmin ? "red" : "#0000ff");
-                const nameDisplay = `<span class="username ${effectClass}" style="color:${colorHex}; --eff-color:${colorHex};">&lt;${escapeHTML(data.username)}&gt;</span>`;
-
-                let messageBody = escapeHTML(data.text);
-                if (data.msgType === 'image' && data.imageUrl) messageBody = `<br><img src="${data.imageUrl}" style="max-width: 100%; border: 2px inset #fff; margin-top: 5px;">`;
-
-                msgDiv.innerHTML = data.to ? `<span class="timestamp">[${timeStr}]</span> <b>[PM]</b> ${nameDisplay} to &lt;${escapeHTML(data.to)}&gt;: ${messageBody}` : `<span class="timestamp">[${timeStr}]</span> ${nameDisplay}: ${messageBody}`;
-                chatBox.appendChild(msgDiv);
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    }
-
-    async function sendMessage() {
-        let text = document.getElementById('message-input').value.trim(); if (!text) return;
-        if (/pedo|pedophile|p3do|nonce|child\s?porn|jailbait/i.test(text)) text = "NOPE";
-
-        let target = null;
-        if (text.startsWith("/msg ")) { const parts = text.split(" "); if (parts.length > 2) { target = parts[1]; text = parts.slice(2).join(" "); } }
-
-        let finalName = isAdmin ? ("★" + myUsername) : myUsername;
-        try {
-            await addDoc(messagesCollection, { username: finalName, text: text, room: currentRoomId, to: target, isAdmin: isAdmin, msgType: 'chat', color: isAdmin ? document.getElementById('admin-color').value : "#0000ff", effect: isAdmin ? document.getElementById('admin-effect').value : "none", createdAt: serverTimestamp() });
-            document.getElementById('message-input').value = ""; document.getElementById('message-input').focus();
-        } catch (error) { console.error("Send Error:", error); }
-    }
-
-    document.getElementById('send-btn').addEventListener('click', sendMessage);
-    document.getElementById('message-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-    // --- Image Logic ---
-    document.getElementById('btn-upload-img').onclick = () => document.getElementById('image-input').click();
-    document.getElementById('image-input').addEventListener('change', function() {
-        const file = this.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const img = new Image();
-            img.onload = async function() {
-                const canvas = document.createElement('canvas'); const MAX_WIDTH = 300; const scaleSize = MAX_WIDTH / img.width;
-                canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
-                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                try {
-                    await addDoc(messagesCollection, { username: isAdmin ? ("★" + myUsername) : myUsername, text: "", imageUrl: canvas.toDataURL('image/jpeg', 0.8), room: currentRoomId, isAdmin: isAdmin, msgType: 'image', color: isAdmin ? document.getElementById('admin-color').value : "#0000ff", effect: isAdmin ? document.getElementById('admin-effect').value : "none", createdAt: serverTimestamp() });
-                } catch (error) { console.error("Image Send Error:", error); }
-            }; img.src = event.target.result;
-        }; reader.readAsDataURL(file); this.value = '';
+    // --- Member List Sync ---
+    onSnapshot(collection(db, "online_users"), (snap) => {
+        const list = document.getElementById('member-list');
+        list.innerHTML = "<b>Online:</b><br>";
+        snap.forEach(d => list.innerHTML += `<div>${d.data().name}</div>`);
     });
 
-    // --- ChatAmp Synchronized Radio (FIXED AUTOPLAY) ---
-    const radioDocRef = doc(db, 'system', 'radio');
-    
-    // Listen for global radio changes
-    onSnapshot(radioDocRef, (docSnap) => {
-        if(docSnap.exists()) {
-            let encodedUrl = encodeURIComponent(docSnap.data().url);
-            // auto_play is set to FALSE so it doesn't scare the user. They must hit play!
-            document.getElementById('sc-player').src = `https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23000080&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+    // --- Chat Sync ---
+    document.getElementById('send-btn').onclick = async () => {
+        const text = document.getElementById('msg-input').value;
+        await addDoc(collection(db, "messages"), { user: myUser, text, time: serverTimestamp() });
+        document.getElementById('msg-input').value = "";
+    };
+
+    onSnapshot(query(collection(db, "messages"), orderBy("time", "asc")), (snap) => {
+        const box = document.getElementById('chat-box');
+        box.innerHTML = "";
+        snap.forEach(d => box.innerHTML += `<div><b>${d.data().user}:</b> ${d.data().text}</div>`);
+    });
+
+    // --- Radio Sync & Voting ---
+    document.getElementById('btn-set-radio').onclick = async () => {
+        await setDoc(doc(db, "system", "radio"), { url: document.getElementById('radio-url').value });
+    };
+
+    document.getElementById('btn-skip').onclick = async () => {
+        await setDoc(doc(db, "radio_votes", myUser), { voted: true });
+    };
+
+    onSnapshot(doc(db, "system", "radio"), (snap) => {
+        if(snap.exists()) {
+            const url = encodeURIComponent(snap.data().url);
+            document.getElementById('sc-player').src = `https://w.soundcloud.com/player/?url=${url}&auto_play=true`;
         }
     });
 
-    // Submit new radio station
-    document.getElementById('btn-set-radio').addEventListener('click', async () => {
-        const scUrl = document.getElementById('radio-input').value.trim();
-        if(scUrl.includes('soundcloud.com')) {
-            await updateDoc(radioDocRef, { url: scUrl });
-            document.getElementById('radio-input').value = "";
-            sendSystemCommand('broadcast', `${myUsername} just changed the global radio station!`);
-        } else {
-            alert("Please paste a valid SoundCloud link.");
+    onSnapshot(collection(db, "radio_votes"), async (snap) => {
+        const count = snap.size;
+        const totalUsers = (await getDocs(collection(db, "online_users"))).size;
+        document.getElementById('skip-count').innerText = `Votes: ${count} / ${Math.ceil(totalUsers/2)}`;
+        
+        if (count >= totalUsers/2 && totalUsers > 0) {
+            alert("Skip voted! Resetting radio...");
+            // Logic to clear votes after skip
+            snap.forEach(d => deleteDoc(d.ref));
         }
     });
-
-    // --- Admin System Commands ---
-    async function sendSystemCommand(action, text = "") { await addDoc(messagesCollection, { room: currentRoomId, msgType: 'system', action: action, text: text, createdAt: serverTimestamp() }); }
-    document.getElementById('btn-broadcast').addEventListener('click', () => { const txt = document.getElementById('admin-broadcast').value.trim(); if(txt) { sendSystemCommand('broadcast', txt); document.getElementById('admin-broadcast').value = ""; } });
-    document.getElementById('btn-earthquake').addEventListener('click', () => sendSystemCommand('earthquake'));
-    document.getElementById('btn-admin-wipe').addEventListener('click', async () => { if(confirm("DANGER: Wipe all chats?")) { const snap = await getDocs(messagesCollection); snap.forEach(d => deleteDoc(d.ref)); sendSystemCommand('broadcast', "SYSTEM: All chatrooms have been wiped."); } });
-
-    function escapeHTML(str) { if (!str) return ""; return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
-
 </script>
 </body>
 </html>
-
-```
