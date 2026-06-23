@@ -15,7 +15,7 @@
   body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
   #app{display:flex;height:100vh}
   a{color:var(--accent2)}
-  .sidebar{width:250px;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column}
+  .sidebar{width:250px;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
   .server-head{padding:18px 16px;font-weight:800;font-size:19px;letter-spacing:.5px;border-bottom:1px solid var(--line);
     background:linear-gradient(135deg,var(--theme1),var(--theme2));-webkit-background-clip:text;background-clip:text;color:transparent}
   .channel{margin:14px 8px 4px;padding:11px 12px;border-radius:8px;
@@ -24,8 +24,10 @@
   .channel .hash{color:var(--muted);font-size:20px}
   .side-section{padding:14px 16px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:800}
   .online-list{flex:1;overflow-y:auto;padding:0 8px}
-  .online-user{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;font-size:14px}
+  .online-user{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;font-size:14px;cursor:pointer;position:relative}
   .online-user:hover{background:var(--bg3)}
+  .online-user:hover .dm-hint{opacity:1}
+  .dm-hint{opacity:0;position:absolute;right:8px;font-size:11px;color:var(--accent2);font-weight:700;transition:.15s;pointer-events:none}
   .online-user img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--bg3)}
   .online-user .status{font-size:11px;color:var(--muted)}
   .dot{width:9px;height:9px;border-radius:50%;background:var(--good);flex-shrink:0;margin-left:auto}
@@ -34,6 +36,9 @@
   .me-card .nm{font-weight:700;font-size:14px}
   .me-card .sub{font-size:11px;color:var(--muted)}
   .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  /* DM pane */
+  .dm-pane{flex:1;display:none;flex-direction:column;min-width:0;border-left:1px solid var(--line)}
+  .dm-pane.open{display:flex}
   .topbar{height:54px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:10px;background:var(--bg2)}
   .topbar .hash{color:var(--muted);font-size:22px}
   .topbar .title{font-weight:800}
@@ -199,6 +204,44 @@
   .sound-btn{background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:14px 6px;cursor:pointer;text-align:center;font-size:13px;font-weight:700}
   .sound-btn:hover{border-color:var(--accent)}
   .sound-btn .se{font-size:24px;display:block}
+
+  /* ===== DM SYSTEM ===== */
+  .dm-list{padding:0 8px 8px}
+  .dm-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;cursor:pointer;font-size:14px;position:relative}
+  .dm-item:hover{background:var(--bg3)}
+  .dm-item.active{background:color-mix(in srgb,var(--theme1) 18%,transparent)}
+  .dm-item img{width:30px;height:30px;border-radius:50%;flex-shrink:0;object-fit:cover;background:var(--bg3)}
+  .dm-item .dm-name{font-weight:700;font-size:13px}
+  .dm-item .dm-preview{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+  .dm-badge{position:absolute;right:8px;top:7px;background:var(--danger);color:#fff;font-size:10px;font-weight:800;border-radius:50%;width:17px;height:17px;display:flex;align-items:center;justify-content:center}
+  .dm-topbar{height:54px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:10px;background:var(--bg2)}
+  .dm-topbar .close-dm{margin-left:auto;color:var(--muted);cursor:pointer;font-size:20px}
+  .dm-topbar .close-dm:hover{color:var(--text)}
+  .dm-messages{flex:1;overflow-y:auto;padding:14px 14px 4px}
+  .dm-msg{display:flex;gap:10px;padding:5px 6px;border-radius:8px}
+  .dm-msg:hover{background:var(--bg3)}
+  .dm-msg img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
+  .dm-msg .body .head{display:flex;align-items:center;gap:8px}
+  .dm-msg .body .name{font-weight:800;font-size:14px}
+  .dm-msg .body .time{font-size:11px;color:var(--muted)}
+  .dm-msg .body .text{margin-top:2px;line-height:1.45;word-wrap:break-word;font-size:14px}
+  .dm-composer{padding:0 14px 14px}
+  .dm-composer-inner{background:var(--bg3);border-radius:12px;display:flex;align-items:center;padding:4px 6px 4px 14px;gap:6px}
+  .dm-composer-inner input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:14px;padding:11px 0}
+  .dm-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--muted);font-size:14px}
+  .dm-empty .ico{font-size:48px}
+
+  /* admin gift UI */
+  .gift-row{display:flex;gap:8px;align-items:flex-end;margin-top:10px}
+  .gift-row>div{flex:1}
+  .gift-row button{flex:0 0 auto;padding:13px 18px;border-radius:9px;border:none;background:var(--good);color:#fff;font-weight:800;cursor:pointer;font-size:14px;margin-top:0}
+  .gift-row button:hover{filter:brightness(1.1)}
+  .online-pick{max-height:160px;overflow-y:auto;margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:9px}
+  .online-pick .op{padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:8px}
+  .online-pick .op:hover{background:var(--bg3)}
+  .online-pick .op.sel{background:color-mix(in srgb,var(--theme1) 22%,transparent)}
+  .online-pick .op img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+  .online-pick .op span{font-weight:700;font-size:14px}
 </style>
 </head>
 <body>
@@ -206,6 +249,8 @@
   <div class="sidebar">
     <div class="server-head">⬢ NEXUS</div>
     <div class="channel"><span class="hash">#</span> the-void</div>
+    <div class="side-section">DMs</div>
+    <div class="dm-list" id="dmList"></div>
     <div class="side-section">Online — <span id="onlineNum">0</span></div>
     <div class="online-list" id="onlineList"></div>
     <div class="me-card" id="meCard">
@@ -216,7 +261,9 @@
       </div>
     </div>
   </div>
-  <div class="main">
+
+  <!-- Main chat -->
+  <div class="main" id="mainChat">
     <div class="topbar">
       <span class="hash">#</span><span class="title">the-void</span>
       <span class="desc">one channel. infinite chaos.</span>
@@ -239,6 +286,29 @@
         <button class="icon-btn" id="sendBtn" title="Send">➤</button>
       </div>
       <div class="hint">Images · GIFs · MP3s · react with 😀 · <b>/me</b> action · <b>/confess</b> anon · <b>&amp;</b> admin · 🎁 <span id="dailyHint">claim daily bonus in Casino</span></div>
+    </div>
+  </div>
+
+  <!-- DM pane -->
+  <div class="dm-pane" id="dmPane">
+    <div class="dm-topbar" id="dmTopbar">
+      <img id="dmTargetAvatar" src="" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
+      <span id="dmTargetName" style="font-weight:800;font-size:16px"></span>
+      <span style="font-size:12px;color:var(--muted)" id="dmEncNote">🔒 End-to-end private · only you two can see this</span>
+      <span class="close-dm" id="closeDm">✕</span>
+    </div>
+    <div class="dm-messages" id="dmMessages">
+      <div class="dm-empty" id="dmEmpty">
+        <div class="ico">💬</div>
+        <div>This is the beginning of your DM with <b id="dmEmptyName"></b></div>
+        <div style="font-size:12px">Messages here are private and only visible to the two of you.</div>
+      </div>
+    </div>
+    <div class="dm-composer">
+      <div class="dm-composer-inner">
+        <input type="text" id="dmInput" placeholder="Send a private message…" maxlength="2000" autocomplete="off">
+        <button class="icon-btn" id="dmSend">➤</button>
+      </div>
     </div>
   </div>
 </div>
@@ -315,8 +385,6 @@
       </div>
     </div>
     <button class="btn warn" id="dailyBtn" style="margin-top:0">🎁 Claim daily 500 coins</button>
-
-    <!-- game select -->
     <div id="casHome" style="margin-top:16px">
       <div class="game-select">
         <div class="game-card" data-game="slots"><div class="ico">🎰</div><div class="gt">Slots</div><div class="gd">match 3 to win big</div></div>
@@ -329,7 +397,6 @@
         <div class="game-card" data-game="wheel"><div class="ico">🎡</div><div class="gt">Wheel</div><div class="gd">spin the multiplier wheel</div></div>
       </div>
     </div>
-
     <!-- SLOTS -->
     <div class="casino-panel" data-panel="slots">
       <span class="back-link casBack">← all games</span>
@@ -340,7 +407,6 @@
       <div class="bet-row"><button class="bMinus" data-g="slots">−</button><input type="number" id="slotsBet" value="50" min="10" step="10"><button class="bPlus" data-g="slots">+</button><button class="bMax" data-g="slots">MAX</button></div>
       <button class="btn good" id="slotsSpin">🎰 SPIN</button>
     </div>
-
     <!-- MINES -->
     <div class="casino-panel" data-panel="mines">
       <span class="back-link casBack">← all games</span>
@@ -357,7 +423,6 @@
         <button class="btn warn" id="minesCash" disabled>Cash out <span id="minesMult">x1.00</span></button>
       </div>
     </div>
-
     <!-- CRASH -->
     <div class="casino-panel" data-panel="crash">
       <span class="back-link casBack">← all games</span>
@@ -372,14 +437,13 @@
         <button class="btn warn" id="crashCash" disabled>💰 Cash out</button>
       </div>
     </div>
-
     <!-- DICE -->
     <div class="casino-panel" data-panel="dice">
       <span class="back-link casBack">← all games</span>
       <h3>🎲 Dice — roll under</h3>
       <div class="dice-val" id="diceVal">—</div>
       <div class="dice-bar" id="diceBar"><div class="dice-marker" id="diceMarker" style="left:50%"></div></div>
-      <label>Roll under: <span id="diceTargetLbl">50</span>  (win chance shown)</label>
+      <label>Roll under: <span id="diceTargetLbl">50</span></label>
       <input type="range" id="diceTarget" min="2" max="98" value="50" style="width:100%">
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px">
         <span>Win chance: <b id="diceChance">49%</b></span><span>Payout: <b id="dicePay">x2.00</b></span>
@@ -389,7 +453,6 @@
       <button class="btn good" id="diceRoll">🎲 Roll</button>
       <div class="game-result" id="diceResult"></div>
     </div>
-
     <!-- PLINKO -->
     <div class="casino-panel" data-panel="plinko">
       <span class="back-link casBack">← all games</span>
@@ -401,7 +464,6 @@
       <button class="btn good" id="plinkoDrop">🔻 Drop ball</button>
       <div class="game-result" id="plinkoResult"></div>
     </div>
-
     <!-- COIN -->
     <div class="casino-panel" data-panel="coin">
       <span class="back-link casBack">← all games</span>
@@ -417,7 +479,6 @@
       </div>
       <button class="btn warn" id="coinCash" disabled>💰 Cash out pot</button>
     </div>
-
     <!-- BLACKJACK -->
     <div class="casino-panel" data-panel="blackjack">
       <span class="back-link casBack">← all games</span>
@@ -435,7 +496,6 @@
         <button class="btn alt" id="bjStand" disabled>Stand</button>
       </div>
     </div>
-
     <!-- WHEEL -->
     <div class="casino-panel" data-panel="wheel">
       <span class="back-link casBack">← all games</span>
@@ -473,6 +533,7 @@
       <div class="admin-tab" data-tab="troll">😈 Troll Box</div>
       <div class="admin-tab" data-tab="mod">🛠️ Moderation</div>
       <div class="admin-tab" data-tab="fun">🎲 Fun</div>
+      <div class="admin-tab" data-tab="coins">🪙 Gift Coins</div>
     </div>
     <div class="admin-panel active" data-panel="style">
       <label>Name Color</label>
@@ -514,6 +575,33 @@
       <button class="troll-btn" data-fun="coin"><span class="t">🪙 Coin Flip</span><span class="d">Heads or tails, posted to chat</span></button>
       <button class="troll-btn" data-fun="rps"><span class="t">✊ Rock Paper Scissors</span><span class="d">Challenge the void</span></button>
     </div>
+
+    <!-- NEW: Gift Coins panel -->
+    <div class="admin-panel" data-panel="coins">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Select an online user and gift them casino coins. They'll receive the coins and a private notification.</p>
+      <label>Pick a user</label>
+      <div class="online-pick" id="giftUserList">
+        <div style="padding:14px;color:var(--muted);font-size:13px;text-align:center">No users online yet</div>
+      </div>
+      <div id="giftSelectedInfo" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:9px;display:flex;align-items:center;gap:10px">
+        <img id="giftSelAvatar" src="" style="width:32px;height:32px;border-radius:50%;object-fit:cover">
+        <span style="font-weight:700" id="giftSelName">—</span>
+        <span style="font-size:12px;color:var(--muted)" id="giftSelCoins"></span>
+      </div>
+      <label>Amount to gift</label>
+      <div class="gift-row">
+        <div><input type="number" id="giftAmount" value="500" min="1" step="100" placeholder="Coins"></div>
+        <button id="giftSendBtn">🎁 Gift</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=100">+100</button>
+        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=500">+500</button>
+        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=1000">+1K</button>
+        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=5000">+5K</button>
+        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=10000">+10K</button>
+      </div>
+      <div class="field-note" id="giftNote" style="margin-top:10px;font-size:13px"></div>
+    </div>
   </div>
 </div>
 
@@ -522,7 +610,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, addDoc, updateDoc,
-  query, orderBy, limit, onSnapshot, serverTimestamp, increment }
+  query, orderBy, limit, onSnapshot, serverTimestamp, increment, where, getDocs }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -539,6 +627,8 @@ const db=getFirestore(app);
 const msgsCol=collection(db,"the-void");
 const usersCol=collection(db,"usernames");
 const presenceCol=collection(db,"presence");
+const dmsCol=collection(db,"dms");         // DM messages: dms/{channelId}/messages
+const giftsCol=collection(db,"gifts");     // coin gifts: gifts/{receiverCID}
 const controlDoc=doc(db,"control","main");
 
 const ADMIN_PASS="9009";
@@ -592,15 +682,15 @@ let clearedAt=0;
 onSnapshot(controlDoc,snap=>{
   if(snap.exists()&&snap.data().clearedAt){
     clearedAt=snap.data().clearedAt;
-    document.querySelectorAll(".msg[data-ms]").forEach(el=>{ if(+el.dataset.ms<clearedAt) el.remove(); });
+    document.querySelectorAll(".msg[data-ms]").forEach(el=>{if(+el.dataset.ms<clearedAt)el.remove();});
   }
 },()=>{});
 
-/* ---- render ---- */
+/* ---- render main chat ---- */
 const messagesEl=$("#messages");
 function renderMsg(m,id){
   const ms=(m.ts&&m.ts.toMillis)?m.ts.toMillis():Date.now();
-  if(clearedAt&&ms<clearedAt) return;
+  if(clearedAt&&ms<clearedAt)return;
   const div=document.createElement("div");div.className="msg"+(m.action?" action":"");div.dataset.ms=ms;div.dataset.id=id;
   const nameClass="name fx-"+(m.effect||"none");
   const colorStyle=(m.effect==="shimmer"||m.effect==="gradient")?"":`color:${esc(m.color||"#fff")}`;
@@ -628,11 +718,11 @@ function renderMsg(m,id){
   renderReactions(id,m.reactions);
 }
 function renderReactions(id,reactions){
-  const box=messagesEl.querySelector(`.reactions[data-id="${id}"]`); if(!box) return;
+  const box=messagesEl.querySelector(`.reactions[data-id="${id}"]`);if(!box)return;
   box.innerHTML="";
-  if(!reactions) return;
+  if(!reactions)return;
   Object.entries(reactions).forEach(([emo,users])=>{
-    if(!users||!users.length) return;
+    if(!users||!users.length)return;
     const r=document.createElement("span");r.className="reaction";r.textContent=`${emo} ${users.length}`;
     r.onclick=()=>toggleReaction(id,emo);
     box.appendChild(r);
@@ -648,7 +738,7 @@ onSnapshot(query(msgsCol,orderBy("ts","asc"),limit(300)),snap=>{
     else if(ch.type==="modified"){renderReactions(id,data.reactions);}
   });
   if(near)messagesEl.scrollTop=messagesEl.scrollHeight;
-},err=>{toast("⚠️ Firestore: "+err.code+" — check rules");console.error(err);});
+},err=>{toast("⚠️ Firestore: "+err.code);console.error(err);});
 
 const REACT_EMOJIS=["😀","😂","🔥","❤️","💀","👍","🎉","😮"];
 async function toggleReaction(id,emo){
@@ -665,19 +755,22 @@ messagesEl.addEventListener("click",e=>{
 });
 
 /* ---- presence ---- */
+let presenceUsers={};
 async function heartbeat(){
   if(!profile.name)return;
-  try{await setDoc(doc(presenceCol,CLIENT_ID),{name:profile.name,avatar:profile.avatar,color:profile.color,effect:profile.effect,status:profile.status||"",ts:Date.now()});}catch(e){}
+  try{await setDoc(doc(presenceCol,CLIENT_ID),{name:profile.name,avatar:profile.avatar,color:profile.color,effect:profile.effect,status:profile.status||"",cid:CLIENT_ID,ts:Date.now()});}catch(e){}
 }
 onSnapshot(presenceCol,snap=>{
-  const now=Date.now(),list=$("#onlineList");list.innerHTML="";let n=0;
-  snap.forEach(d=>{const u=d.data();if(now-(u.ts||0)<45000){n++;
+  const now=Date.now(),list=$("#onlineList");list.innerHTML="";presenceUsers={};let n=0;
+  snap.forEach(d=>{const u=d.data();if(now-(u.ts||0)<45000){n++;presenceUsers[d.id]=u;
     const el=document.createElement("div");el.className="online-user";
     const cs=(u.effect==="shimmer"||u.effect==="gradient")?"":`color:${esc(u.color||"#fff")}`;
-    el.innerHTML=`<img src="${esc(u.avatar||DEFAULT_AVATAR)}"><div style="min-width:0"><div class="name fx-${u.effect||'none'}" style="${cs};font-weight:700;font-size:14px">${esc(u.name)}</div>${u.status?`<div class="status">${esc(u.status)}</div>`:""}</div><span class="dot"></span>`;
+    el.innerHTML=`<img src="${esc(u.avatar||DEFAULT_AVATAR)}"><div style="min-width:0;flex:1"><div class="name fx-${u.effect||'none'}" style="${cs};font-weight:700;font-size:14px">${esc(u.name)}</div>${u.status?`<div class="status">${esc(u.status)}</div>`:""}</div>${d.id!==CLIENT_ID?'<span class="dm-hint">DM</span>':''}<span class="dot"></span>`;
+    if(d.id!==CLIENT_ID){el.onclick=()=>openDm(d.id,u);}
     list.appendChild(el);}});
   $("#onlineNum").textContent=n;
-});
+  refreshGiftUserList();
+},()=>{});
 setInterval(heartbeat,15000);
 window.addEventListener("beforeunload",()=>{try{deleteDoc(doc(presenceCol,CLIENT_ID));}catch(e){}});
 
@@ -686,7 +779,7 @@ const typingCol=collection(db,"typing");
 let typingTimer=null;
 function setTyping(on){
   if(!profile.name)return;
-  try{ if(on) setDoc(doc(typingCol,CLIENT_ID),{name:profile.name,ts:Date.now()}); else deleteDoc(doc(typingCol,CLIENT_ID)); }catch(e){}
+  try{if(on)setDoc(doc(typingCol,CLIENT_ID),{name:profile.name,ts:Date.now()});else deleteDoc(doc(typingCol,CLIENT_ID));}catch(e){}
 }
 onSnapshot(typingCol,snap=>{
   const now=Date.now();const names=[];
@@ -718,7 +811,7 @@ async function send(extra={}){
 const input=$("#msgInput");
 $("#sendBtn").onclick=trySend;
 input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();trySend();}});
-input.addEventListener("input",()=>{ setTyping(true); clearTimeout(typingTimer); typingTimer=setTimeout(()=>setTyping(false),2500); });
+input.addEventListener("input",()=>{setTyping(true);clearTimeout(typingTimer);typingTimer=setTimeout(()=>setTyping(false),2500);});
 function trySend(){
   let v=input.value.trim();if(!v)return;
   if(v==="&"){input.value="";openPassword();return;}
@@ -779,7 +872,7 @@ $("#thApply").onclick=()=>{profile.theme={mode:thMode,c1:thC1,c2:thC2};saveProfi
 $("#thReset").onclick=()=>{profile.theme={mode:"solid",c1:"#5865f2",c2:"#7d4bff"};saveProfile();applyTheme();openTheme();toast("Theme reset");};
 $("#themeClose").onclick=()=>$("#themeOverlay").classList.remove("show");$("#themeOpen").onclick=openTheme;
 
-/* ---- soundboard (WebAudio synth) ---- */
+/* ---- soundboard ---- */
 let actx;
 function beep(freq,dur,type="square",slideTo){
   try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=freq;if(slideTo)o.frequency.exponentialRampToValueAtTime(slideTo,actx.currentTime+dur);g.gain.value=.15;g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+dur);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+dur);}catch(e){}
@@ -798,7 +891,219 @@ const SOUNDS=[
 function openSound(){const g=$("#soundGrid");g.innerHTML="";SOUNDS.forEach(s=>{const b=document.createElement("div");b.className="sound-btn";b.innerHTML=`<span class="se">${s.e}</span>${s.n}`;b.onclick=s.f;g.appendChild(b);});$("#soundOverlay").classList.add("show");}
 $("#soundOpen").onclick=openSound;$("#soundClose").onclick=()=>$("#soundOverlay").classList.remove("show");
 
-/* ================= CASINO ================= */
+/* ===================== DM SYSTEM ===================== */
+let activeDmCid=null;
+let activeDmUnsub=null;
+let dmUnreadCounts={};
+let dmPreviews={};
+
+function dmChannelId(a,b){return[a,b].sort().join("__");}
+
+function openDm(targetCid,targetUser){
+  if(!profile.name){openProfile();toast("Set a username first!");return;}
+  activeDmCid=targetCid;
+  const chId=dmChannelId(CLIENT_ID,targetCid);
+
+  // update topbar
+  $("#dmTargetAvatar").src=targetUser.avatar||DEFAULT_AVATAR;
+  $("#dmTargetName").textContent=targetUser.name||"Unknown";
+  $("#dmEmptyName").textContent=targetUser.name||"Unknown";
+
+  // clear messages
+  const msgEl=$("#dmMessages");
+  // keep the empty state div, remove old messages
+  msgEl.querySelectorAll(".dm-msg").forEach(el=>el.remove());
+  const emptyDiv=$("#dmEmpty");
+  emptyDiv.style.display="flex";
+
+  // show dm pane
+  $("#dmPane").classList.add("open");
+
+  // unsub old listener
+  if(activeDmUnsub){activeDmUnsub();activeDmUnsub=null;}
+
+  // subscribe to DM messages
+  const dmMsgs=collection(db,"dms",chId,"messages");
+  const q=query(dmMsgs,orderBy("ts","asc"),limit(200));
+  const dmSeenIds=new Set();
+
+  activeDmUnsub=onSnapshot(q,snap=>{
+    const near=msgEl.scrollHeight-msgEl.scrollTop-msgEl.clientHeight<120;
+    snap.docChanges().forEach(ch=>{
+      if(ch.type==="added"&&!dmSeenIds.has(ch.doc.id)){
+        dmSeenIds.add(ch.doc.id);
+        const m=ch.doc.data();
+        emptyDiv.style.display="none";
+        const div=document.createElement("div");div.className="dm-msg";
+        const isMe=m.senderCid===CLIENT_ID;
+        div.innerHTML=`<img src="${esc(m.avatar||DEFAULT_AVATAR)}">
+          <div class="body"><div class="head">
+            <span class="name" style="color:${esc(m.color||"#fff")}">${esc(m.name||"?")}</span>
+            <span class="time">${fmtTime(m.ts)}</span>
+          </div><div class="text">${esc(m.text||"")}</div></div>`;
+        if(isMe)div.style.flexDirection="row-reverse";
+        msgEl.appendChild(div);
+      }
+    });
+    if(near)msgEl.scrollTop=msgEl.scrollHeight;
+
+    // clear unread for this convo
+    dmUnreadCounts[targetCid]=0;
+    refreshDmList();
+  },()=>{});
+
+  // mark active in sidebar
+  refreshDmList();
+  activateDmSidebar(targetCid,targetUser);
+  dmInput.focus();
+}
+
+function activateDmSidebar(cid,user){
+  // add to DM list if not already there
+  if(!dmPreviews[cid]){dmPreviews[cid]={name:user.name,avatar:user.avatar,color:user.color,cid};}
+  refreshDmList();
+}
+
+function refreshDmList(){
+  const dl=$("#dmList");dl.innerHTML="";
+  Object.entries(dmPreviews).forEach(([cid,u])=>{
+    const div=document.createElement("div");div.className="dm-item"+(cid===activeDmCid?" active":"");
+    const unread=dmUnreadCounts[cid]||0;
+    div.innerHTML=`<img src="${esc(u.avatar||DEFAULT_AVATAR)}">
+      <div style="min-width:0;flex:1"><div class="dm-name" style="color:${esc(u.color||"#fff")}">${esc(u.name)}</div>
+      <div class="dm-preview">${esc(u.lastMsg||"No messages yet")}</div></div>
+      ${unread>0?`<div class="dm-badge">${unread}</div>`:""}`;
+    div.onclick=()=>{
+      const pUser=presenceUsers[cid]||u;
+      openDm(cid,pUser);
+    };
+    dl.appendChild(div);
+  });
+}
+
+// send DM
+const dmInput=$("#dmInput");
+$("#dmSend").onclick=sendDm;
+dmInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendDm();}});
+async function sendDm(){
+  const v=dmInput.value.trim();if(!v||!activeDmCid)return;
+  if(!profile.name){openProfile();return;}
+  const chId=dmChannelId(CLIENT_ID,activeDmCid);
+  const dmMsgs=collection(db,"dms",chId,"messages");
+  try{
+    await addDoc(dmMsgs,{text:v,name:profile.name,avatar:profile.avatar,color:profile.color,senderCid:CLIENT_ID,ts:serverTimestamp()});
+    // update preview for both sides via a shared "channel meta" doc
+    const metaRef=doc(db,"dmsMeta",chId);
+    await setDoc(metaRef,{participants:[CLIENT_ID,activeDmCid],lastMsg:v,lastTs:Date.now(),
+      [`name_${CLIENT_ID}`]:profile.name,[`avatar_${CLIENT_ID}`]:profile.avatar,[`color_${CLIENT_ID}`]:profile.color,
+      [`name_${activeDmCid}`]:presenceUsers[activeDmCid]?.name||"",
+      [`avatar_${activeDmCid}`]:presenceUsers[activeDmCid]?.avatar||"",
+      [`color_${activeDmCid}`]:presenceUsers[activeDmCid]?.color||"",
+    },{merge:true});
+    if(dmPreviews[activeDmCid])dmPreviews[activeDmCid].lastMsg=v;
+    refreshDmList();
+    dmInput.value="";
+  }catch(e){toast("DM failed: "+e.code);}
+}
+
+// close DM pane
+$("#closeDm").onclick=()=>{
+  $("#dmPane").classList.remove("open");
+  if(activeDmUnsub){activeDmUnsub();activeDmUnsub=null;}
+  activeDmCid=null;
+  refreshDmList();
+};
+
+// listen for incoming DMs (dmsMeta where I'm a participant)
+// We watch for channel meta docs that include our CLIENT_ID
+const dmsMetaCol=collection(db,"dmsMeta");
+onSnapshot(query(dmsMetaCol,where("participants","array-contains",CLIENT_ID)),snap=>{
+  snap.docChanges().forEach(ch=>{
+    const d=ch.doc.data();
+    const [a,b]=ch.doc.id.split("__");
+    const otherCid=a===CLIENT_ID?b:a;
+    if(!otherCid)return;
+    const otherName=d[`name_${otherCid}`]||"Someone";
+    const otherAvatar=d[`avatar_${otherCid}`]||DEFAULT_AVATAR;
+    const otherColor=d[`color_${otherCid}`]||"#fff";
+    if(!dmPreviews[otherCid]){
+      dmPreviews[otherCid]={name:otherName,avatar:otherAvatar,color:otherColor,cid:otherCid};
+    }
+    dmPreviews[otherCid].lastMsg=d.lastMsg||"";
+    // increment unread if not the active convo and not our own message
+    if(ch.type==="modified"&&otherCid!==activeDmCid){
+      dmUnreadCounts[otherCid]=(dmUnreadCounts[otherCid]||0)+1;
+    }
+    refreshDmList();
+  });
+},()=>{});
+
+/* ===================== GIFT COINS (ADMIN) ===================== */
+let giftSelectedCid=null;
+
+function refreshGiftUserList(){
+  const list=$("#giftUserList");if(!list)return;
+  list.innerHTML="";
+  const users=Object.entries(presenceUsers).filter(([cid])=>cid!==CLIENT_ID);
+  if(users.length===0){list.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px;text-align:center">No other users online</div>';return;}
+  users.forEach(([cid,u])=>{
+    const div=document.createElement("div");div.className="op"+(cid===giftSelectedCid?" sel":"");
+    div.innerHTML=`<img src="${esc(u.avatar||DEFAULT_AVATAR)}"><span style="color:${esc(u.color||"#fff")}">${esc(u.name)}</span>`;
+    div.onclick=()=>{
+      giftSelectedCid=cid;
+      list.querySelectorAll(".op").forEach(x=>x.classList.remove("sel"));
+      div.classList.add("sel");
+      const info=$("#giftSelectedInfo");
+      info.style.display="flex";
+      $("#giftSelAvatar").src=u.avatar||DEFAULT_AVATAR;
+      $("#giftSelName").textContent=u.name;
+      $("#giftSelCoins").textContent="";
+      $("#giftNote").textContent="";
+    };
+    list.appendChild(div);
+  });
+}
+
+$("#giftSendBtn").onclick=async()=>{
+  if(!giftSelectedCid){$("#giftNote").style.color="var(--danger)";$("#giftNote").textContent="Select a user first.";return;}
+  const amt=parseInt($("#giftAmount").value)||0;
+  if(amt<1){$("#giftNote").style.color="var(--danger)";$("#giftNote").textContent="Enter a valid amount.";return;}
+  const targetUser=presenceUsers[giftSelectedCid];
+  if(!targetUser){$("#giftNote").style.color="var(--danger)";$("#giftNote").textContent="User not found.";return;}
+  try{
+    // write a gift doc for the recipient to pick up
+    const giftRef=doc(db,"gifts",giftSelectedCid+"_"+Date.now());
+    await setDoc(giftRef,{
+      toCid:giftSelectedCid,fromName:profile.name,fromAvatar:profile.avatar,
+      amount:amt,ts:Date.now(),claimed:false
+    });
+    // post public message
+    await send({text:`🎁 Admin gifted **${targetUser.name}** ${amt} casino coins!`,system:"announce",name:"Casino",avatar:randomAvatar("casino"),color:"#faa61a",effect:"glow"});
+    $("#giftNote").style.color="var(--good)";
+    $("#giftNote").textContent=`✔ Gifted ${amt} coins to ${targetUser.name}!`;
+    toast(`🎁 Gifted ${amt} coins to ${targetUser.name}`);
+    giftSelectedCid=null;
+    $("#giftSelectedInfo").style.display="none";
+  }catch(e){
+    $("#giftNote").style.color="var(--danger)";
+    $("#giftNote").textContent="Failed: "+e.code;
+  }
+};
+
+// Listen for gifts targeted at this client
+onSnapshot(query(collection(db,"gifts"),where("toCid","==",CLIENT_ID),where("claimed","==",false)),snap=>{
+  snap.docChanges().forEach(async ch=>{
+    if(ch.type!=="added")return;
+    const g=ch.doc.data();
+    profile.coins+=g.amount;
+    saveProfile();
+    toast(`🎁 ${g.fromName} gifted you ${g.amount} coins!`);
+    // mark claimed
+    try{await updateDoc(ch.doc.ref,{claimed:true});}catch(e){}
+  });
+},()=>{});
+
+/* ===================== CASINO ===================== */
 function refreshCasino(){$("#casBal").textContent=profile.coins;$("#casWins").textContent=profile.wins;$("#casPlays").textContent=profile.plays;$("#casBest").textContent=profile.best;}
 function openCasino(){if(!profile.name){openProfile();toast("Make a profile first");return;}showCasHome();refreshCasino();updateDaily();$("#casinoOverlay").classList.add("show");}
 $("#casinoOpen").onclick=openCasino;$("#casinoClose").onclick=()=>$("#casinoOverlay").classList.remove("show");
@@ -809,16 +1114,13 @@ function win(amt){profile.coins+=amt;profile.wins++;if(amt>profile.best)profile.
 function settleLoss(){profile.plays++;saveProfile();}
 function canBet(v){if(v<10){toast("Min bet 10");return false;}if(v>profile.coins){toast("Not enough coins!");return false;}return true;}
 
-/* bet steppers */
 $$(".bMinus").forEach(b=>b.onclick=()=>{const i=$("#"+b.dataset.g+"Bet");i.value=Math.max(10,(+i.value||10)-10);});
 $$(".bPlus").forEach(b=>b.onclick=()=>{const i=$("#"+b.dataset.g+"Bet");i.value=(+i.value||10)+10;});
 $$(".bMax").forEach(b=>b.onclick=()=>{$("#"+b.dataset.g+"Bet").value=Math.max(10,profile.coins);});
 
-/* daily bonus */
 function updateDaily(){const can=Date.now()-(profile.lastDaily||0)>20*60*60*1000;$("#dailyBtn").disabled=!can;$("#dailyBtn").textContent=can?"🎁 Claim daily 500 coins":"🎁 Daily claimed — come back later";}
 $("#dailyBtn").onclick=()=>{if(Date.now()-(profile.lastDaily||0)>20*60*60*1000){profile.coins+=500;profile.lastDaily=Date.now();saveProfile();refreshCasino();updateDaily();toast("+500 coins 🎁");}};
 
-/* ----- SLOTS ----- */
 const SY=["🍒","🍋","🍇","🔔","⭐","💎","7️⃣"];const PAY={"💎":50,"7️⃣":25,"⭐":12,"🔔":8,"🍇":5,"🍋":4,"🍒":3};
 let slotsBusy=false;
 $("#slotsSpin").onclick=()=>{if(slotsBusy)return;const bet=Math.floor(+$("#slotsBet").value||0);if(!canBet(bet))return;slotsBusy=true;profile.coins-=bet;saveProfile();refreshCasino();
@@ -828,7 +1130,6 @@ $("#slotsSpin").onclick=()=>{if(slotsBusy)return;const bet=Math.floor(+$("#slots
     let w=0,msg;if(r[0]===r[1]&&r[1]===r[2]){w=bet*PAY[r[0]];msg=`🎉 JACKPOT ${r[0]}! +${w}`;}else if(r[0]===r[1]||r[1]===r[2]||r[0]===r[2]){w=Math.floor(bet*1.5);msg=`✨ Pair! +${w}`;}else{msg=`💀 No match. -${bet}`;}
     if(w>0)win(w);else settleLoss();refreshCasino();$("#slotsResult").textContent=msg;slotsBusy=false;},1000);};
 
-/* ----- MINES ----- */
 let mines={active:false,bombs:[],picked:0,bet:0,count:5,mult:1};
 function buildMinesGrid(){const g=$("#minesGrid");g.innerHTML="";for(let i=0;i<25;i++){const c=document.createElement("div");c.className="mine-cell";c.dataset.i=i;c.onclick=()=>mineClick(i);g.appendChild(c);}}
 buildMinesGrid();
@@ -841,10 +1142,8 @@ function mineClick(i){if(!mines.active)return;const cell=$(`.mine-cell[data-i="$
     mines.bombs.forEach(b=>{const c=$(`.mine-cell[data-i="${b}"]`);c.classList.add("bomb","revealed");c.textContent="💣";});
     settleLoss();refreshCasino();$("#minesResult").textContent=`💀 Boom! Lost ${mines.bet}.`;}
   else{cell.classList.add("gem");cell.textContent="💎";mines.picked++;mines.mult=minesMultFor(mines.picked,mines.count);$("#minesMult").textContent="x"+mines.mult.toFixed(2);$("#minesResult").textContent=`Cash value: ${Math.floor(mines.bet*mines.mult)}`;}}
-$("#minesCash").onclick=()=>{if(!mines.active||mines.picked===0)return;const payout=Math.floor(mines.bet*mines.mult);win(payout);settleLossSkip();mines.active=false;$("#minesCash").disabled=true;$("#minesResult").textContent=`💰 Cashed out +${payout}!`;refreshCasino();};
-function settleLossSkip(){profile.plays++;saveProfile();}
+$("#minesCash").onclick=()=>{if(!mines.active||mines.picked===0)return;const payout=Math.floor(mines.bet*mines.mult);win(payout);profile.plays++;saveProfile();mines.active=false;$("#minesCash").disabled=true;$("#minesResult").textContent=`💰 Cashed out +${payout}!`;refreshCasino();};
 
-/* ----- CRASH ----- */
 let crash={running:false,mult:1,crashAt:0,bet:0,raf:0,start:0};
 $("#crashStart").onclick=()=>{if(crash.running)return;const bet=Math.floor(+$("#crashBet").value||0);if(!canBet(bet))return;profile.coins-=bet;saveProfile();refreshCasino();
   const r=Math.random();crash={running:true,mult:1,crashAt:Math.max(1,(0.97/(1-r))),bet,start:performance.now()};
@@ -855,7 +1154,6 @@ $("#crashStart").onclick=()=>{if(crash.running)return;const bet=Math.floor(+$("#
 function crashBoom(){cancelAnimationFrame(crash.raf);crash.running=false;$("#crashCash").disabled=true;$("#crashStart").disabled=false;$("#crashDisplay").className="crash-display crashed";$("#crashDisplay").textContent="💥 "+crash.crashAt.toFixed(2)+"x";$("#crashResult").textContent=`Crashed! Lost ${crash.bet}.`;settleLoss();refreshCasino();}
 $("#crashCash").onclick=()=>{if(!crash.running)return;cancelAnimationFrame(crash.raf);crash.running=false;const payout=Math.floor(crash.bet*crash.mult);win(payout);$("#crashCash").disabled=true;$("#crashStart").disabled=false;$("#crashDisplay").className="crash-display cashed";$("#crashResult").textContent=`💰 Cashed @ ${crash.mult.toFixed(2)}x → +${payout}`;refreshCasino();};
 
-/* ----- DICE ----- */
 function updateDice(){const t=+$("#diceTarget").value;$("#diceTargetLbl").textContent=t;const chance=t-1;$("#diceChance").textContent=chance+"%";const pay=(98/chance);$("#dicePay").textContent="x"+pay.toFixed(2);$("#diceMarker").style.left=t+"%";$("#diceBar").style.setProperty("--t",t+"%");}
 $("#diceTarget").addEventListener("input",updateDice);
 $("#diceRoll").onclick=()=>{const bet=Math.floor(+$("#diceBet").value||0);if(!canBet(bet))return;const t=+$("#diceTarget").value;profile.coins-=bet;saveProfile();
@@ -863,7 +1161,6 @@ $("#diceRoll").onclick=()=>{const bet=Math.floor(+$("#diceBet").value||0);if(!ca
   if(roll<t){const pay=Math.floor(bet*(98/(t-1)));win(pay);$("#diceResult").textContent=`🎉 ${roll} < ${t} → +${pay}`;}else{settleLoss();$("#diceResult").textContent=`💀 ${roll} ≥ ${t}. -${bet}`;}
   refreshCasino();};
 
-/* ----- PLINKO ----- */
 const PLINKO_MULT=[8,3,1.5,1,0.5,1,1.5,3,8];
 function buildPlinko(){const b=$("#plinkoBoard");if(b.dataset.built)return;b.dataset.built="1";const rows=8;for(let r=0;r<rows;r++){for(let c=0;c<=r+1;c++){const p=document.createElement("div");p.className="peg";p.style.left=(50+(c-(r+1)/2)*9)+"%";p.style.top=(12+r*26)+"px";b.appendChild(p);}}const s=$("#plinkoSlots");s.innerHTML="";PLINKO_MULT.forEach(m=>{const d=document.createElement("div");d.className="ps";d.textContent=m+"x";s.appendChild(d);});}
 let plinkoBusy=false;
@@ -873,10 +1170,9 @@ $("#plinkoDrop").onclick=()=>{if(plinkoBusy)return;const bet=Math.floor(+$("#pli
   const iv=setInterval(()=>{const dir=Math.random()<.5?-1:1;x+=dir*5.2;x=Math.max(6,Math.min(94,x));ball.style.left=x+"%";ball.style.top=(10+row*26)+"px";row++;
     if(row>steps){clearInterval(iv);const slot=Math.max(0,Math.min(8,Math.round((x-50)/9+4)));const mult=PLINKO_MULT[slot];const payout=Math.floor(bet*mult);
       if(payout>0&&mult>=1)win(payout);else if(payout>0){profile.coins+=payout;saveProfile();}else settleLoss();
-      $("#plinkoResult").textContent=`Landed ${mult}x → ${payout>=bet?"+":""}${payout-bet>=0?"+":""}${payout} (net ${payout-bet>=0?"+":""}${payout-bet})`;
+      $("#plinkoResult").textContent=`Landed ${mult}x → net ${payout-bet>=0?"+":""}${payout-bet}`;
       refreshCasino();setTimeout(()=>ball.remove(),600);plinkoBusy=false;}},120);};
 
-/* ----- COIN FLIP streak ----- */
 let coin={pot:0,streak:0,bet:0,running:false};
 function coinUpdate(){$("#coinStreak").textContent=coin.streak;$("#coinPot").textContent=coin.pot;$("#coinCash").disabled=!coin.running||coin.pot<=0;}
 function coinPlay(side){
@@ -890,7 +1186,6 @@ function coinPlay(side){
 $("#coinHeads").onclick=()=>coinPlay("heads");$("#coinTails").onclick=()=>coinPlay("tails");
 $("#coinCash").onclick=()=>{if(coin.running&&coin.pot>0){win(coin.pot);$("#coinResult").textContent=`💰 Cashed out +${coin.pot}!`;coin={pot:0,streak:0,bet:0,running:false};coinUpdate();refreshCasino();}};
 
-/* ----- BLACKJACK ----- */
 let bj={deck:[],player:[],dealer:[],bet:0,active:false};
 function newDeck(){const s=["♠","♥","♦","♣"],v=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];const d=[];s.forEach(su=>v.forEach(va=>d.push({s:su,v:va})));for(let i=d.length-1;i>0;i--){const j=ri(i+1);[d[i],d[j]]=[d[j],d[i]];}return d;}
 function cardVal(h){let t=0,a=0;h.forEach(c=>{if(c.v==="A"){a++;t+=11;}else if(["K","Q","J"].includes(c.v))t+=10;else t+=+c.v;});while(t>21&&a){t-=10;a--;}return t;}
@@ -910,15 +1205,14 @@ function bjStand(){if(!bj.active)return;$("#bjHit").disabled=true;$("#bjStand").
   bjEnd(msg);}
 function bjEnd(msg){bj.active=false;$("#bjHit").disabled=true;$("#bjStand").disabled=true;$("#bjDeal").disabled=false;renderHand($("#bjDealer"),bj.dealer);$("#bjDealerVal").textContent="("+cardVal(bj.dealer)+")";$("#bjResult").textContent=msg;refreshCasino();}
 
-/* ----- WHEEL ----- */
 const WHEEL=[0,0.2,0.5,1,1,1.5,2,3,5,10];
 let wheelBusy=false;
 $("#wheelSpin").onclick=()=>{if(wheelBusy)return;const bet=Math.floor(+$("#wheelBet").value||0);if(!canBet(bet))return;wheelBusy=true;profile.coins-=bet;saveProfile();refreshCasino();
   const face=$("#wheelFace");let n=0;const iv=setInterval(()=>{face.style.transform=`rotate(${n+=40}deg)`;},50);
   setTimeout(()=>{clearInterval(iv);face.style.transform="";const m=rand(WHEEL);const payout=Math.floor(bet*m);if(payout>0){if(m>=1)win(payout);else{profile.coins+=payout;saveProfile();}}else settleLoss();
-    $("#wheelResult").textContent=`🎡 Landed ${m}x → ${payout} coins (net ${payout-bet>=0?"+":""}${payout-bet})`;refreshCasino();wheelBusy=false;},1700);};
+    $("#wheelResult").textContent=`🎡 Landed ${m}x → net ${payout-bet>=0?"+":""}${payout-bet}`;refreshCasino();wheelBusy=false;},1700);};
 
-/* ================= ADMIN ================= */
+/* ===================== ADMIN ===================== */
 let adminUnlocked=false;
 function openPassword(){if(adminUnlocked){openAdmin();return;}$("#pwInput").value="";$("#pwNote").textContent="";$("#pwOverlay").classList.add("show");setTimeout(()=>$("#pwInput").focus(),50);}
 $("#pwClose").onclick=()=>$("#pwOverlay").classList.remove("show");$("#pwSubmit").onclick=tryPw;
@@ -926,21 +1220,19 @@ $("#pwInput").addEventListener("keydown",e=>{if(e.key==="Enter")tryPw();});
 function tryPw(){if($("#pwInput").value===ADMIN_PASS){adminUnlocked=true;$("#pwOverlay").classList.remove("show");openAdmin();toast("Access granted ⚡");}else{$("#pwNote").textContent="Wrong passcode.";$("#pwInput").value="";}}
 
 let adColor=profile.color,adEffect=profile.effect;
-function openAdmin(){buildColorGrid($("#adColorGrid"),adColor,c=>{adColor=rgbToHex(c);updateAdPreview();});const eg=$("#adEffectGrid");eg.innerHTML="";EFFECTS.forEach(ef=>{const o=document.createElement("div");o.className="effect-opt"+(ef.id===adEffect?" sel":"");o.textContent=ef.l;o.onclick=()=>{eg.querySelectorAll(".effect-opt").forEach(x=>x.classList.remove("sel"));o.classList.add("sel");adEffect=ef.id;updateAdPreview();};eg.appendChild(o);});updateAdPreview();$("#adminOverlay").classList.add("show");}
+function openAdmin(){
+  buildColorGrid($("#adColorGrid"),adColor,c=>{adColor=rgbToHex(c);updateAdPreview();});
+  const eg=$("#adEffectGrid");eg.innerHTML="";
+  EFFECTS.forEach(ef=>{const o=document.createElement("div");o.className="effect-opt"+(ef.id===adEffect?" sel":"");o.textContent=ef.l;o.onclick=()=>{eg.querySelectorAll(".effect-opt").forEach(x=>x.classList.remove("sel"));o.classList.add("sel");adEffect=ef.id;updateAdPreview();};eg.appendChild(o);});
+  updateAdPreview();
+  refreshGiftUserList();
+  $("#adminOverlay").classList.add("show");
+}
 function updateAdPreview(){const p=$("#adPreview");p.className="preview-box fx-"+adEffect;p.style.color=(adEffect==="shimmer"||adEffect==="gradient")?"":adColor;p.textContent=profile.name||"YourName";}
 $("#adApplyStyle").onclick=()=>{profile.color=adColor;profile.effect=adEffect;saveProfile();heartbeat();toast("Style applied ✨");closeAdmin();};
 $("#adClearStyle").onclick=()=>{adColor="#ffffff";adEffect="none";profile.color="#ffffff";profile.effect="none";saveProfile();heartbeat();openAdmin();toast("Reset to plain");};
 function closeAdmin(){$("#adminOverlay").classList.remove("show");}$("#adminClose").onclick=closeAdmin;
-$$(".admin-tab").forEach(t=>{t.onclick=()=>{$$(".admin-tab").forEach(x=>x.classList.remove("active"));$$(".admin-panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(`.admin-panel[data-panel="${t.dataset.tab}"]`).classList.add("active");};});
-
-/* GLOBAL CLEAR */
-$("#modGlobalClear").onclick=async()=>{
-  if(!confirm("Clear the chat for EVERYONE? This hides all current messages for all users."))return;
-  try{await setDoc(controlDoc,{clearedAt:Date.now(),by:profile.name},{merge:true});
-    document.querySelectorAll(".msg").forEach(el=>el.remove());
-    await ghost(`🧨 Chat was cleared by an admin.`);
-    toast("Global clear done 🧨");closeAdmin();}catch(e){toast("Clear failed: "+e.code);}
-};
+$$(".admin-tab").forEach(t=>{t.onclick=()=>{$$(".admin-tab").forEach(x=>x.classList.remove("active"));$$(".admin-panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(`.admin-panel[data-panel="${t.dataset.tab}"]`).classList.add("active");if(t.dataset.tab==="coins")refreshGiftUserList();};});
 
 /* troll */
 const FAKE=["xX_Sniper_Xx","BigChungus","404Notfound","SteveFromAccounting","theRealElon","CaptainObvious","NoobMaster69","ToiletDuck","gigaChad420","lurker_99"];
@@ -976,6 +1268,15 @@ $("#modPinBtn").onclick=()=>{const t=$("#modPin").value.trim();if(!t){toast("Typ
 $("#modClearBtn").onclick=()=>{messagesEl.innerHTML="";toast("View cleared (local)");};
 let slowOn=false;
 $("#modSlowBtn").onclick=()=>{slowOn=!slowOn;let b=$("#slowBanner");if(slowOn){if(!b){b=document.createElement("div");b.id="slowBanner";b.style.cssText="background:var(--warn);color:#1a1a1a;text-align:center;padding:6px;font-weight:800;font-size:13px";b.textContent="🐌 Slow-mode is enabled";$(".main").insertBefore(b,$(".messages"));}}else if(b)b.remove();toast("Slow-mode "+(slowOn?"on":"off"));};
+
+/* global clear */
+$("#modGlobalClear").onclick=async()=>{
+  if(!confirm("Clear the chat for EVERYONE? This hides all current messages for all users."))return;
+  try{await setDoc(controlDoc,{clearedAt:Date.now(),by:profile.name},{merge:true});
+    document.querySelectorAll(".msg").forEach(el=>el.remove());
+    await ghost(`🧨 Chat was cleared by an admin.`);
+    toast("Global clear done 🧨");closeAdmin();}catch(e){toast("Clear failed: "+e.code);}
+};
 
 document.addEventListener("keydown",e=>{if(e.key==="&"&&document.activeElement!==input&&!document.querySelector(".overlay.show")){e.preventDefault();openPassword();}});
 
