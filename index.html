@@ -15,7 +15,7 @@
   body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
   #app{display:flex;height:100vh}
   a{color:var(--accent2)}
-  .sidebar{width:250px;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+  .sidebar{width:250px;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column}
   .server-head{padding:18px 16px;font-weight:800;font-size:19px;letter-spacing:.5px;border-bottom:1px solid var(--line);
     background:linear-gradient(135deg,var(--theme1),var(--theme2));-webkit-background-clip:text;background-clip:text;color:transparent}
   .channel{margin:14px 8px 4px;padding:11px 12px;border-radius:8px;
@@ -24,10 +24,8 @@
   .channel .hash{color:var(--muted);font-size:20px}
   .side-section{padding:14px 16px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:800}
   .online-list{flex:1;overflow-y:auto;padding:0 8px}
-  .online-user{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;font-size:14px;cursor:pointer;position:relative}
+  .online-user{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;font-size:14px}
   .online-user:hover{background:var(--bg3)}
-  .online-user:hover .dm-hint{opacity:1}
-  .dm-hint{opacity:0;position:absolute;right:8px;font-size:11px;color:var(--accent2);font-weight:700;transition:.15s;pointer-events:none}
   .online-user img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--bg3)}
   .online-user .status{font-size:11px;color:var(--muted)}
   .dot{width:9px;height:9px;border-radius:50%;background:var(--good);flex-shrink:0;margin-left:auto}
@@ -36,9 +34,6 @@
   .me-card .nm{font-weight:700;font-size:14px}
   .me-card .sub{font-size:11px;color:var(--muted)}
   .main{flex:1;display:flex;flex-direction:column;min-width:0}
-  /* DM pane */
-  .dm-pane{flex:1;display:none;flex-direction:column;min-width:0;border-left:1px solid var(--line)}
-  .dm-pane.open{display:flex}
   .topbar{height:54px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:10px;background:var(--bg2)}
   .topbar .hash{color:var(--muted);font-size:22px}
   .topbar .title{font-weight:800}
@@ -204,44 +199,92 @@
   .sound-btn{background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:14px 6px;cursor:pointer;text-align:center;font-size:13px;font-weight:700}
   .sound-btn:hover{border-color:var(--accent)}
   .sound-btn .se{font-size:24px;display:block}
-
-  /* ===== DM SYSTEM ===== */
-  .dm-list{padding:0 8px 8px}
-  .dm-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;cursor:pointer;font-size:14px;position:relative}
-  .dm-item:hover{background:var(--bg3)}
-  .dm-item.active{background:color-mix(in srgb,var(--theme1) 18%,transparent)}
-  .dm-item img{width:30px;height:30px;border-radius:50%;flex-shrink:0;object-fit:cover;background:var(--bg3)}
-  .dm-item .dm-name{font-weight:700;font-size:13px}
-  .dm-item .dm-preview{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
-  .dm-badge{position:absolute;right:8px;top:7px;background:var(--danger);color:#fff;font-size:10px;font-weight:800;border-radius:50%;width:17px;height:17px;display:flex;align-items:center;justify-content:center}
-  .dm-topbar{height:54px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:10px;background:var(--bg2)}
-  .dm-topbar .close-dm{margin-left:auto;color:var(--muted);cursor:pointer;font-size:20px}
-  .dm-topbar .close-dm:hover{color:var(--text)}
-  .dm-messages{flex:1;overflow-y:auto;padding:14px 14px 4px}
-  .dm-msg{display:flex;gap:10px;padding:5px 6px;border-radius:8px}
-  .dm-msg:hover{background:var(--bg3)}
-  .dm-msg img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
-  .dm-msg .body .head{display:flex;align-items:center;gap:8px}
-  .dm-msg .body .name{font-weight:800;font-size:14px}
-  .dm-msg .body .time{font-size:11px;color:var(--muted)}
-  .dm-msg .body .text{margin-top:2px;line-height:1.45;word-wrap:break-word;font-size:14px}
-  .dm-composer{padding:0 14px 14px}
-  .dm-composer-inner{background:var(--bg3);border-radius:12px;display:flex;align-items:center;padding:4px 6px 4px 14px;gap:6px}
-  .dm-composer-inner input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:14px;padding:11px 0}
-  .dm-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--muted);font-size:14px}
-  .dm-empty .ico{font-size:48px}
-
-  /* admin gift UI */
-  .gift-row{display:flex;gap:8px;align-items:flex-end;margin-top:10px}
-  .gift-row>div{flex:1}
-  .gift-row button{flex:0 0 auto;padding:13px 18px;border-radius:9px;border:none;background:var(--good);color:#fff;font-weight:800;cursor:pointer;font-size:14px;margin-top:0}
-  .gift-row button:hover{filter:brightness(1.1)}
-  .online-pick{max-height:160px;overflow-y:auto;margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:9px}
-  .online-pick .op{padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:8px}
-  .online-pick .op:hover{background:var(--bg3)}
-  .online-pick .op.sel{background:color-mix(in srgb,var(--theme1) 22%,transparent)}
-  .online-pick .op img{width:28px;height:28px;border-radius:50%;object-fit:cover}
-  .online-pick .op span{font-weight:700;font-size:14px}
+  .online-user .name{cursor:pointer}
+  .online-user .name:hover{text-decoration:underline}
+  .msg .name{cursor:pointer}
+  /* DM windows */
+  #dmDock{position:fixed;bottom:0;right:18px;display:flex;align-items:flex-end;gap:12px;z-index:60;pointer-events:none}
+  .dm-window{width:300px;height:420px;background:var(--bg2);border:1px solid var(--line);border-bottom:none;border-radius:12px 12px 0 0;display:flex;flex-direction:column;pointer-events:auto;box-shadow:0 -4px 24px rgba(0,0,0,.4)}
+  .dm-window.min{height:46px}
+  .dm-head{display:flex;align-items:center;gap:9px;padding:10px 12px;background:linear-gradient(135deg,var(--theme1),var(--theme2));border-radius:11px 11px 0 0;cursor:pointer;flex-shrink:0}
+  .dm-head img{width:26px;height:26px;border-radius:50%;object-fit:cover;background:var(--bg3)}
+  .dm-head .dm-nm{font-weight:800;font-size:14px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+  .dm-head .dm-x{cursor:pointer;font-size:20px;line-height:1;color:rgba(255,255,255,.85);padding:0 2px}
+  .dm-head .dm-x:hover{color:#fff}
+  .dm-body{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+  .dm-window.min .dm-body,.dm-window.min .dm-composer{display:none}
+  .dm-msg{max-width:80%;padding:7px 11px;border-radius:12px;font-size:13px;line-height:1.4;word-wrap:break-word;overflow-wrap:anywhere}
+  .dm-msg.them{background:var(--bg3);align-self:flex-start;border-bottom-left-radius:3px}
+  .dm-msg.me{background:linear-gradient(135deg,var(--theme1),var(--theme2));color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+  .dm-msg .dm-t{display:block;font-size:9px;opacity:.6;margin-top:3px}
+  .dm-empty{color:var(--muted);font-size:12px;text-align:center;margin:auto}
+  .dm-composer{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line);flex-shrink:0}
+  .dm-composer input{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:18px;color:var(--text);padding:8px 12px;font-size:13px;outline:none}
+  .dm-composer button{background:linear-gradient(135deg,var(--theme1),var(--theme2));border:none;color:#fff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:15px;flex-shrink:0}
+  /* youtube embed cards */
+  .yt-card{margin-top:8px;max-width:400px;background:var(--bg3);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;position:relative}
+  .yt-thumb{position:relative;aspect-ratio:16/9;background:#000;display:block}
+  .yt-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .yt-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .yt-play span{width:62px;height:44px;background:rgba(0,0,0,.7);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;transition:.15s}
+  .yt-card:hover .yt-play span{background:var(--danger);transform:scale(1.08)}
+  .yt-meta{padding:9px 12px}
+  .yt-meta .yt-t{font-weight:700;font-size:13px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .yt-meta .yt-sub{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:5px}
+  .yt-card iframe{width:100%;aspect-ratio:16/9;border:none;display:block}
+  .yt-party{position:absolute;top:8px;right:8px;background:var(--danger);color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+  /* shared watch-party bar */
+  #watchBar{display:none;background:var(--bg2);border-bottom:1px solid var(--line);padding:10px 14px;align-items:center;gap:12px}
+  #watchBar.show{display:flex}
+  #watchBar .wp-thumb{width:64px;aspect-ratio:16/9;border-radius:7px;object-fit:cover;background:#000;flex-shrink:0}
+  #watchBar .wp-info{flex:1;min-width:0}
+  #watchBar .wp-t{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #watchBar .wp-sub{font-size:11px;color:var(--muted)}
+  #watchBar .wp-btn{background:var(--accent);border:none;color:#fff;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;flex-shrink:0}
+  #watchBar .wp-x{cursor:pointer;color:var(--muted);font-size:20px;flex-shrink:0}
+  #watchBar .wp-x:hover{color:var(--text)}
+  #watchTheater{display:none;position:fixed;bottom:18px;left:18px;width:360px;background:#000;border:1px solid var(--line);border-radius:12px;overflow:hidden;z-index:55;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  #watchTheater.show{display:block}
+  #watchTheater iframe{width:100%;aspect-ratio:16/9;border:none;display:block}
+  #watchTheater .th-bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg2)}
+  #watchTheater .th-t{flex:1;min-width:0;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #watchTheater .th-x{cursor:pointer;color:var(--muted);font-size:18px}
+  #watchTheater .th-x:hover{color:var(--text)}
+  /* clickable avatars open profile cards */
+  .msg img.avatar{cursor:pointer}
+  .online-user img{cursor:pointer}
+  /* profile card modal */
+  .pc-banner{height:110px;border-radius:14px 14px 0 0;margin:-26px -26px 0;background:linear-gradient(135deg,var(--theme1),var(--theme2));background-size:cover;background-position:center;position:relative}
+  .pc-avatar{width:88px;height:88px;border-radius:50%;border:4px solid var(--bg2);object-fit:cover;background:var(--bg3);margin-top:-48px;position:relative;z-index:1}
+  .pc-name{font-size:22px;font-weight:800;margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .pc-pron{font-size:12px;color:var(--muted);background:var(--bg3);padding:2px 9px;border-radius:20px;font-weight:600}
+  .pc-status{color:var(--muted);font-size:13px;margin-top:2px}
+  .pc-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+  .pc-meta span{display:flex;align-items:center;gap:5px}
+  .pc-section{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:800;margin:18px 0 6px}
+  .pc-bio{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+  .pc-bio a{color:var(--accent2);font-weight:600}
+  .pc-bio img.bio-embed{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+  .pc-links{display:flex;flex-direction:column;gap:8px}
+  .pc-link{display:flex;align-items:center;gap:11px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 13px;text-decoration:none;color:var(--text);font-weight:700;font-size:14px;transition:.13s}
+  .pc-link:hover{border-color:var(--accent);transform:translateX(3px)}
+  .pc-link .pl-ico{font-size:20px;width:26px;text-align:center}
+  .pc-link .pl-sub{font-size:11px;color:var(--muted);font-weight:500}
+  .pc-actions{display:flex;gap:10px;margin-top:18px}
+  .pc-actions .btn{margin-top:0}
+  .pc-stats{display:flex;gap:10px;margin-top:12px}
+  .pc-stat{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+  .pc-stat .v{font-size:18px;font-weight:800}
+  .pc-stat .l{font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px}
+  /* link rows in profile editor */
+  .link-editor{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .link-row{display:flex;gap:8px;align-items:center}
+  .link-row select{flex:0 0 38%}
+  .link-row input{flex:1}
+  .link-row .lr-del{cursor:pointer;color:var(--danger);font-size:20px;flex-shrink:0;padding:0 4px}
+  .banner-pick{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .banner-opt{width:54px;height:34px;border-radius:7px;cursor:pointer;border:2px solid transparent;background-size:cover;background-position:center}
+  .banner-opt.sel{border-color:#fff;transform:scale(1.08)}
 </style>
 </head>
 <body>
@@ -249,8 +292,6 @@
   <div class="sidebar">
     <div class="server-head">⬢ NEXUS</div>
     <div class="channel"><span class="hash">#</span> the-void</div>
-    <div class="side-section">DMs</div>
-    <div class="dm-list" id="dmList"></div>
     <div class="side-section">Online — <span id="onlineNum">0</span></div>
     <div class="online-list" id="onlineList"></div>
     <div class="me-card" id="meCard">
@@ -261,9 +302,7 @@
       </div>
     </div>
   </div>
-
-  <!-- Main chat -->
-  <div class="main" id="mainChat">
+  <div class="main">
     <div class="topbar">
       <span class="hash">#</span><span class="title">the-void</span>
       <span class="desc">one channel. infinite chaos.</span>
@@ -273,6 +312,12 @@
         <span class="pill" id="themeOpen">🎨 Theme</span>
         <span class="pill live">● live</span>
       </div>
+    </div>
+    <div id="watchBar">
+      <img class="wp-thumb" id="wpThumb" src="">
+      <div class="wp-info"><div class="wp-t" id="wpTitle">—</div><div class="wp-sub" id="wpSub">started a watch party</div></div>
+      <button class="wp-btn" id="wpJoin">▶ Play</button>
+      <span class="wp-x" id="wpClose" title="Hide">&times;</span>
     </div>
     <div class="messages" id="messages"></div>
     <div class="typing" id="typing"></div>
@@ -285,30 +330,7 @@
         <input type="text" id="msgInput" placeholder="Message #the-void   (& = admin, /me, /confess, /shrug)" maxlength="2000" autocomplete="off">
         <button class="icon-btn" id="sendBtn" title="Send">➤</button>
       </div>
-      <div class="hint">Images · GIFs · MP3s · react with 😀 · <b>/me</b> action · <b>/confess</b> anon · <b>&amp;</b> admin · 🎁 <span id="dailyHint">claim daily bonus in Casino</span></div>
-    </div>
-  </div>
-
-  <!-- DM pane -->
-  <div class="dm-pane" id="dmPane">
-    <div class="dm-topbar" id="dmTopbar">
-      <img id="dmTargetAvatar" src="" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
-      <span id="dmTargetName" style="font-weight:800;font-size:16px"></span>
-      <span style="font-size:12px;color:var(--muted)" id="dmEncNote">🔒 End-to-end private · only you two can see this</span>
-      <span class="close-dm" id="closeDm">✕</span>
-    </div>
-    <div class="dm-messages" id="dmMessages">
-      <div class="dm-empty" id="dmEmpty">
-        <div class="ico">💬</div>
-        <div>This is the beginning of your DM with <b id="dmEmptyName"></b></div>
-        <div style="font-size:12px">Messages here are private and only visible to the two of you.</div>
-      </div>
-    </div>
-    <div class="dm-composer">
-      <div class="dm-composer-inner">
-        <input type="text" id="dmInput" placeholder="Send a private message…" maxlength="2000" autocomplete="off">
-        <button class="icon-btn" id="dmSend">➤</button>
-      </div>
+      <div class="hint">Images · GIFs · MP3s · 📺 paste a <b>YouTube link</b> for a thumbnail · click avatars for profiles · <b>/me</b> · <b>/confess</b> · <b>&amp;</b> admin · 🎁 <span id="dailyHint">daily bonus in Casino</span></div>
     </div>
   </div>
 </div>
@@ -330,12 +352,22 @@
     <label>Username (must be unique)</label>
     <input type="text" id="pfName" maxlength="20" placeholder="CoolName123" autocomplete="off">
     <div class="field-note" id="pfNameNote"></div>
+    <div class="row">
+      <div><label>Pronouns</label><input type="text" id="pfPronouns" maxlength="20" placeholder="they/them"></div>
+      <div><label>Location</label><input type="text" id="pfLocation" maxlength="30" placeholder="🌍 somewhere"></div>
+    </div>
     <label>Status / mood</label>
     <input type="text" id="pfStatus" maxlength="40" placeholder="online · vibing · afk...">
-    <label>Bio</label>
-    <textarea id="pfBio" maxlength="140" placeholder="Tell the void about yourself..."></textarea>
+    <label>Bio (supports links & **bold** — paste an image URL to embed it)</label>
+    <textarea id="pfBio" maxlength="600" placeholder="Tell the void about yourself... drop links, they become clickable!" style="min-height:90px"></textarea>
+    <label>Profile Banner</label>
+    <div class="banner-pick" id="pfBannerPick"></div>
+    <input type="file" id="pfBannerInput" accept="image/*" hidden>
     <label>Name Color</label>
     <div class="color-grid" id="pfColorGrid"></div>
+    <label>Your Links / Socials</label>
+    <div class="link-editor" id="pfLinks"></div>
+    <button class="btn alt" id="pfAddLink" style="margin-top:8px">+ Add a link</button>
     <button class="btn" id="pfSave">Save Profile</button>
   </div>
 </div>
@@ -385,6 +417,8 @@
       </div>
     </div>
     <button class="btn warn" id="dailyBtn" style="margin-top:0">🎁 Claim daily 500 coins</button>
+
+    <!-- game select -->
     <div id="casHome" style="margin-top:16px">
       <div class="game-select">
         <div class="game-card" data-game="slots"><div class="ico">🎰</div><div class="gt">Slots</div><div class="gd">match 3 to win big</div></div>
@@ -395,8 +429,10 @@
         <div class="game-card" data-game="coin"><div class="ico">🪙</div><div class="gt">Coin Flip</div><div class="gd">double or nothing streaks</div></div>
         <div class="game-card" data-game="blackjack"><div class="ico">🃏</div><div class="gt">Blackjack</div><div class="gd">beat the dealer to 21</div></div>
         <div class="game-card" data-game="wheel"><div class="ico">🎡</div><div class="gt">Wheel</div><div class="gd">spin the multiplier wheel</div></div>
+        <div class="game-card" data-game="flappy"><div class="ico">🐤</div><div class="gt">Flappy</div><div class="gd">each pipe = a multiplier</div></div>
       </div>
     </div>
+
     <!-- SLOTS -->
     <div class="casino-panel" data-panel="slots">
       <span class="back-link casBack">← all games</span>
@@ -407,6 +443,7 @@
       <div class="bet-row"><button class="bMinus" data-g="slots">−</button><input type="number" id="slotsBet" value="50" min="10" step="10"><button class="bPlus" data-g="slots">+</button><button class="bMax" data-g="slots">MAX</button></div>
       <button class="btn good" id="slotsSpin">🎰 SPIN</button>
     </div>
+
     <!-- MINES -->
     <div class="casino-panel" data-panel="mines">
       <span class="back-link casBack">← all games</span>
@@ -423,6 +460,7 @@
         <button class="btn warn" id="minesCash" disabled>Cash out <span id="minesMult">x1.00</span></button>
       </div>
     </div>
+
     <!-- CRASH -->
     <div class="casino-panel" data-panel="crash">
       <span class="back-link casBack">← all games</span>
@@ -437,13 +475,14 @@
         <button class="btn warn" id="crashCash" disabled>💰 Cash out</button>
       </div>
     </div>
+
     <!-- DICE -->
     <div class="casino-panel" data-panel="dice">
       <span class="back-link casBack">← all games</span>
       <h3>🎲 Dice — roll under</h3>
       <div class="dice-val" id="diceVal">—</div>
       <div class="dice-bar" id="diceBar"><div class="dice-marker" id="diceMarker" style="left:50%"></div></div>
-      <label>Roll under: <span id="diceTargetLbl">50</span></label>
+      <label>Roll under: <span id="diceTargetLbl">50</span>  (win chance shown)</label>
       <input type="range" id="diceTarget" min="2" max="98" value="50" style="width:100%">
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px">
         <span>Win chance: <b id="diceChance">49%</b></span><span>Payout: <b id="dicePay">x2.00</b></span>
@@ -453,6 +492,7 @@
       <button class="btn good" id="diceRoll">🎲 Roll</button>
       <div class="game-result" id="diceResult"></div>
     </div>
+
     <!-- PLINKO -->
     <div class="casino-panel" data-panel="plinko">
       <span class="back-link casBack">← all games</span>
@@ -464,6 +504,7 @@
       <button class="btn good" id="plinkoDrop">🔻 Drop ball</button>
       <div class="game-result" id="plinkoResult"></div>
     </div>
+
     <!-- COIN -->
     <div class="casino-panel" data-panel="coin">
       <span class="back-link casBack">← all games</span>
@@ -479,6 +520,7 @@
       </div>
       <button class="btn warn" id="coinCash" disabled>💰 Cash out pot</button>
     </div>
+
     <!-- BLACKJACK -->
     <div class="casino-panel" data-panel="blackjack">
       <span class="back-link casBack">← all games</span>
@@ -496,6 +538,7 @@
         <button class="btn alt" id="bjStand" disabled>Stand</button>
       </div>
     </div>
+
     <!-- WHEEL -->
     <div class="casino-panel" data-panel="wheel">
       <span class="back-link casBack">← all games</span>
@@ -505,6 +548,24 @@
       <label>Bet</label>
       <input type="number" id="wheelBet" value="50" min="10" step="10">
       <button class="btn good" id="wheelSpin">🎡 Spin the wheel</button>
+    </div>
+
+    <!-- FLAPPY -->
+    <div class="casino-panel" data-panel="flappy">
+      <span class="back-link casBack">← all games</span>
+      <h3>🐤 Flappy Multiplier</h3>
+      <p class="sub" style="margin:6px 0">Tap / Space to flap. Each pipe you clear adds its multiplier. Cash out anytime — but crash and you lose it all.</p>
+      <canvas id="flappyCanvas" width="420" height="300" style="width:100%;background:var(--bg);border-radius:12px;border:1px solid var(--line);display:block;cursor:pointer"></canvas>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:8px">
+        <span>Pipes cleared: <b id="flappyPipes">0</b></span><span>Multiplier: <b id="flappyMult">x0.00</b></span><span>Cash value: 🪙 <b id="flappyValue">0</b></span>
+      </div>
+      <div class="game-result" id="flappyResult">Set your bet & press Start.</div>
+      <label>Bet</label>
+      <input type="number" id="flappyBet" value="50" min="10" step="10">
+      <div class="row">
+        <button class="btn good" id="flappyStart">🐤 Start</button>
+        <button class="btn warn" id="flappyCash" disabled>💰 Cash out</button>
+      </div>
     </div>
   </div>
 </div>
@@ -530,10 +591,10 @@
     <p class="sub">Style your name &amp; unleash chaos. Authorized personnel only.</p>
     <div class="admin-tabs">
       <div class="admin-tab active" data-tab="style">🎨 Name Style</div>
+      <div class="admin-tab" data-tab="coins">🪙 Coins</div>
       <div class="admin-tab" data-tab="troll">😈 Troll Box</div>
       <div class="admin-tab" data-tab="mod">🛠️ Moderation</div>
       <div class="admin-tab" data-tab="fun">🎲 Fun</div>
-      <div class="admin-tab" data-tab="coins">🪙 Gift Coins</div>
     </div>
     <div class="admin-panel active" data-panel="style">
       <label>Name Color</label>
@@ -543,6 +604,16 @@
       <div class="preview-box" id="adPreview">YourName</div>
       <button class="btn good" id="adApplyStyle">Apply Style</button>
       <button class="btn alt" id="adClearStyle">Reset to plain</button>
+    </div>
+    <div class="admin-panel" data-panel="coins">
+      <p class="sub" style="margin-bottom:14px">Grant coins to yourself or any online user. Grants to others are delivered live.</p>
+      <button class="btn good" id="adGiveSelf" style="margin-top:0">🪙 Give myself coins</button>
+      <label>Amount</label>
+      <input type="number" id="adCoinAmt" value="1000" min="1" step="100">
+      <label>Give to user</label>
+      <select id="adCoinUser"><option value="">— select an online user —</option></select>
+      <button class="btn" id="adGiveUser">🎁 Send coins to selected user</button>
+      <div class="game-result" id="adCoinResult" style="margin-top:12px"></div>
     </div>
     <div class="admin-panel" data-panel="troll">
       <button class="troll-btn" data-troll="fakejoin"><span class="t">👻 Fake Join Wave</span><span class="d">Spam a burst of fake "user joined" messages</span></button>
@@ -575,42 +646,36 @@
       <button class="troll-btn" data-fun="coin"><span class="t">🪙 Coin Flip</span><span class="d">Heads or tails, posted to chat</span></button>
       <button class="troll-btn" data-fun="rps"><span class="t">✊ Rock Paper Scissors</span><span class="d">Challenge the void</span></button>
     </div>
-
-    <!-- NEW: Gift Coins panel -->
-    <div class="admin-panel" data-panel="coins">
-      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Select an online user and gift them casino coins. They'll receive the coins and a private notification.</p>
-      <label>Pick a user</label>
-      <div class="online-pick" id="giftUserList">
-        <div style="padding:14px;color:var(--muted);font-size:13px;text-align:center">No users online yet</div>
-      </div>
-      <div id="giftSelectedInfo" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:9px;display:flex;align-items:center;gap:10px">
-        <img id="giftSelAvatar" src="" style="width:32px;height:32px;border-radius:50%;object-fit:cover">
-        <span style="font-weight:700" id="giftSelName">—</span>
-        <span style="font-size:12px;color:var(--muted)" id="giftSelCoins"></span>
-      </div>
-      <label>Amount to gift</label>
-      <div class="gift-row">
-        <div><input type="number" id="giftAmount" value="500" min="1" step="100" placeholder="Coins"></div>
-        <button id="giftSendBtn">🎁 Gift</button>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=100">+100</button>
-        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=500">+500</button>
-        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=1000">+1K</button>
-        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=5000">+5K</button>
-        <button class="btn alt" style="margin-top:0;padding:8px 12px;font-size:12px" onclick="document.getElementById('giftAmount').value=10000">+10K</button>
-      </div>
-      <div class="field-note" id="giftNote" style="margin-top:10px;font-size:13px"></div>
-    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="dmDock"></div>
+<div id="watchTheater">
+  <div id="watchTheaterPlayer"></div>
+  <div class="th-bar"><span class="th-t" id="thTitle">—</span><span class="th-x" id="thClose" title="Close">&times;</span></div>
+</div>
+
+<!-- Profile card (view other users) -->
+<div class="overlay" id="cardOverlay">
+  <div class="modal">
+    <span class="close-x" id="cardClose" style="position:relative;z-index:2">&times;</span>
+    <div class="pc-banner" id="pcBanner"></div>
+    <img class="pc-avatar" id="pcAvatar" src="">
+    <div class="pc-name"><span id="pcName">Name</span><span class="pc-pron" id="pcPron" style="display:none"></span></div>
+    <div class="pc-status" id="pcStatus"></div>
+    <div class="pc-meta" id="pcMeta"></div>
+    <div class="pc-stats" id="pcStats"></div>
+    <div id="pcBioWrap"><div class="pc-section">About</div><div class="pc-bio" id="pcBio"></div></div>
+    <div id="pcLinksWrap"><div class="pc-section">Links</div><div class="pc-links" id="pcLinks"></div></div>
+    <div class="pc-actions" id="pcActions"></div>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, addDoc, updateDoc,
-  query, orderBy, limit, onSnapshot, serverTimestamp, increment, where, getDocs }
+  query, orderBy, limit, onSnapshot, serverTimestamp, increment }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -627,9 +692,11 @@ const db=getFirestore(app);
 const msgsCol=collection(db,"the-void");
 const usersCol=collection(db,"usernames");
 const presenceCol=collection(db,"presence");
-const dmsCol=collection(db,"dms");         // DM messages: dms/{channelId}/messages
-const giftsCol=collection(db,"gifts");     // coin gifts: gifts/{receiverCID}
 const controlDoc=doc(db,"control","main");
+const grantsCol=collection(db,"grants");
+const dmsCol=collection(db,"dms");
+const profilesCol=collection(db,"profiles");
+const watchDoc=doc(db,"control","watchparty");
 
 const ADMIN_PASS="9009";
 const $=s=>document.querySelector(s);
@@ -652,7 +719,7 @@ const DEFAULT_AVATAR=randomAvatar(CLIENT_ID);
 
 let profile=loadProfile();
 function loadProfile(){try{const p=JSON.parse(localStorage.getItem("nexus_profile"));if(p&&p.name)return Object.assign(defProfile(),p);}catch(e){}return defProfile();}
-function defProfile(){return{name:"",bio:"",status:"",avatar:DEFAULT_AVATAR,color:"#ffffff",effect:"none",
+function defProfile(){return{name:"",bio:"",status:"",pronouns:"",location:"",banner:"",links:[],avatar:DEFAULT_AVATAR,color:"#ffffff",effect:"none",
   coins:1000,wins:0,plays:0,best:0,lastDaily:0,theme:{mode:"solid",c1:"#5865f2",c2:"#7d4bff"}};}
 function saveProfile(){localStorage.setItem("nexus_profile",JSON.stringify(profile));refreshMe();refreshCasino();}
 function refreshMe(){
@@ -670,6 +737,30 @@ function applyTheme(){
   document.documentElement.style.setProperty("--accent2",t.mode==="solid"?t.c1:t.c2);
 }
 function esc(s){return(s||"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+/* ---- youtube + link helpers ---- */
+function ytId(url){
+  try{const m=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/);return m?m[1]:null;}catch(e){return null;}
+}
+function firstYouTube(text){
+  if(!text)return null;
+  const urls=text.match(/https?:\/\/[^\s]+/g)||[];
+  for(const u of urls){const id=ytId(u);if(id)return id;}
+  return null;
+}
+function ytThumb(id){return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;}
+/* linkify text: bold, links, and embed bare image URLs */
+function linkify(raw,allowImg){
+  let s=esc(raw||"");
+  s=s.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+  s=s.replace(/(https?:\/\/[^\s<]+)/g,u=>{
+    const clean=u.replace(/[.,)]+$/,"");
+    if(allowImg&&/\.(png|jpe?g|gif|webp|svg)$/i.test(clean)){
+      return `<img class="bio-embed" src="${esc(clean)}" loading="lazy">`;
+    }
+    return `<a href="${esc(clean)}" target="_blank" rel="noopener">${esc(clean)}</a>`;
+  });
+  return s;
+}
 function fmtTime(ts){try{const d=ts&&ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}catch(e){return"";}}
 function rgbToHex(c){if(!c)return"#ffffff";if(c.startsWith("#"))return c;const m=c.match(/\d+/g);if(!m)return c;return"#"+m.slice(0,3).map(x=>(+x).toString(16).padStart(2,"0")).join("");}
 function rand(a){return a[Math.floor(Math.random()*a.length)];}
@@ -682,15 +773,15 @@ let clearedAt=0;
 onSnapshot(controlDoc,snap=>{
   if(snap.exists()&&snap.data().clearedAt){
     clearedAt=snap.data().clearedAt;
-    document.querySelectorAll(".msg[data-ms]").forEach(el=>{if(+el.dataset.ms<clearedAt)el.remove();});
+    document.querySelectorAll(".msg[data-ms]").forEach(el=>{ if(+el.dataset.ms<clearedAt) el.remove(); });
   }
 },()=>{});
 
-/* ---- render main chat ---- */
+/* ---- render ---- */
 const messagesEl=$("#messages");
 function renderMsg(m,id){
   const ms=(m.ts&&m.ts.toMillis)?m.ts.toMillis():Date.now();
-  if(clearedAt&&ms<clearedAt)return;
+  if(clearedAt&&ms<clearedAt) return;
   const div=document.createElement("div");div.className="msg"+(m.action?" action":"");div.dataset.ms=ms;div.dataset.id=id;
   const nameClass="name fx-"+(m.effect||"none");
   const colorStyle=(m.effect==="shimmer"||m.effect==="gradient")?"":`color:${esc(m.color||"#fff")}`;
@@ -700,11 +791,16 @@ function renderMsg(m,id){
   else if(m.system==="highlight")badge=`<span class="badge" style="background:var(--danger)">📌 hot</span>`;
   else if(m.system==="confess")badge=`<span class="badge" style="background:#9b59b6">anon</span>`;
   else if(m.admin)badge=`<span class="badge">admin</span>`;
-  let content=esc(m.text||"");
-  content=content.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`);
-  content=content.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+  let content=linkify(m.text||"");
   if(m.image)content+=`<img class="attach" src="${m.image}">`;
   if(m.audio)content+=`<div class="audio-wrap"><div class="fn">🎵 ${esc(m.audioName||"audio")}</div><audio controls src="${m.audio}"></audio></div>`;
+  const ytid=firstYouTube(m.text);
+  if(ytid){
+    content+=`<div class="yt-card" data-ytid="${ytid}">
+      <div class="yt-thumb"><img src="${ytThumb(ytid)}" loading="lazy"><div class="yt-play"><span>▶</span></div></div>
+      <div class="yt-meta"><div class="yt-t" data-yttitle="${ytid}">YouTube video</div><div class="yt-sub">▶ play here · 🎉 <span class="yt-party-link" data-ytid="${ytid}">start watch party</span></div></div>
+    </div>`;
+  }
   if(m.system==="highlight")content=`<div style="text-shadow:0 0 10px var(--theme1);font-size:17px;font-weight:700">${content}</div>`;
   const dispName=m.action?("* "+esc(m.name)):esc(m.name||"Anon");
   div.innerHTML=`<img class="avatar" src="${esc(m.avatar||DEFAULT_AVATAR)}">
@@ -718,11 +814,11 @@ function renderMsg(m,id){
   renderReactions(id,m.reactions);
 }
 function renderReactions(id,reactions){
-  const box=messagesEl.querySelector(`.reactions[data-id="${id}"]`);if(!box)return;
+  const box=messagesEl.querySelector(`.reactions[data-id="${id}"]`); if(!box) return;
   box.innerHTML="";
-  if(!reactions)return;
+  if(!reactions) return;
   Object.entries(reactions).forEach(([emo,users])=>{
-    if(!users||!users.length)return;
+    if(!users||!users.length) return;
     const r=document.createElement("span");r.className="reaction";r.textContent=`${emo} ${users.length}`;
     r.onclick=()=>toggleReaction(id,emo);
     box.appendChild(r);
@@ -738,7 +834,7 @@ onSnapshot(query(msgsCol,orderBy("ts","asc"),limit(300)),snap=>{
     else if(ch.type==="modified"){renderReactions(id,data.reactions);}
   });
   if(near)messagesEl.scrollTop=messagesEl.scrollHeight;
-},err=>{toast("⚠️ Firestore: "+err.code);console.error(err);});
+},err=>{toast("⚠️ Firestore: "+err.code+" — check rules");console.error(err);});
 
 const REACT_EMOJIS=["😀","😂","🔥","❤️","💀","👍","🎉","😮"];
 async function toggleReaction(id,emo){
@@ -751,35 +847,80 @@ async function toggleReaction(id,emo){
 }
 messagesEl.addEventListener("click",e=>{
   const add=e.target.closest(".react-add");
-  if(add){const id=add.dataset.id;const emo=prompt("React with which emoji? "+REACT_EMOJIS.join(" "),"🔥");if(emo)toggleReaction(id,emo.trim());}
+  if(add){const id=add.dataset.id;const emo=prompt("React with which emoji? "+REACT_EMOJIS.join(" "),"🔥");if(emo)toggleReaction(id,emo.trim());return;}
+  const yt=e.target.closest(".yt-card");
+  if(yt){ytCardPlay(yt);return;}
+  const av=e.target.closest(".msg .avatar");
+  if(av){const msgEl=av.closest(".msg");const id=msgEl?.dataset.id;const data=id?msgCache[id]:null;
+    if(data&&data.name&&!data.system&&data.name!=="Anonymous"){openProfileCard(data.name);}return;}
+  const nameEl=e.target.closest(".msg .name");
+  if(nameEl){const msgEl=nameEl.closest(".msg");const id=msgEl?.dataset.id;const data=id?msgCache[id]:null;
+    if(data&&data.name&&!data.system&&data.name!=="Anonymous"){openDM(data.name,data.avatar||DEFAULT_AVATAR);}}
 });
 
 /* ---- presence ---- */
-let presenceUsers={};
 async function heartbeat(){
   if(!profile.name)return;
-  try{await setDoc(doc(presenceCol,CLIENT_ID),{name:profile.name,avatar:profile.avatar,color:profile.color,effect:profile.effect,status:profile.status||"",cid:CLIENT_ID,ts:Date.now()});}catch(e){}
+  try{await setDoc(doc(presenceCol,CLIENT_ID),{name:profile.name,avatar:profile.avatar,color:profile.color,effect:profile.effect,status:profile.status||"",ts:Date.now()});}catch(e){}
+  publishProfile();
 }
+let lastProfilePublish=0;
+async function publishProfile(force){
+  if(!profile.name)return;
+  if(!force&&Date.now()-lastProfilePublish<8000)return;
+  lastProfilePublish=Date.now();
+  try{await setDoc(doc(profilesCol,profile.name.toLowerCase()),{
+    name:profile.name,avatar:profile.avatar,color:profile.color,effect:profile.effect,
+    status:profile.status||"",bio:profile.bio||"",pronouns:profile.pronouns||"",
+    location:profile.location||"",banner:profile.banner||"",links:profile.links||[],
+    coins:profile.coins,wins:profile.wins,plays:profile.plays,best:profile.best,
+    cid:CLIENT_ID,ts:Date.now()});}catch(e){}
+}
+let presenceSnapCache=[];
 onSnapshot(presenceCol,snap=>{
-  const now=Date.now(),list=$("#onlineList");list.innerHTML="";presenceUsers={};let n=0;
-  snap.forEach(d=>{const u=d.data();if(now-(u.ts||0)<45000){n++;presenceUsers[d.id]=u;
+  const now=Date.now(),list=$("#onlineList");list.innerHTML="";let n=0;presenceSnapCache=[];
+  snap.forEach(d=>{const u=d.data();presenceSnapCache.push(u);if(now-(u.ts||0)<45000){n++;
     const el=document.createElement("div");el.className="online-user";
     const cs=(u.effect==="shimmer"||u.effect==="gradient")?"":`color:${esc(u.color||"#fff")}`;
-    el.innerHTML=`<img src="${esc(u.avatar||DEFAULT_AVATAR)}"><div style="min-width:0;flex:1"><div class="name fx-${u.effect||'none'}" style="${cs};font-weight:700;font-size:14px">${esc(u.name)}</div>${u.status?`<div class="status">${esc(u.status)}</div>`:""}</div>${d.id!==CLIENT_ID?'<span class="dm-hint">DM</span>':''}<span class="dot"></span>`;
-    if(d.id!==CLIENT_ID){el.onclick=()=>openDm(d.id,u);}
+    el.innerHTML=`<img src="${esc(u.avatar||DEFAULT_AVATAR)}" data-profile="${esc(u.name)}"><div style="min-width:0"><div class="name fx-${u.effect||'none'}" style="${cs};font-weight:700;font-size:14px" data-dm="${esc(u.name)}" data-avatar="${esc(u.avatar||DEFAULT_AVATAR)}">${esc(u.name)}</div>${u.status?`<div class="status">${esc(u.status)}</div>`:""}</div><span class="dot"></span>`;
     list.appendChild(el);}});
   $("#onlineNum").textContent=n;
-  refreshGiftUserList();
-},()=>{});
+  if($("#adminOverlay").classList.contains("show")&&$(".admin-tab.active")?.dataset.tab==="coins")populateCoinUsers();
+});
+/* click name = DM, click avatar = view profile card */
+$("#onlineList").addEventListener("click",e=>{
+  const av=e.target.closest("[data-profile]");
+  if(av){openProfileCard(av.dataset.profile);return;}
+  const nameEl=e.target.closest("[data-dm]");if(!nameEl)return;
+  openDM(nameEl.dataset.dm,nameEl.dataset.avatar);
+});
 setInterval(heartbeat,15000);
 window.addEventListener("beforeunload",()=>{try{deleteDoc(doc(presenceCol,CLIENT_ID));}catch(e){}});
+
+/* ---- coin grants (admin → user, delivered live) ---- */
+let appliedGrants=new Set(JSON.parse(localStorage.getItem("nexus_grants")||"[]"));
+function saveAppliedGrants(){localStorage.setItem("nexus_grants",JSON.stringify([...appliedGrants].slice(-200)));}
+onSnapshot(grantsCol,snap=>{
+  if(!profile.name)return;
+  const me=profile.name.toLowerCase();
+  snap.docChanges().forEach(ch=>{
+    if(ch.type!=="added")return;
+    const id=ch.doc.id,g=ch.doc.data();
+    if(appliedGrants.has(id))return;
+    if((g.to||"").toLowerCase()!==me)return;
+    if(g.cid&&g.cid===CLIENT_ID)return; // self-grants applied locally already
+    appliedGrants.add(id);saveAppliedGrants();
+    profile.coins+=g.amount;saveProfile();refreshCasino();
+    toast(`🪙 +${g.amount} coins from ${g.by||"an admin"}!`);
+  });
+},()=>{});
 
 /* ---- typing indicator ---- */
 const typingCol=collection(db,"typing");
 let typingTimer=null;
 function setTyping(on){
   if(!profile.name)return;
-  try{if(on)setDoc(doc(typingCol,CLIENT_ID),{name:profile.name,ts:Date.now()});else deleteDoc(doc(typingCol,CLIENT_ID));}catch(e){}
+  try{ if(on) setDoc(doc(typingCol,CLIENT_ID),{name:profile.name,ts:Date.now()}); else deleteDoc(doc(typingCol,CLIENT_ID)); }catch(e){}
 }
 onSnapshot(typingCol,snap=>{
   const now=Date.now();const names=[];
@@ -811,7 +952,7 @@ async function send(extra={}){
 const input=$("#msgInput");
 $("#sendBtn").onclick=trySend;
 input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();trySend();}});
-input.addEventListener("input",()=>{setTyping(true);clearTimeout(typingTimer);typingTimer=setTimeout(()=>setTyping(false),2500);});
+input.addEventListener("input",()=>{ setTyping(true); clearTimeout(typingTimer); typingTimer=setTimeout(()=>setTyping(false),2500); });
 function trySend(){
   let v=input.value.trim();if(!v)return;
   if(v==="&"){input.value="";openPassword();return;}
@@ -819,6 +960,9 @@ function trySend(){
   if(v.startsWith("/me ")){send({text:v.slice(4),action:true});input.value="";return;}
   if(v.startsWith("/confess ")){send({text:v.slice(9),name:"Anonymous",avatar:randomAvatar("anon"+Date.now()),color:"#9b59b6",effect:"none",system:"confess"});input.value="";return;}
   if(v==="/shrug"){v="¯\\_(ツ)_/¯";}
+  if(v==="/tableflip"){send({text:"(╯°□°)╯︵ ┻━┻"});input.value="";return;}
+  if(v==="/unflip"){send({text:"┬─┬ ノ( ゜-゜ノ)"});input.value="";return;}
+  if(v==="/lenny"){send({text:"( ͡° ͜ʖ ͡°)"});input.value="";return;}
   if(v==="/flip"){send({text:`🪙 ${Math.random()<.5?"HEADS":"TAILS"}`});input.value="";return;}
   if(v==="/roll"){send({text:`🎲 rolled ${Math.ceil(Math.random()*100)}`});input.value="";return;}
   send({text:v});input.value="";
@@ -837,8 +981,43 @@ $("#audioInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.
 function buildColorGrid(grid,current,onpick){grid.innerHTML="";COLORS.forEach(c=>{const s=document.createElement("div");s.className="swatch"+(rgbToHex(c)===rgbToHex(current)?" sel":"");s.style.background=c;s.onclick=()=>{grid.querySelectorAll(".swatch").forEach(x=>x.classList.remove("sel"));s.classList.add("sel");onpick(c);};grid.appendChild(s);});}
 
 /* ---- profile modal ---- */
+const BANNERS=[
+  "linear-gradient(135deg,#5865f2,#7d4bff)","linear-gradient(135deg,#ff6bcb,#7d4bff)",
+  "linear-gradient(135deg,#00d2ff,#3ba55d)","linear-gradient(135deg,#faa61a,#ed4245)",
+  "linear-gradient(135deg,#23272a,#5865f2)","linear-gradient(135deg,#01ff70,#00d2ff)",
+  "linear-gradient(135deg,#f012be,#ff851b)","linear-gradient(120deg,#0b0c10,#7d4bff,#0b0c10)"
+];
+let pfBanner="";  // working banner value
+let pfLinks=[];   // working links array
+function buildBannerPick(){
+  const box=$("#pfBannerPick");box.innerHTML="";
+  BANNERS.forEach(bg=>{const o=document.createElement("div");o.className="banner-opt"+(pfBanner===bg?" sel":"");o.style.background=bg;
+    o.onclick=()=>{pfBanner=bg;box.querySelectorAll(".banner-opt").forEach(x=>x.classList.remove("sel"));o.classList.add("sel");};box.appendChild(o);});
+  // custom upload tile
+  const up=document.createElement("div");up.className="banner-opt"+((pfBanner&&pfBanner.startsWith("url"))?" sel":"");up.style.cssText+=";display:flex;align-items:center;justify-content:center;background:var(--bg3);font-size:18px";up.textContent="📁";up.title="Upload banner";
+  up.onclick=()=>$("#pfBannerInput").click();box.appendChild(up);
+}
+$("#pfBannerInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=await compressImage(f,800,0.6);pfBanner=`url(${d}) center/cover`;buildBannerPick();toast("Banner set ✔");}catch(err){toast("Banner failed");}};
+function buildLinkEditor(){
+  const box=$("#pfLinks");box.innerHTML="";
+  pfLinks.forEach((l,i)=>{
+    const row=document.createElement("div");row.className="link-row";
+    const opts=Object.entries(SOCIALS).map(([k,v])=>`<option value="${k}"${l.type===k?" selected":""}>${v.ico} ${v.label}</option>`).join("");
+    row.innerHTML=`<select>${opts}</select><input type="text" placeholder="https://..." value="${esc(l.url||"")}"><span class="lr-del" title="Remove">&times;</span>`;
+    const sel=row.querySelector("select"),inp=row.querySelector("input");
+    sel.onchange=()=>{pfLinks[i].type=sel.value;};
+    inp.oninput=()=>{pfLinks[i].url=inp.value.trim();};
+    row.querySelector(".lr-del").onclick=()=>{pfLinks.splice(i,1);buildLinkEditor();};
+    box.appendChild(row);
+  });
+}
+$("#pfAddLink").onclick=()=>{if(pfLinks.length>=8){toast("Max 8 links");return;}pfLinks.push({type:"website",url:"",label:""});buildLinkEditor();};
 function openProfile(){
-  $("#pfName").value=profile.name;$("#pfBio").value=profile.bio;$("#pfStatus").value=profile.status||"";$("#pfAvatarPreview").src=profile.avatar;$("#pfNameNote").textContent="";
+  $("#pfName").value=profile.name;$("#pfBio").value=profile.bio;$("#pfStatus").value=profile.status||"";
+  $("#pfPronouns").value=profile.pronouns||"";$("#pfLocation").value=profile.location||"";
+  $("#pfAvatarPreview").src=profile.avatar;$("#pfNameNote").textContent="";
+  pfBanner=profile.banner||"";pfLinks=JSON.parse(JSON.stringify(profile.links||[]));
+  buildBannerPick();buildLinkEditor();
   buildColorGrid($("#pfColorGrid"),profile.color,()=>{});
   $("#pfSave").onclick=async()=>{
     const newName=$("#pfName").value.trim();
@@ -847,13 +1026,16 @@ function openProfile(){
     if(newName.toLowerCase()!==profile.name.toLowerCase()){const r=await checkName(newName);if(r==="taken"){$("#pfNameNote").className="field-note bad";$("#pfNameNote").textContent="❌ Name taken — pick another";return;}try{await claimName(newName);}catch(e){toast("Couldn't claim name");return;}}
     const sel=$("#pfColorGrid").querySelector(".swatch.sel");
     profile.name=newName;profile.bio=$("#pfBio").value.trim();profile.status=$("#pfStatus").value.trim();
+    profile.pronouns=$("#pfPronouns").value.trim();profile.location=$("#pfLocation").value.trim();
+    profile.banner=pfBanner;profile.links=pfLinks.filter(l=>l.url);
     profile.color=sel?rgbToHex(sel.style.background):profile.color;
-    saveProfile();heartbeat();closeProfile();toast("Profile saved ✔");
+    saveProfile();heartbeat();publishProfile(true);closeProfile();toast("Profile saved ✔");
   };
   $("#profileOverlay").classList.add("show");
 }
 function closeProfile(){$("#profileOverlay").classList.remove("show");}
-$("#profileClose").onclick=closeProfile;$("#meCard").onclick=openProfile;
+$("#profileClose").onclick=closeProfile;
+$("#meCard").onclick=e=>{if(e.target.id==="meAvatar"&&profile.name){openProfileCard(profile.name);}else{openProfile();}};
 $("#pfAvatarBtn").onclick=()=>$("#pfAvatarInput").click();
 $("#pfRandomBtn").onclick=()=>{profile.avatar=randomAvatar();$("#pfAvatarPreview").src=profile.avatar;};
 $("#pfAvatarInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{profile.avatar=await compressImage(f,256,0.7);$("#pfAvatarPreview").src=profile.avatar;}catch(err){toast("avatar failed");}};
@@ -872,7 +1054,7 @@ $("#thApply").onclick=()=>{profile.theme={mode:thMode,c1:thC1,c2:thC2};saveProfi
 $("#thReset").onclick=()=>{profile.theme={mode:"solid",c1:"#5865f2",c2:"#7d4bff"};saveProfile();applyTheme();openTheme();toast("Theme reset");};
 $("#themeClose").onclick=()=>$("#themeOverlay").classList.remove("show");$("#themeOpen").onclick=openTheme;
 
-/* ---- soundboard ---- */
+/* ---- soundboard (WebAudio synth) ---- */
 let actx;
 function beep(freq,dur,type="square",slideTo){
   try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=freq;if(slideTo)o.frequency.exponentialRampToValueAtTime(slideTo,actx.currentTime+dur);g.gain.value=.15;g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+dur);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+dur);}catch(e){}
@@ -891,236 +1073,238 @@ const SOUNDS=[
 function openSound(){const g=$("#soundGrid");g.innerHTML="";SOUNDS.forEach(s=>{const b=document.createElement("div");b.className="sound-btn";b.innerHTML=`<span class="se">${s.e}</span>${s.n}`;b.onclick=s.f;g.appendChild(b);});$("#soundOverlay").classList.add("show");}
 $("#soundOpen").onclick=openSound;$("#soundClose").onclick=()=>$("#soundOverlay").classList.remove("show");
 
-/* ===================== DM SYSTEM ===================== */
-let activeDmCid=null;
-let activeDmUnsub=null;
-let dmUnreadCounts={};
-let dmPreviews={};
-
-function dmChannelId(a,b){return[a,b].sort().join("__");}
-
-function openDm(targetCid,targetUser){
-  if(!profile.name){openProfile();toast("Set a username first!");return;}
-  activeDmCid=targetCid;
-  const chId=dmChannelId(CLIENT_ID,targetCid);
-
-  // update topbar
-  $("#dmTargetAvatar").src=targetUser.avatar||DEFAULT_AVATAR;
-  $("#dmTargetName").textContent=targetUser.name||"Unknown";
-  $("#dmEmptyName").textContent=targetUser.name||"Unknown";
-
-  // clear messages
-  const msgEl=$("#dmMessages");
-  // keep the empty state div, remove old messages
-  msgEl.querySelectorAll(".dm-msg").forEach(el=>el.remove());
-  const emptyDiv=$("#dmEmpty");
-  emptyDiv.style.display="flex";
-
-  // show dm pane
-  $("#dmPane").classList.add("open");
-
-  // unsub old listener
-  if(activeDmUnsub){activeDmUnsub();activeDmUnsub=null;}
-
-  // subscribe to DM messages
-  const dmMsgs=collection(db,"dms",chId,"messages");
-  const q=query(dmMsgs,orderBy("ts","asc"),limit(200));
-  const dmSeenIds=new Set();
-
-  activeDmUnsub=onSnapshot(q,snap=>{
-    const near=msgEl.scrollHeight-msgEl.scrollTop-msgEl.clientHeight<120;
-    snap.docChanges().forEach(ch=>{
-      if(ch.type==="added"&&!dmSeenIds.has(ch.doc.id)){
-        dmSeenIds.add(ch.doc.id);
-        const m=ch.doc.data();
-        emptyDiv.style.display="none";
-        const div=document.createElement("div");div.className="dm-msg";
-        const isMe=m.senderCid===CLIENT_ID;
-        div.innerHTML=`<img src="${esc(m.avatar||DEFAULT_AVATAR)}">
-          <div class="body"><div class="head">
-            <span class="name" style="color:${esc(m.color||"#fff")}">${esc(m.name||"?")}</span>
-            <span class="time">${fmtTime(m.ts)}</span>
-          </div><div class="text">${esc(m.text||"")}</div></div>`;
-        if(isMe)div.style.flexDirection="row-reverse";
-        msgEl.appendChild(div);
-      }
-    });
-    if(near)msgEl.scrollTop=msgEl.scrollHeight;
-
-    // clear unread for this convo
-    dmUnreadCounts[targetCid]=0;
-    refreshDmList();
-  },()=>{});
-
-  // mark active in sidebar
-  refreshDmList();
-  activateDmSidebar(targetCid,targetUser);
-  dmInput.focus();
-}
-
-function activateDmSidebar(cid,user){
-  // add to DM list if not already there
-  if(!dmPreviews[cid]){dmPreviews[cid]={name:user.name,avatar:user.avatar,color:user.color,cid};}
-  refreshDmList();
-}
-
-function refreshDmList(){
-  const dl=$("#dmList");dl.innerHTML="";
-  Object.entries(dmPreviews).forEach(([cid,u])=>{
-    const div=document.createElement("div");div.className="dm-item"+(cid===activeDmCid?" active":"");
-    const unread=dmUnreadCounts[cid]||0;
-    div.innerHTML=`<img src="${esc(u.avatar||DEFAULT_AVATAR)}">
-      <div style="min-width:0;flex:1"><div class="dm-name" style="color:${esc(u.color||"#fff")}">${esc(u.name)}</div>
-      <div class="dm-preview">${esc(u.lastMsg||"No messages yet")}</div></div>
-      ${unread>0?`<div class="dm-badge">${unread}</div>`:""}`;
-    div.onclick=()=>{
-      const pUser=presenceUsers[cid]||u;
-      openDm(cid,pUser);
-    };
-    dl.appendChild(div);
-  });
-}
-
-// send DM
-const dmInput=$("#dmInput");
-$("#dmSend").onclick=sendDm;
-dmInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendDm();}});
-async function sendDm(){
-  const v=dmInput.value.trim();if(!v||!activeDmCid)return;
-  if(!profile.name){openProfile();return;}
-  const chId=dmChannelId(CLIENT_ID,activeDmCid);
-  const dmMsgs=collection(db,"dms",chId,"messages");
+/* ================= YOUTUBE EMBEDS + WATCH PARTY ================= */
+const ytTitleCache={};
+async function fetchYtTitle(id){
+  if(ytTitleCache[id])return ytTitleCache[id];
   try{
-    await addDoc(dmMsgs,{text:v,name:profile.name,avatar:profile.avatar,color:profile.color,senderCid:CLIENT_ID,ts:serverTimestamp()});
-    // update preview for both sides via a shared "channel meta" doc
-    const metaRef=doc(db,"dmsMeta",chId);
-    await setDoc(metaRef,{participants:[CLIENT_ID,activeDmCid],lastMsg:v,lastTs:Date.now(),
-      [`name_${CLIENT_ID}`]:profile.name,[`avatar_${CLIENT_ID}`]:profile.avatar,[`color_${CLIENT_ID}`]:profile.color,
-      [`name_${activeDmCid}`]:presenceUsers[activeDmCid]?.name||"",
-      [`avatar_${activeDmCid}`]:presenceUsers[activeDmCid]?.avatar||"",
-      [`color_${activeDmCid}`]:presenceUsers[activeDmCid]?.color||"",
-    },{merge:true});
-    if(dmPreviews[activeDmCid])dmPreviews[activeDmCid].lastMsg=v;
-    refreshDmList();
-    dmInput.value="";
-  }catch(e){toast("DM failed: "+e.code);}
+    const r=await fetch(`https://www.youtube.com/oembed?url=https://youtu.be/${id}&format=json`);
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    ytTitleCache[id]={title:j.title,author:j.author_name};
+    return ytTitleCache[id];
+  }catch(e){return null;}
 }
-
-// close DM pane
-$("#closeDm").onclick=()=>{
-  $("#dmPane").classList.remove("open");
-  if(activeDmUnsub){activeDmUnsub();activeDmUnsub=null;}
-  activeDmCid=null;
-  refreshDmList();
-};
-
-// listen for incoming DMs (dmsMeta where I'm a participant)
-// We watch for channel meta docs that include our CLIENT_ID
-const dmsMetaCol=collection(db,"dmsMeta");
-onSnapshot(query(dmsMetaCol,where("participants","array-contains",CLIENT_ID)),snap=>{
-  snap.docChanges().forEach(ch=>{
-    const d=ch.doc.data();
-    const [a,b]=ch.doc.id.split("__");
-    const otherCid=a===CLIENT_ID?b:a;
-    if(!otherCid)return;
-    const otherName=d[`name_${otherCid}`]||"Someone";
-    const otherAvatar=d[`avatar_${otherCid}`]||DEFAULT_AVATAR;
-    const otherColor=d[`color_${otherCid}`]||"#fff";
-    if(!dmPreviews[otherCid]){
-      dmPreviews[otherCid]={name:otherName,avatar:otherAvatar,color:otherColor,cid:otherCid};
-    }
-    dmPreviews[otherCid].lastMsg=d.lastMsg||"";
-    // increment unread if not the active convo and not our own message
-    if(ch.type==="modified"&&otherCid!==activeDmCid){
-      dmUnreadCounts[otherCid]=(dmUnreadCounts[otherCid]||0)+1;
-    }
-    refreshDmList();
-  });
-},()=>{});
-
-/* ===================== GIFT COINS (ADMIN) ===================== */
-let giftSelectedCid=null;
-
-function refreshGiftUserList(){
-  const list=$("#giftUserList");if(!list)return;
-  list.innerHTML="";
-  const users=Object.entries(presenceUsers).filter(([cid])=>cid!==CLIENT_ID);
-  if(users.length===0){list.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px;text-align:center">No other users online</div>';return;}
-  users.forEach(([cid,u])=>{
-    const div=document.createElement("div");div.className="op"+(cid===giftSelectedCid?" sel":"");
-    div.innerHTML=`<img src="${esc(u.avatar||DEFAULT_AVATAR)}"><span style="color:${esc(u.color||"#fff")}">${esc(u.name)}</span>`;
-    div.onclick=()=>{
-      giftSelectedCid=cid;
-      list.querySelectorAll(".op").forEach(x=>x.classList.remove("sel"));
-      div.classList.add("sel");
-      const info=$("#giftSelectedInfo");
-      info.style.display="flex";
-      $("#giftSelAvatar").src=u.avatar||DEFAULT_AVATAR;
-      $("#giftSelName").textContent=u.name;
-      $("#giftSelCoins").textContent="";
-      $("#giftNote").textContent="";
-    };
-    list.appendChild(div);
-  });
-}
-
-$("#giftSendBtn").onclick=async()=>{
-  if(!giftSelectedCid){$("#giftNote").style.color="var(--danger)";$("#giftNote").textContent="Select a user first.";return;}
-  const amt=parseInt($("#giftAmount").value)||0;
-  if(amt<1){$("#giftNote").style.color="var(--danger)";$("#giftNote").textContent="Enter a valid amount.";return;}
-  const targetUser=presenceUsers[giftSelectedCid];
-  if(!targetUser){$("#giftNote").style.color="var(--danger)";$("#giftNote").textContent="User not found.";return;}
-  try{
-    // write a gift doc for the recipient to pick up
-    const giftRef=doc(db,"gifts",giftSelectedCid+"_"+Date.now());
-    await setDoc(giftRef,{
-      toCid:giftSelectedCid,fromName:profile.name,fromAvatar:profile.avatar,
-      amount:amt,ts:Date.now(),claimed:false
-    });
-    // post public message
-    await send({text:`🎁 Admin gifted **${targetUser.name}** ${amt} casino coins!`,system:"announce",name:"Casino",avatar:randomAvatar("casino"),color:"#faa61a",effect:"glow"});
-    $("#giftNote").style.color="var(--good)";
-    $("#giftNote").textContent=`✔ Gifted ${amt} coins to ${targetUser.name}!`;
-    toast(`🎁 Gifted ${amt} coins to ${targetUser.name}`);
-    giftSelectedCid=null;
-    $("#giftSelectedInfo").style.display="none";
-  }catch(e){
-    $("#giftNote").style.color="var(--danger)";
-    $("#giftNote").textContent="Failed: "+e.code;
+// fill in titles for any rendered yt cards
+const ytTitleObserver=new MutationObserver(()=>hydrateYtTitles());
+ytTitleObserver.observe(messagesEl,{childList:true,subtree:true});
+async function hydrateYtTitles(){
+  for(const el of messagesEl.querySelectorAll("[data-yttitle]")){
+    if(el.dataset.done)continue;el.dataset.done="1";
+    const id=el.dataset.yttitle;const info=await fetchYtTitle(id);
+    if(info){el.textContent=info.title;const sub=el.closest(".yt-meta")?.querySelector(".yt-sub");if(sub&&info.author)el.title=info.author;}
   }
-};
+}
+// play a youtube card inline (local to this user)
+function ytCardPlay(card){
+  if(card.querySelector("iframe"))return;
+  const id=card.dataset.ytid;
+  const titleEl=card.querySelector("[data-yttitle]");
+  const title=titleEl?titleEl.textContent:"YouTube";
+  card.innerHTML=`<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+    <div class="yt-meta"><div class="yt-t">${esc(title)}</div><div class="yt-sub">🎉 <span class="yt-party-link" data-ytid="${id}">start a watch party for everyone</span></div></div>`;
+}
+// clicking "start watch party" link
+messagesEl.addEventListener("click",e=>{
+  const pl=e.target.closest(".yt-party-link");
+  if(pl){e.stopPropagation();startWatchParty(pl.dataset.ytid);}
+},true);
 
-// Listen for gifts targeted at this client
-onSnapshot(query(collection(db,"gifts"),where("toCid","==",CLIENT_ID),where("claimed","==",false)),snap=>{
-  snap.docChanges().forEach(async ch=>{
-    if(ch.type!=="added")return;
-    const g=ch.doc.data();
-    profile.coins+=g.amount;
-    saveProfile();
-    toast(`🎁 ${g.fromName} gifted you ${g.amount} coins!`);
-    // mark claimed
-    try{await updateDoc(ch.doc.ref,{claimed:true});}catch(e){}
-  });
+/* ----- shared watch party (synced via Firebase) ----- */
+let watchState=null,watchDismissed=0;
+async function startWatchParty(id){
+  if(!profile.name){toast("Set a username first");return;}
+  const info=await fetchYtTitle(id);
+  try{
+    await setDoc(watchDoc,{ytid:id,title:info?info.title:"YouTube video",by:profile.name,startedAt:Date.now()});
+    toast("🎉 Watch party started for everyone!");
+    joinWatchParty(true);
+  }catch(e){toast("Couldn't start party: "+(e.code||e.message));}
+}
+onSnapshot(watchDoc,snap=>{
+  if(!snap.exists()){watchState=null;$("#watchBar").classList.remove("show");return;}
+  const d=snap.data();watchState=d;
+  if(!d.ytid){$("#watchBar").classList.remove("show");return;}
+  // show the join bar (unless this exact party was dismissed)
+  if(d.startedAt&&d.startedAt!==watchDismissed){
+    $("#wpThumb").src=ytThumb(d.ytid);
+    $("#wpTitle").textContent=d.title||"YouTube video";
+    $("#wpSub").textContent=`${d.by||"someone"} started a watch party`;
+    $("#watchBar").classList.add("show");
+  }
 },()=>{});
+function joinWatchParty(){
+  if(!watchState||!watchState.ytid)return;
+  const d=watchState;
+  // sync to roughly where the party is (seconds since start)
+  const elapsed=Math.max(0,Math.floor((Date.now()-(d.startedAt||Date.now()))/1000));
+  $("#watchTheaterPlayer").innerHTML=`<iframe src="https://www.youtube.com/embed/${d.ytid}?autoplay=1&start=${elapsed}&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  $("#thTitle").textContent=d.title||"Watch party";
+  $("#watchTheater").classList.add("show");
+  $("#watchBar").classList.remove("show");
+}
+$("#wpJoin").onclick=()=>joinWatchParty();
+$("#wpClose").onclick=()=>{watchDismissed=watchState?.startedAt||Date.now();$("#watchBar").classList.remove("show");};
+$("#thClose").onclick=()=>{$("#watchTheaterPlayer").innerHTML="";$("#watchTheater").classList.remove("show");};
 
-/* ===================== CASINO ===================== */
+/* ================= PROFILE CARDS ================= */
+const SOCIALS={
+  youtube:{ico:"▶️",label:"YouTube"},twitch:{ico:"🎮",label:"Twitch"},
+  twitter:{ico:"🐦",label:"X / Twitter"},instagram:{ico:"📸",label:"Instagram"},
+  tiktok:{ico:"🎵",label:"TikTok"},discord:{ico:"💬",label:"Discord"},
+  github:{ico:"🐙",label:"GitHub"},spotify:{ico:"🎧",label:"Spotify"},
+  website:{ico:"🌐",label:"Website"},other:{ico:"🔗",label:"Link"}
+};
+async function openProfileCard(name){
+  if(!name)return;
+  let data=null;
+  // if it's me, use local; else fetch from firestore
+  if(profile.name&&name.toLowerCase()===profile.name.toLowerCase())data=profile;
+  else{
+    try{const snap=await getDoc(doc(profilesCol,name.toLowerCase()));if(snap.exists())data=snap.data();}catch(e){}
+  }
+  if(!data){
+    // fall back to presence info
+    const u=presenceSnapCache.find(p=>(p.name||"").toLowerCase()===name.toLowerCase());
+    data=u?{name:u.name,avatar:u.avatar,color:u.color,effect:u.effect,status:u.status}:{name,avatar:DEFAULT_AVATAR};
+  }
+  renderProfileCard(data);
+}
+function renderProfileCard(d){
+  const isMe=profile.name&&(d.name||"").toLowerCase()===profile.name.toLowerCase();
+  // banner
+  const b=$("#pcBanner");
+  if(d.banner&&(d.banner.startsWith("url")||d.banner.startsWith("data:")||d.banner.startsWith("http")))b.style.background=d.banner.startsWith("http")?`url(${d.banner}) center/cover`:d.banner;
+  else if(d.banner)b.style.background=d.banner;
+  else b.style.background="linear-gradient(135deg,var(--theme1),var(--theme2))";
+  $("#pcAvatar").src=d.avatar||DEFAULT_AVATAR;
+  const nameEl=$("#pcName");nameEl.textContent=d.name||"Anon";
+  nameEl.className="";nameEl.style.color=(d.effect==="shimmer"||d.effect==="gradient")?"":(d.color||"");
+  // re-add pronouns span (textContent wiped it)
+  nameEl.innerHTML=`<span class="fx-${d.effect||'none'}" style="${(d.effect==="shimmer"||d.effect==="gradient")?"":`color:${esc(d.color||"#fff")}`}">${esc(d.name||"Anon")}</span>`;
+  const pron=$("#pcPron");
+  if(d.pronouns){pron.textContent=d.pronouns;pron.style.display="";nameEl.appendChild(pron);}else pron.style.display="none";
+  $("#pcStatus").textContent=d.status||"";
+  // meta
+  const meta=$("#pcMeta");meta.innerHTML="";
+  if(d.location)meta.innerHTML+=`<span>📍 ${esc(d.location)}</span>`;
+  meta.innerHTML+=`<span>🪙 ${d.coins!=null?d.coins:"—"} coins</span>`;
+  // stats
+  const stats=$("#pcStats");
+  if(d.wins!=null){stats.style.display="";stats.innerHTML=`
+    <div class="pc-stat"><div class="v">${d.wins||0}</div><div class="l">Wins</div></div>
+    <div class="pc-stat"><div class="v">${d.plays||0}</div><div class="l">Plays</div></div>
+    <div class="pc-stat"><div class="v">${d.best||0}</div><div class="l">Best win</div></div>`;}
+  else stats.style.display="none";
+  // bio
+  if(d.bio&&d.bio.trim()){$("#pcBioWrap").style.display="";$("#pcBio").innerHTML=linkify(d.bio,true);}
+  else $("#pcBioWrap").style.display="none";
+  // links
+  const links=(d.links||[]).filter(l=>l&&l.url);
+  if(links.length){$("#pcLinksWrap").style.display="";const box=$("#pcLinks");box.innerHTML="";
+    links.forEach(l=>{const meta2=SOCIALS[l.type]||SOCIALS.other;const a=document.createElement("a");
+      a.className="pc-link";a.href=l.url;a.target="_blank";a.rel="noopener";
+      a.innerHTML=`<span class="pl-ico">${meta2.ico}</span><span style="min-width:0"><span style="display:block">${esc(l.label||meta2.label)}</span><span class="pl-sub">${esc(l.url.replace(/^https?:\/\//,""))}</span></span>`;
+      box.appendChild(a);});
+  }else $("#pcLinksWrap").style.display="none";
+  // actions
+  const act=$("#pcActions");act.innerHTML="";
+  if(isMe){const e=document.createElement("button");e.className="btn";e.textContent="✏️ Edit my profile";e.onclick=()=>{closeCard();openProfile();};act.appendChild(e);}
+  else{
+    const dm=document.createElement("button");dm.className="btn";dm.textContent="💬 Message";dm.onclick=()=>{closeCard();openDM(d.name,d.avatar||DEFAULT_AVATAR);};act.appendChild(dm);
+  }
+  $("#cardOverlay").classList.add("show");
+}
+function closeCard(){$("#cardOverlay").classList.remove("show");}
+$("#cardClose").onclick=closeCard;
+$("#cardOverlay").addEventListener("click",e=>{if(e.target===$("#cardOverlay"))closeCard();});
+
+/* ================= DIRECT MESSAGES ================= */
+const openDMs={}; // peerLower -> {peer, avatar, el, bodyEl, unsub, msgs:Set}
+function pairKey(a,b){return [a.toLowerCase(),b.toLowerCase()].sort().join("__");}
+function openDM(peerName,peerAvatar){
+  if(!profile.name){openProfile();toast("Set a username first!");return;}
+  if(peerName.toLowerCase()===profile.name.toLowerCase()){toast("You can't DM yourself 🙂");return;}
+  const key=peerName.toLowerCase();
+  if(openDMs[key]){const w=openDMs[key];w.el.classList.remove("min");w.el.querySelector(".dm-input").focus();return;}
+  const win=document.createElement("div");win.className="dm-window";
+  win.innerHTML=`
+    <div class="dm-head">
+      <img src="${esc(peerAvatar||DEFAULT_AVATAR)}">
+      <span class="dm-nm">${esc(peerName)}</span>
+      <span class="dm-x" title="Close DM">&times;</span>
+    </div>
+    <div class="dm-body"><div class="dm-empty">No messages yet. Say hi 👋</div></div>
+    <div class="dm-composer">
+      <input class="dm-input" type="text" maxlength="1000" placeholder="Message ${esc(peerName)}…" autocomplete="off">
+      <button class="dm-send" title="Send">➤</button>
+    </div>`;
+  $("#dmDock").appendChild(win);
+  const rec={peer:peerName,avatar:peerAvatar,el:win,bodyEl:win.querySelector(".dm-body"),msgs:new Set(),unsub:null};
+  openDMs[key]=rec;
+
+  // minimize on header click, but not when hitting the X
+  win.querySelector(".dm-head").addEventListener("click",e=>{
+    if(e.target.closest(".dm-x"))return;
+    win.classList.toggle("min");
+  });
+  // close DM
+  win.querySelector(".dm-x").addEventListener("click",e=>{e.stopPropagation();closeDM(key);});
+
+  const inp=win.querySelector(".dm-input"),sendBtn=win.querySelector(".dm-send");
+  const doSend=async()=>{const t=inp.value.trim();if(!t)return;inp.value="";
+    try{await addDoc(dmsCol,{pair:pairKey(profile.name,peerName),from:profile.name,fromCid:CLIENT_ID,to:peerName,text:t,avatar:profile.avatar,ts:Date.now()});}
+    catch(e){toast("DM failed: "+(e.code||e.message));}};
+  sendBtn.onclick=doSend;
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doSend();}});
+
+  // live listen to this thread
+  const key2=pairKey(profile.name,peerName);
+  const q=query(dmsCol,orderBy("ts","asc"),limit(200));
+  rec.unsub=onSnapshot(q,snap=>{
+    snap.docChanges().forEach(ch=>{
+      if(ch.type!=="added")return;const d=ch.doc.data();if(d.pair!==key2)return;if(rec.msgs.has(ch.doc.id))return;
+      rec.msgs.add(ch.doc.id);renderDM(rec,d);
+    });
+  },()=>{});
+  setTimeout(()=>inp.focus(),50);
+}
+function renderDM(rec,d){
+  const empty=rec.bodyEl.querySelector(".dm-empty");if(empty)empty.remove();
+  const mine=(d.fromCid===CLIENT_ID)||(d.from||"").toLowerCase()===profile.name.toLowerCase();
+  const el=document.createElement("div");el.className="dm-msg "+(mine?"me":"them");
+  let txt=esc(d.text||"");
+  txt=txt.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`);
+  const time=new Date(d.ts||Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  el.innerHTML=`${txt}<span class="dm-t">${time}</span>`;
+  rec.bodyEl.appendChild(el);
+  rec.bodyEl.scrollTop=rec.bodyEl.scrollHeight;
+  // flash if minimized
+  if(!mine&&rec.el.classList.contains("min")){rec.el.querySelector(".dm-head").style.filter="brightness(1.25)";setTimeout(()=>rec.el.querySelector(".dm-head").style.filter="",600);}
+}
+function closeDM(key){const rec=openDMs[key];if(!rec)return;if(rec.unsub)rec.unsub();rec.el.remove();delete openDMs[key];}
+
+/* ================= CASINO ================= */
 function refreshCasino(){$("#casBal").textContent=profile.coins;$("#casWins").textContent=profile.wins;$("#casPlays").textContent=profile.plays;$("#casBest").textContent=profile.best;}
 function openCasino(){if(!profile.name){openProfile();toast("Make a profile first");return;}showCasHome();refreshCasino();updateDaily();$("#casinoOverlay").classList.add("show");}
 $("#casinoOpen").onclick=openCasino;$("#casinoClose").onclick=()=>$("#casinoOverlay").classList.remove("show");
-function showCasHome(){$("#casHome").style.display="block";$$(".casino-panel").forEach(p=>p.classList.remove("active"));}
-$$(".game-card").forEach(c=>c.onclick=()=>{$("#casHome").style.display="none";$$(".casino-panel").forEach(p=>p.classList.remove("active"));$(`.casino-panel[data-panel="${c.dataset.game}"]`).classList.add("active");if(c.dataset.game==="plinko")buildPlinko();if(c.dataset.game==="dice")updateDice();});
+function showCasHome(){if(flappy.running){cancelAnimationFrame(flappy.raf);flappy.running=false;$("#flappyCash").disabled=true;$("#flappyStart").disabled=false;}$("#casHome").style.display="block";$$(".casino-panel").forEach(p=>p.classList.remove("active"));}
+$$(".game-card").forEach(c=>c.onclick=()=>{$("#casHome").style.display="none";$$(".casino-panel").forEach(p=>p.classList.remove("active"));$(`.casino-panel[data-panel="${c.dataset.game}"]`).classList.add("active");if(c.dataset.game==="plinko")buildPlinko();if(c.dataset.game==="dice")updateDice();if(c.dataset.game==="flappy")flappyInit();});
 $$(".casBack").forEach(b=>b.onclick=showCasHome);
 function win(amt){profile.coins+=amt;profile.wins++;if(amt>profile.best)profile.best=amt;saveProfile();}
 function settleLoss(){profile.plays++;saveProfile();}
 function canBet(v){if(v<10){toast("Min bet 10");return false;}if(v>profile.coins){toast("Not enough coins!");return false;}return true;}
 
+/* bet steppers */
 $$(".bMinus").forEach(b=>b.onclick=()=>{const i=$("#"+b.dataset.g+"Bet");i.value=Math.max(10,(+i.value||10)-10);});
 $$(".bPlus").forEach(b=>b.onclick=()=>{const i=$("#"+b.dataset.g+"Bet");i.value=(+i.value||10)+10;});
 $$(".bMax").forEach(b=>b.onclick=()=>{$("#"+b.dataset.g+"Bet").value=Math.max(10,profile.coins);});
 
+/* daily bonus */
 function updateDaily(){const can=Date.now()-(profile.lastDaily||0)>20*60*60*1000;$("#dailyBtn").disabled=!can;$("#dailyBtn").textContent=can?"🎁 Claim daily 500 coins":"🎁 Daily claimed — come back later";}
 $("#dailyBtn").onclick=()=>{if(Date.now()-(profile.lastDaily||0)>20*60*60*1000){profile.coins+=500;profile.lastDaily=Date.now();saveProfile();refreshCasino();updateDaily();toast("+500 coins 🎁");}};
 
+/* ----- SLOTS ----- */
 const SY=["🍒","🍋","🍇","🔔","⭐","💎","7️⃣"];const PAY={"💎":50,"7️⃣":25,"⭐":12,"🔔":8,"🍇":5,"🍋":4,"🍒":3};
 let slotsBusy=false;
 $("#slotsSpin").onclick=()=>{if(slotsBusy)return;const bet=Math.floor(+$("#slotsBet").value||0);if(!canBet(bet))return;slotsBusy=true;profile.coins-=bet;saveProfile();refreshCasino();
@@ -1130,6 +1314,7 @@ $("#slotsSpin").onclick=()=>{if(slotsBusy)return;const bet=Math.floor(+$("#slots
     let w=0,msg;if(r[0]===r[1]&&r[1]===r[2]){w=bet*PAY[r[0]];msg=`🎉 JACKPOT ${r[0]}! +${w}`;}else if(r[0]===r[1]||r[1]===r[2]||r[0]===r[2]){w=Math.floor(bet*1.5);msg=`✨ Pair! +${w}`;}else{msg=`💀 No match. -${bet}`;}
     if(w>0)win(w);else settleLoss();refreshCasino();$("#slotsResult").textContent=msg;slotsBusy=false;},1000);};
 
+/* ----- MINES ----- */
 let mines={active:false,bombs:[],picked:0,bet:0,count:5,mult:1};
 function buildMinesGrid(){const g=$("#minesGrid");g.innerHTML="";for(let i=0;i<25;i++){const c=document.createElement("div");c.className="mine-cell";c.dataset.i=i;c.onclick=()=>mineClick(i);g.appendChild(c);}}
 buildMinesGrid();
@@ -1142,8 +1327,10 @@ function mineClick(i){if(!mines.active)return;const cell=$(`.mine-cell[data-i="$
     mines.bombs.forEach(b=>{const c=$(`.mine-cell[data-i="${b}"]`);c.classList.add("bomb","revealed");c.textContent="💣";});
     settleLoss();refreshCasino();$("#minesResult").textContent=`💀 Boom! Lost ${mines.bet}.`;}
   else{cell.classList.add("gem");cell.textContent="💎";mines.picked++;mines.mult=minesMultFor(mines.picked,mines.count);$("#minesMult").textContent="x"+mines.mult.toFixed(2);$("#minesResult").textContent=`Cash value: ${Math.floor(mines.bet*mines.mult)}`;}}
-$("#minesCash").onclick=()=>{if(!mines.active||mines.picked===0)return;const payout=Math.floor(mines.bet*mines.mult);win(payout);profile.plays++;saveProfile();mines.active=false;$("#minesCash").disabled=true;$("#minesResult").textContent=`💰 Cashed out +${payout}!`;refreshCasino();};
+$("#minesCash").onclick=()=>{if(!mines.active||mines.picked===0)return;const payout=Math.floor(mines.bet*mines.mult);win(payout);settleLossSkip();mines.active=false;$("#minesCash").disabled=true;$("#minesResult").textContent=`💰 Cashed out +${payout}!`;refreshCasino();};
+function settleLossSkip(){profile.plays++;saveProfile();}
 
+/* ----- CRASH ----- */
 let crash={running:false,mult:1,crashAt:0,bet:0,raf:0,start:0};
 $("#crashStart").onclick=()=>{if(crash.running)return;const bet=Math.floor(+$("#crashBet").value||0);if(!canBet(bet))return;profile.coins-=bet;saveProfile();refreshCasino();
   const r=Math.random();crash={running:true,mult:1,crashAt:Math.max(1,(0.97/(1-r))),bet,start:performance.now()};
@@ -1154,6 +1341,7 @@ $("#crashStart").onclick=()=>{if(crash.running)return;const bet=Math.floor(+$("#
 function crashBoom(){cancelAnimationFrame(crash.raf);crash.running=false;$("#crashCash").disabled=true;$("#crashStart").disabled=false;$("#crashDisplay").className="crash-display crashed";$("#crashDisplay").textContent="💥 "+crash.crashAt.toFixed(2)+"x";$("#crashResult").textContent=`Crashed! Lost ${crash.bet}.`;settleLoss();refreshCasino();}
 $("#crashCash").onclick=()=>{if(!crash.running)return;cancelAnimationFrame(crash.raf);crash.running=false;const payout=Math.floor(crash.bet*crash.mult);win(payout);$("#crashCash").disabled=true;$("#crashStart").disabled=false;$("#crashDisplay").className="crash-display cashed";$("#crashResult").textContent=`💰 Cashed @ ${crash.mult.toFixed(2)}x → +${payout}`;refreshCasino();};
 
+/* ----- DICE ----- */
 function updateDice(){const t=+$("#diceTarget").value;$("#diceTargetLbl").textContent=t;const chance=t-1;$("#diceChance").textContent=chance+"%";const pay=(98/chance);$("#dicePay").textContent="x"+pay.toFixed(2);$("#diceMarker").style.left=t+"%";$("#diceBar").style.setProperty("--t",t+"%");}
 $("#diceTarget").addEventListener("input",updateDice);
 $("#diceRoll").onclick=()=>{const bet=Math.floor(+$("#diceBet").value||0);if(!canBet(bet))return;const t=+$("#diceTarget").value;profile.coins-=bet;saveProfile();
@@ -1161,6 +1349,7 @@ $("#diceRoll").onclick=()=>{const bet=Math.floor(+$("#diceBet").value||0);if(!ca
   if(roll<t){const pay=Math.floor(bet*(98/(t-1)));win(pay);$("#diceResult").textContent=`🎉 ${roll} < ${t} → +${pay}`;}else{settleLoss();$("#diceResult").textContent=`💀 ${roll} ≥ ${t}. -${bet}`;}
   refreshCasino();};
 
+/* ----- PLINKO ----- */
 const PLINKO_MULT=[8,3,1.5,1,0.5,1,1.5,3,8];
 function buildPlinko(){const b=$("#plinkoBoard");if(b.dataset.built)return;b.dataset.built="1";const rows=8;for(let r=0;r<rows;r++){for(let c=0;c<=r+1;c++){const p=document.createElement("div");p.className="peg";p.style.left=(50+(c-(r+1)/2)*9)+"%";p.style.top=(12+r*26)+"px";b.appendChild(p);}}const s=$("#plinkoSlots");s.innerHTML="";PLINKO_MULT.forEach(m=>{const d=document.createElement("div");d.className="ps";d.textContent=m+"x";s.appendChild(d);});}
 let plinkoBusy=false;
@@ -1170,9 +1359,10 @@ $("#plinkoDrop").onclick=()=>{if(plinkoBusy)return;const bet=Math.floor(+$("#pli
   const iv=setInterval(()=>{const dir=Math.random()<.5?-1:1;x+=dir*5.2;x=Math.max(6,Math.min(94,x));ball.style.left=x+"%";ball.style.top=(10+row*26)+"px";row++;
     if(row>steps){clearInterval(iv);const slot=Math.max(0,Math.min(8,Math.round((x-50)/9+4)));const mult=PLINKO_MULT[slot];const payout=Math.floor(bet*mult);
       if(payout>0&&mult>=1)win(payout);else if(payout>0){profile.coins+=payout;saveProfile();}else settleLoss();
-      $("#plinkoResult").textContent=`Landed ${mult}x → net ${payout-bet>=0?"+":""}${payout-bet}`;
+      $("#plinkoResult").textContent=`Landed ${mult}x → ${payout>=bet?"+":""}${payout-bet>=0?"+":""}${payout} (net ${payout-bet>=0?"+":""}${payout-bet})`;
       refreshCasino();setTimeout(()=>ball.remove(),600);plinkoBusy=false;}},120);};
 
+/* ----- COIN FLIP streak ----- */
 let coin={pot:0,streak:0,bet:0,running:false};
 function coinUpdate(){$("#coinStreak").textContent=coin.streak;$("#coinPot").textContent=coin.pot;$("#coinCash").disabled=!coin.running||coin.pot<=0;}
 function coinPlay(side){
@@ -1186,6 +1376,7 @@ function coinPlay(side){
 $("#coinHeads").onclick=()=>coinPlay("heads");$("#coinTails").onclick=()=>coinPlay("tails");
 $("#coinCash").onclick=()=>{if(coin.running&&coin.pot>0){win(coin.pot);$("#coinResult").textContent=`💰 Cashed out +${coin.pot}!`;coin={pot:0,streak:0,bet:0,running:false};coinUpdate();refreshCasino();}};
 
+/* ----- BLACKJACK ----- */
 let bj={deck:[],player:[],dealer:[],bet:0,active:false};
 function newDeck(){const s=["♠","♥","♦","♣"],v=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];const d=[];s.forEach(su=>v.forEach(va=>d.push({s:su,v:va})));for(let i=d.length-1;i>0;i--){const j=ri(i+1);[d[i],d[j]]=[d[j],d[i]];}return d;}
 function cardVal(h){let t=0,a=0;h.forEach(c=>{if(c.v==="A"){a++;t+=11;}else if(["K","Q","J"].includes(c.v))t+=10;else t+=+c.v;});while(t>21&&a){t-=10;a--;}return t;}
@@ -1205,14 +1396,116 @@ function bjStand(){if(!bj.active)return;$("#bjHit").disabled=true;$("#bjStand").
   bjEnd(msg);}
 function bjEnd(msg){bj.active=false;$("#bjHit").disabled=true;$("#bjStand").disabled=true;$("#bjDeal").disabled=false;renderHand($("#bjDealer"),bj.dealer);$("#bjDealerVal").textContent="("+cardVal(bj.dealer)+")";$("#bjResult").textContent=msg;refreshCasino();}
 
+/* ----- WHEEL ----- */
 const WHEEL=[0,0.2,0.5,1,1,1.5,2,3,5,10];
 let wheelBusy=false;
 $("#wheelSpin").onclick=()=>{if(wheelBusy)return;const bet=Math.floor(+$("#wheelBet").value||0);if(!canBet(bet))return;wheelBusy=true;profile.coins-=bet;saveProfile();refreshCasino();
   const face=$("#wheelFace");let n=0;const iv=setInterval(()=>{face.style.transform=`rotate(${n+=40}deg)`;},50);
   setTimeout(()=>{clearInterval(iv);face.style.transform="";const m=rand(WHEEL);const payout=Math.floor(bet*m);if(payout>0){if(m>=1)win(payout);else{profile.coins+=payout;saveProfile();}}else settleLoss();
-    $("#wheelResult").textContent=`🎡 Landed ${m}x → net ${payout-bet>=0?"+":""}${payout-bet}`;refreshCasino();wheelBusy=false;},1700);};
+    $("#wheelResult").textContent=`🎡 Landed ${m}x → ${payout} coins (net ${payout-bet>=0?"+":""}${payout-bet})`;refreshCasino();wheelBusy=false;},1700);};
 
-/* ===================== ADMIN ===================== */
+/* ----- FLAPPY (each pipe = a multiplier) ----- */
+const flappy={canvas:null,ctx:null,running:false,bet:0,raf:0,
+  bird:{y:150,v:0},pipes:[],gravity:0.45,flapV:-7.2,gap:110,pipeW:46,speed:2.2,
+  spawnX:420,pipesCleared:0,mult:0,nextMultIdx:0,W:420,H:300};
+const FLAPPY_MULTS=[0.3,0.5,0.7,1,1.2,1.5,2,2.5,3,4,5,7,10];
+function flappyInit(){
+  if(flappy.canvas)return;
+  flappy.canvas=$("#flappyCanvas");flappy.ctx=flappy.canvas.getContext("2d");
+  flappy.W=flappy.canvas.width;flappy.H=flappy.canvas.height;
+  flappy.canvas.addEventListener("click",flappyFlap);
+  document.addEventListener("keydown",e=>{
+    if(e.code==="Space"&&$(".casino-panel[data-panel='flappy']").classList.contains("active")&&flappy.running){e.preventDefault();flappyFlap();}
+  });
+  flappyDraw();
+}
+function flappyFlap(){if(flappy.running)flappy.bird.v=flappy.flapV;}
+function randPipeMult(){return rand(FLAPPY_MULTS);}
+function flappyReset(){
+  flappy.bird={y:flappy.H/2,v:0};flappy.pipes=[];flappy.pipesCleared=0;flappy.mult=0;
+  // pre-seed a few pipes
+  let x=flappy.W+40;
+  for(let i=0;i<4;i++){flappy.pipes.push(makePipe(x));x+=170;}
+}
+function makePipe(x){
+  const minTop=30,maxTop=flappy.H-flappy.gap-30;
+  const top=minTop+Math.random()*(maxTop-minTop);
+  return {x,top,passed:false,mult:randPipeMult()};
+}
+$("#flappyStart").onclick=()=>{
+  flappyInit();
+  if(flappy.running)return;
+  const bet=Math.floor(+$("#flappyBet").value||0);if(!canBet(bet))return;
+  profile.coins-=bet;saveProfile();refreshCasino();
+  flappy.bet=bet;flappy.running=true;flappyReset();
+  $("#flappyCash").disabled=false;$("#flappyStart").disabled=true;
+  $("#flappyResult").textContent="Flap to clear pipes! Cash out anytime.";
+  updateFlappyHUD();
+  flappy.last=performance.now();
+  flappy.raf=requestAnimationFrame(flappyLoop);
+};
+function updateFlappyHUD(){
+  $("#flappyPipes").textContent=flappy.pipesCleared;
+  $("#flappyMult").textContent="x"+flappy.mult.toFixed(2);
+  $("#flappyValue").textContent=Math.floor(flappy.bet*flappy.mult);
+}
+function flappyLoop(now){
+  if(!flappy.running)return;
+  const dt=Math.min(2,(now-(flappy.last||now))/16.67);flappy.last=now;
+  flappy.bird.v+=flappy.gravity*dt;flappy.bird.y+=flappy.bird.v*dt;
+  flappy.pipes.forEach(p=>p.x-=flappy.speed*dt);
+  // recycle / spawn
+  if(flappy.pipes.length&&flappy.pipes[flappy.pipes.length-1].x<flappy.W-170)flappy.pipes.push(makePipe(flappy.pipes[flappy.pipes.length-1].x+170));
+  flappy.pipes=flappy.pipes.filter(p=>p.x+flappy.pipeW>-10);
+  // collision + scoring
+  const bx=70,br=11;
+  for(const p of flappy.pipes){
+    if(!p.passed&&p.x+flappy.pipeW<bx){p.passed=true;flappy.pipesCleared++;flappy.mult+=p.mult;updateFlappyHUD();
+      $("#flappyResult").textContent=`+${p.mult}x! Pipe ${flappy.pipesCleared} cleared.`;}
+    // collision box
+    if(bx+br>p.x&&bx-br<p.x+flappy.pipeW){
+      if(flappy.bird.y-br<p.top||flappy.bird.y+br>p.top+flappy.gap){return flappyCrash();}
+    }
+  }
+  if(flappy.bird.y+br>flappy.H||flappy.bird.y-br<0)return flappyCrash();
+  flappyDraw();
+  flappy.raf=requestAnimationFrame(flappyLoop);
+}
+function flappyDraw(){
+  const ctx=flappy.ctx;if(!ctx)return;
+  ctx.clearRect(0,0,flappy.W,flappy.H);
+  // pipes
+  flappy.pipes.forEach(p=>{
+    ctx.fillStyle=p.passed?"#3ba55d":"#2e9e7d";
+    ctx.fillRect(p.x,0,flappy.pipeW,p.top);
+    ctx.fillRect(p.x,p.top+flappy.gap,flappy.pipeW,flappy.H-(p.top+flappy.gap));
+    // multiplier label in the gap
+    ctx.fillStyle="#fff";ctx.font="bold 13px sans-serif";ctx.textAlign="center";
+    ctx.fillText(p.mult+"x",p.x+flappy.pipeW/2,p.top+flappy.gap/2+5);
+  });
+  // bird
+  ctx.fillStyle="#faa61a";ctx.beginPath();ctx.arc(70,flappy.bird.y,11,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#1a1a1a";ctx.beginPath();ctx.arc(74,flappy.bird.y-3,2.5,0,Math.PI*2);ctx.fill();
+}
+function flappyCrash(){
+  cancelAnimationFrame(flappy.raf);flappy.running=false;
+  $("#flappyCash").disabled=true;$("#flappyStart").disabled=false;
+  $("#flappyResult").textContent=`💥 Crashed! Lost ${flappy.bet} (and ${flappy.mult.toFixed(2)}x pot).`;
+  settleLoss();refreshCasino();
+  // flash the canvas red
+  const ctx=flappy.ctx;ctx.fillStyle="rgba(237,66,69,.35)";ctx.fillRect(0,0,flappy.W,flappy.H);
+}
+$("#flappyCash").onclick=()=>{
+  if(!flappy.running)return;
+  if(flappy.mult<=0){toast("Clear at least one pipe first!");return;}
+  cancelAnimationFrame(flappy.raf);flappy.running=false;
+  const payout=Math.floor(flappy.bet*flappy.mult);win(payout);
+  $("#flappyCash").disabled=true;$("#flappyStart").disabled=false;
+  $("#flappyResult").textContent=`💰 Cashed out @ ${flappy.mult.toFixed(2)}x → +${payout}!`;
+  refreshCasino();
+};
+
+/* ================= ADMIN ================= */
 let adminUnlocked=false;
 function openPassword(){if(adminUnlocked){openAdmin();return;}$("#pwInput").value="";$("#pwNote").textContent="";$("#pwOverlay").classList.add("show");setTimeout(()=>$("#pwInput").focus(),50);}
 $("#pwClose").onclick=()=>$("#pwOverlay").classList.remove("show");$("#pwSubmit").onclick=tryPw;
@@ -1220,19 +1513,55 @@ $("#pwInput").addEventListener("keydown",e=>{if(e.key==="Enter")tryPw();});
 function tryPw(){if($("#pwInput").value===ADMIN_PASS){adminUnlocked=true;$("#pwOverlay").classList.remove("show");openAdmin();toast("Access granted ⚡");}else{$("#pwNote").textContent="Wrong passcode.";$("#pwInput").value="";}}
 
 let adColor=profile.color,adEffect=profile.effect;
-function openAdmin(){
-  buildColorGrid($("#adColorGrid"),adColor,c=>{adColor=rgbToHex(c);updateAdPreview();});
-  const eg=$("#adEffectGrid");eg.innerHTML="";
-  EFFECTS.forEach(ef=>{const o=document.createElement("div");o.className="effect-opt"+(ef.id===adEffect?" sel":"");o.textContent=ef.l;o.onclick=()=>{eg.querySelectorAll(".effect-opt").forEach(x=>x.classList.remove("sel"));o.classList.add("sel");adEffect=ef.id;updateAdPreview();};eg.appendChild(o);});
-  updateAdPreview();
-  refreshGiftUserList();
-  $("#adminOverlay").classList.add("show");
-}
+function openAdmin(){buildColorGrid($("#adColorGrid"),adColor,c=>{adColor=rgbToHex(c);updateAdPreview();});const eg=$("#adEffectGrid");eg.innerHTML="";EFFECTS.forEach(ef=>{const o=document.createElement("div");o.className="effect-opt"+(ef.id===adEffect?" sel":"");o.textContent=ef.l;o.onclick=()=>{eg.querySelectorAll(".effect-opt").forEach(x=>x.classList.remove("sel"));o.classList.add("sel");adEffect=ef.id;updateAdPreview();};eg.appendChild(o);});updateAdPreview();$("#adminOverlay").classList.add("show");}
 function updateAdPreview(){const p=$("#adPreview");p.className="preview-box fx-"+adEffect;p.style.color=(adEffect==="shimmer"||adEffect==="gradient")?"":adColor;p.textContent=profile.name||"YourName";}
 $("#adApplyStyle").onclick=()=>{profile.color=adColor;profile.effect=adEffect;saveProfile();heartbeat();toast("Style applied ✨");closeAdmin();};
 $("#adClearStyle").onclick=()=>{adColor="#ffffff";adEffect="none";profile.color="#ffffff";profile.effect="none";saveProfile();heartbeat();openAdmin();toast("Reset to plain");};
 function closeAdmin(){$("#adminOverlay").classList.remove("show");}$("#adminClose").onclick=closeAdmin;
-$$(".admin-tab").forEach(t=>{t.onclick=()=>{$$(".admin-tab").forEach(x=>x.classList.remove("active"));$$(".admin-panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(`.admin-panel[data-panel="${t.dataset.tab}"]`).classList.add("active");if(t.dataset.tab==="coins")refreshGiftUserList();};});
+$$(".admin-tab").forEach(t=>{t.onclick=()=>{$$(".admin-tab").forEach(x=>x.classList.remove("active"));$$(".admin-panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(`.admin-panel[data-panel="${t.dataset.tab}"]`).classList.add("active");if(t.dataset.tab==="coins")populateCoinUsers();};});
+
+/* ---- admin: grant coins ---- */
+function populateCoinUsers(){
+  const sel=$("#adCoinUser");const cur=sel.value;sel.innerHTML='<option value="">— select an online user —</option>';
+  const now=Date.now();const seenNames=new Set();
+  presenceSnapCache.forEach(u=>{
+    if(now-(u.ts||0)>45000)return;
+    const nm=u.name;if(!nm||seenNames.has(nm.toLowerCase()))return;seenNames.add(nm.toLowerCase());
+    const o=document.createElement("option");o.value=nm;o.textContent=nm+(nm.toLowerCase()===profile.name.toLowerCase()?" (you)":"");sel.appendChild(o);
+  });
+  sel.value=cur;
+}
+$("#adGiveSelf").onclick=()=>{
+  const amt=Math.floor(+$("#adCoinAmt").value||0);
+  if(amt<1){toast("Enter a valid amount");return;}
+  profile.coins+=amt;saveProfile();refreshCasino();
+  $("#adCoinResult").textContent=`🪙 Gave yourself +${amt} coins (balance: ${profile.coins}).`;
+  toast(`+${amt} coins 🪙`);
+};
+$("#adGiveUser").onclick=async()=>{
+  const amt=Math.floor(+$("#adCoinAmt").value||0);
+  const to=$("#adCoinUser").value;
+  if(amt<1){toast("Enter a valid amount");return;}
+  if(!to){toast("Pick a user");return;}
+  if(to.toLowerCase()===profile.name.toLowerCase()){
+    profile.coins+=amt;saveProfile();refreshCasino();
+    $("#adCoinResult").textContent=`🪙 Gave yourself +${amt} coins.`;toast(`+${amt} coins 🪙`);return;
+  }
+  try{
+    await addDoc(grantsCol,{to,amount:amt,by:profile.name,cid:CLIENT_ID,ts:Date.now()});
+    $("#adCoinResult").textContent=`✅ Sent +${amt} coins to ${to}. They'll receive it live if online.`;
+    toast(`Sent ${amt} 🪙 to ${to}`);
+  }catch(e){$("#adCoinResult").textContent="❌ Failed to send: "+(e.code||e.message);toast("Grant failed");}
+};
+
+/* GLOBAL CLEAR */
+$("#modGlobalClear").onclick=async()=>{
+  if(!confirm("Clear the chat for EVERYONE? This hides all current messages for all users."))return;
+  try{await setDoc(controlDoc,{clearedAt:Date.now(),by:profile.name},{merge:true});
+    document.querySelectorAll(".msg").forEach(el=>el.remove());
+    await ghost(`🧨 Chat was cleared by an admin.`);
+    toast("Global clear done 🧨");closeAdmin();}catch(e){toast("Clear failed: "+e.code);}
+};
 
 /* troll */
 const FAKE=["xX_Sniper_Xx","BigChungus","404Notfound","SteveFromAccounting","theRealElon","CaptainObvious","NoobMaster69","ToiletDuck","gigaChad420","lurker_99"];
@@ -1268,15 +1597,6 @@ $("#modPinBtn").onclick=()=>{const t=$("#modPin").value.trim();if(!t){toast("Typ
 $("#modClearBtn").onclick=()=>{messagesEl.innerHTML="";toast("View cleared (local)");};
 let slowOn=false;
 $("#modSlowBtn").onclick=()=>{slowOn=!slowOn;let b=$("#slowBanner");if(slowOn){if(!b){b=document.createElement("div");b.id="slowBanner";b.style.cssText="background:var(--warn);color:#1a1a1a;text-align:center;padding:6px;font-weight:800;font-size:13px";b.textContent="🐌 Slow-mode is enabled";$(".main").insertBefore(b,$(".messages"));}}else if(b)b.remove();toast("Slow-mode "+(slowOn?"on":"off"));};
-
-/* global clear */
-$("#modGlobalClear").onclick=async()=>{
-  if(!confirm("Clear the chat for EVERYONE? This hides all current messages for all users."))return;
-  try{await setDoc(controlDoc,{clearedAt:Date.now(),by:profile.name},{merge:true});
-    document.querySelectorAll(".msg").forEach(el=>el.remove());
-    await ghost(`🧨 Chat was cleared by an admin.`);
-    toast("Global clear done 🧨");closeAdmin();}catch(e){toast("Clear failed: "+e.code);}
-};
 
 document.addEventListener("keydown",e=>{if(e.key==="&"&&document.activeElement!==input&&!document.querySelector(".overlay.show")){e.preventDefault();openPassword();}});
 
