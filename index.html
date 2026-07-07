@@ -54,9 +54,13 @@
   .msg .text{margin-top:2px;line-height:1.45;word-wrap:break-word;overflow-wrap:anywhere}
   .msg.action .text{font-style:italic;color:var(--muted)}
   .msg .text img.attach{max-width:340px;max-height:300px;border-radius:8px;margin-top:6px;display:block}
+  .msg .text video.attach{max-width:380px;max-height:320px;border-radius:8px;margin-top:6px;display:block;background:#000}
   .msg .audio-wrap{margin-top:8px;background:var(--bg3);border-radius:10px;padding:10px 12px;max-width:360px}
   .msg .audio-wrap .fn{font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
   audio{width:100%;height:34px}
+  .file-chip{display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:10px 14px;text-decoration:none;color:var(--text);font-weight:700;font-size:13px}
+  .file-chip:hover{border-color:var(--accent)}
+  .file-chip .fs{font-size:11px;color:var(--muted);font-weight:500}
   .reactions{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
   .reaction{background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:1px 8px;font-size:12px;cursor:pointer}
   .reaction:hover{border-color:var(--accent)}
@@ -69,6 +73,9 @@
   .icon-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:19px;padding:8px;border-radius:8px}
   .icon-btn:hover{color:var(--text);background:var(--bg2)}
   .hint{font-size:11px;color:var(--muted);padding:6px 4px 0}
+  #upProgress{display:none;height:6px;border-radius:3px;background:var(--bg3);margin-top:8px;overflow:hidden}
+  #upProgress .bar{height:100%;width:0;background:linear-gradient(90deg,var(--theme1),var(--theme2));transition:width .2s}
+  #upLabel{display:none;font-size:11px;color:var(--muted);padding:4px 4px 0}
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(5px)}
   .overlay.show{display:flex}
   .modal{background:var(--bg2);border:1px solid var(--line);border-radius:16px;width:min(500px,93vw);max-height:90vh;overflow-y:auto;padding:26px}
@@ -167,7 +174,34 @@
   .card{width:48px;height:70px;border-radius:8px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;border:2px solid #ccc}
   .card.red{color:#d32f2f}
   .card.back{background:linear-gradient(135deg,var(--theme1),var(--theme2));color:#fff}
+  .card.big{width:76px;height:110px;font-size:28px}
   .bj-label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:800;margin-top:8px}
+  /* roulette */
+  .rl-wheel{text-align:center;font-size:56px;margin:10px 0;transition:transform .1s}
+  .rl-number{text-align:center;font-size:40px;font-weight:900;min-height:52px}
+  .rl-number .rn{display:inline-block;min-width:72px;padding:4px 16px;border-radius:12px}
+  .rl-bets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+  .rl-bet{padding:14px 6px;border-radius:9px;text-align:center;font-weight:800;cursor:pointer;border:2px solid transparent;font-size:13px;color:#fff}
+  .rl-bet.red{background:#b33}
+  .rl-bet.black{background:#1a1a22;border:1px solid var(--line)}
+  .rl-bet.green{background:#2e7d32}
+  .rl-bet.sel{border-color:#fff;transform:scale(1.04)}
+  /* hi-lo */
+  .hilo-cards{display:flex;gap:16px;justify-content:center;align-items:center;margin:16px 0}
+  .hilo-vs{font-weight:900;color:var(--muted)}
+  /* scratch */
+  .scratch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+  .scr-cell{aspect-ratio:1;background:linear-gradient(135deg,#8a8fa8,#c3c8dd);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:34px;cursor:pointer;color:transparent;user-select:none;transition:.15s}
+  .scr-cell:hover:not(.revealed){filter:brightness(1.15)}
+  .scr-cell.revealed{background:var(--bg);color:inherit;border:1px solid var(--line);cursor:default}
+  .scr-cell.winner{border-color:var(--good);box-shadow:0 0 10px rgba(59,165,93,.5)}
+  /* leaderboard */
+  .lb-row{display:flex;align-items:center;gap:10px;padding:9px 8px;border-bottom:1px solid var(--line)}
+  .lb-row img{width:34px;height:34px;border-radius:50%;object-fit:cover;background:var(--bg3)}
+  .lb-rank{width:30px;text-align:center;font-weight:900;color:var(--muted);font-size:15px}
+  .lb-rank.top{font-size:20px}
+  .lb-name{font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-coins{margin-left:auto;font-weight:800;flex-shrink:0}
   /* effects */
   @keyframes rainbow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
   @keyframes glitchA{0%,100%{transform:translate(0)}20%{transform:translate(-2px,1px)}40%{transform:translate(2px,-1px)}60%{transform:translate(-1px,-1px)}80%{transform:translate(1px,1px)}}
@@ -176,6 +210,8 @@
   @keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
   @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes discoSpin{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
+  body.disco #app{animation:discoSpin 1.1s linear infinite}
   .fx-glow{text-shadow:0 0 8px currentColor,0 0 16px currentColor}
   .fx-rainbow{animation:rainbow 3s linear infinite}
   .fx-glitch{animation:glitchA .25s infinite;text-shadow:1px 0 #ff0040,-1px 0 #00fff0}
@@ -241,8 +277,10 @@
   #watchBar .wp-t{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #watchBar .wp-sub{font-size:11px;color:var(--muted)}
   #watchBar .wp-btn{background:var(--accent);border:none;color:#fff;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;flex-shrink:0}
+  #watchBar .wp-btn.end{background:var(--danger);display:none}
   #watchBar .wp-x{cursor:pointer;color:var(--muted);font-size:20px;flex-shrink:0}
   #watchBar .wp-x:hover{color:var(--text)}
+  #frozenBanner{display:none;background:var(--danger);color:#fff;text-align:center;padding:6px;font-weight:800;font-size:13px}
   #watchTheater{display:none;position:fixed;bottom:18px;left:18px;width:360px;background:#000;border:1px solid var(--line);border-radius:12px;overflow:hidden;z-index:55;box-shadow:0 8px 30px rgba(0,0,0,.5)}
   #watchTheater.show{display:block}
   #watchTheater iframe{width:100%;aspect-ratio:16/9;border:none;display:block}
@@ -313,10 +351,12 @@
         <span class="pill live">● live</span>
       </div>
     </div>
+    <div id="frozenBanner">🧊 Chat is frozen by an admin</div>
     <div id="watchBar">
       <img class="wp-thumb" id="wpThumb" src="">
       <div class="wp-info"><div class="wp-t" id="wpTitle">—</div><div class="wp-sub" id="wpSub">started a watch party</div></div>
       <button class="wp-btn" id="wpJoin">▶ Play</button>
+      <button class="wp-btn end" id="wpEnd">■ End for all</button>
       <span class="wp-x" id="wpClose" title="Hide">&times;</span>
     </div>
     <div class="messages" id="messages"></div>
@@ -325,12 +365,16 @@
       <div class="composer-inner">
         <button class="icon-btn" id="imgBtn" title="Image / GIF">🖼️</button>
         <button class="icon-btn" id="audioBtn" title="Audio / MP3">🎵</button>
+        <button class="icon-btn" id="vidBtn" title="Video">🎬</button>
         <input type="file" id="imgInput" accept="image/*,image/gif" hidden>
-        <input type="file" id="audioInput" accept="audio/*,audio/mpeg" hidden>
-        <input type="text" id="msgInput" placeholder="Message #the-void   (& = admin, /me, /confess, /shrug)" maxlength="2000" autocomplete="off">
+        <input type="file" id="audioInput" accept="audio/*" hidden>
+        <input type="file" id="vidInput" accept="video/*" hidden>
+        <input type="text" id="msgInput" placeholder="Message #the-void   (& = admin, /me, /confess, /gift)" maxlength="2000" autocomplete="off">
         <button class="icon-btn" id="sendBtn" title="Send">➤</button>
       </div>
-      <div class="hint">Images · GIFs · MP3s · 📺 paste a <b>YouTube link</b> for a thumbnail · click avatars for profiles · <b>/me</b> · <b>/confess</b> · <b>&amp;</b> admin · 🎁 <span id="dailyHint">daily bonus in Casino</span></div>
+      <div id="upProgress"><div class="bar"></div></div>
+      <div id="upLabel"></div>
+      <div class="hint">Big uploads up to <b>250MB</b> — 🖼️ photos · 🎵 songs · 🎬 videos · 📺 paste a <b>YouTube link</b> · <b>/gift name amount</b> · <b>/me</b> · <b>/confess</b> · <b>&amp;</b> admin · 🎁 <span id="dailyHint">daily bonus in Casino</span></div>
     </div>
   </div>
 </div>
@@ -430,6 +474,10 @@
         <div class="game-card" data-game="blackjack"><div class="ico">🃏</div><div class="gt">Blackjack</div><div class="gd">beat the dealer to 21</div></div>
         <div class="game-card" data-game="wheel"><div class="ico">🎡</div><div class="gt">Wheel</div><div class="gd">spin the multiplier wheel</div></div>
         <div class="game-card" data-game="flappy"><div class="ico">🐤</div><div class="gt">Flappy</div><div class="gd">each pipe = a multiplier</div></div>
+        <div class="game-card" data-game="roulette"><div class="ico">🔴</div><div class="gt">Roulette</div><div class="gd">red, black, or brave green</div></div>
+        <div class="game-card" data-game="hilo"><div class="ico">🔺</div><div class="gt">Hi-Lo</div><div class="gd">guess the next card, stack odds</div></div>
+        <div class="game-card" data-game="scratch"><div class="ico">🎟️</div><div class="gt">Scratch Card</div><div class="gd">match 3 symbols to win</div></div>
+        <div class="game-card" data-game="leaderboard"><div class="ico">🏆</div><div class="gt">Leaderboard</div><div class="gd">richest players in the void</div></div>
       </div>
     </div>
 
@@ -567,6 +615,68 @@
         <button class="btn warn" id="flappyCash" disabled>💰 Cash out</button>
       </div>
     </div>
+
+    <!-- ROULETTE -->
+    <div class="casino-panel" data-panel="roulette">
+      <span class="back-link casBack">← all games</span>
+      <h3>🔴 Roulette</h3>
+      <div class="rl-wheel" id="rlWheel">🎡</div>
+      <div class="rl-number" id="rlNumber"></div>
+      <div class="game-result" id="rlResult">Pick a color. Red/Black pay 2x, Green (0) pays 14x.</div>
+      <div class="rl-bets">
+        <div class="rl-bet red" data-rl="red">🔴 RED<br><span style="font-size:11px;opacity:.8">pays 2x</span></div>
+        <div class="rl-bet green" data-rl="green">🟢 GREEN<br><span style="font-size:11px;opacity:.8">pays 14x</span></div>
+        <div class="rl-bet black" data-rl="black">⚫ BLACK<br><span style="font-size:11px;opacity:.8">pays 2x</span></div>
+      </div>
+      <label>Bet</label>
+      <input type="number" id="rlBet" value="50" min="10" step="10">
+      <button class="btn good" id="rlSpin">🔴 Spin</button>
+    </div>
+
+    <!-- HI-LO -->
+    <div class="casino-panel" data-panel="hilo">
+      <span class="back-link casBack">← all games</span>
+      <h3>🔺 Hi-Lo</h3>
+      <p class="sub" style="margin:6px 0">Guess if the next card is higher or lower. Riskier guesses pay more. Ties push. Cash out anytime.</p>
+      <div class="hilo-cards">
+        <div class="card big" id="hlCur">?</div>
+        <span class="hilo-vs">VS</span>
+        <div class="card big back" id="hlNext">?</div>
+      </div>
+      <div style="text-align:center;font-size:13px;color:var(--muted)">Pot: 🪙 <b id="hlPot">0</b> · Streak: <b id="hlStreak">0</b></div>
+      <div class="game-result" id="hlResult">Bet to draw your first card.</div>
+      <label>Bet (to start a run)</label>
+      <input type="number" id="hlBet" value="50" min="10" step="10">
+      <div class="row">
+        <button class="btn" id="hlHi" disabled>🔺 Higher <span id="hlHiPay"></span></button>
+        <button class="btn alt" id="hlLo" disabled>🔻 Lower <span id="hlLoPay"></span></button>
+      </div>
+      <div class="row">
+        <button class="btn good" id="hlStart">Draw first card</button>
+        <button class="btn warn" id="hlCash" disabled>💰 Cash out</button>
+      </div>
+    </div>
+
+    <!-- SCRATCH -->
+    <div class="casino-panel" data-panel="scratch">
+      <span class="back-link casBack">← all games</span>
+      <h3>🎟️ Scratch Card</h3>
+      <p class="sub" style="margin:6px 0">Buy a card, scratch all 9 cells. Match 3+ of a symbol to win its multiplier.</p>
+      <div class="scratch-grid" id="scrGrid"></div>
+      <div class="game-result" id="scrResult">💎=20x · 7️⃣=10x · ⭐=5x · 🔔=3x · 🍒=2x</div>
+      <label>Card price</label>
+      <input type="number" id="scrBet" value="50" min="10" step="10">
+      <button class="btn good" id="scrBuy">🎟️ Buy a card</button>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="casino-panel" data-panel="leaderboard">
+      <span class="back-link casBack">← all games</span>
+      <h3>🏆 Void Leaderboard</h3>
+      <p class="sub" style="margin:6px 0">The richest players (updates when players are online).</p>
+      <div id="lbList"></div>
+      <button class="btn alt" id="lbRefresh">🔄 Refresh</button>
+    </div>
   </div>
 </div>
 
@@ -593,6 +703,7 @@
       <div class="admin-tab active" data-tab="style">🎨 Name Style</div>
       <div class="admin-tab" data-tab="coins">🪙 Coins</div>
       <div class="admin-tab" data-tab="troll">😈 Troll Box</div>
+      <div class="admin-tab" data-tab="broadcast">🌍 Broadcast</div>
       <div class="admin-tab" data-tab="mod">🛠️ Moderation</div>
       <div class="admin-tab" data-tab="fun">🎲 Fun</div>
     </div>
@@ -613,6 +724,7 @@
       <label>Give to user</label>
       <select id="adCoinUser"><option value="">— select an online user —</option></select>
       <button class="btn" id="adGiveUser">🎁 Send coins to selected user</button>
+      <button class="btn warn" id="adCoinRain">🌧️ COIN RAIN — give this amount to EVERYONE online</button>
       <div class="game-result" id="adCoinResult" style="margin-top:12px"></div>
     </div>
     <div class="admin-panel" data-panel="troll">
@@ -626,6 +738,14 @@
       <button class="troll-btn" data-troll="confetti"><span class="t">🎉 Confetti Drop</span><span class="d">Rain emoji confetti on your screen</span></button>
       <button class="troll-btn" data-troll="quake"><span class="t">📳 Screen Shake</span><span class="d">Shake the whole UI for a few seconds</span></button>
       <button class="troll-btn" data-troll="matrix"><span class="t">🟩 Matrix Rain</span><span class="d">Green code rain overlay (your screen)</span></button>
+    </div>
+    <div class="admin-panel" data-panel="broadcast">
+      <p class="sub" style="margin-bottom:6px">These hit <b>everyone's screen</b>, live. Use responsibly. Or don't.</p>
+      <button class="troll-btn" data-bfx="confetti"><span class="t">🎉 Global Confetti</span><span class="d">Confetti rains on every user's screen</span></button>
+      <button class="troll-btn" data-bfx="quake"><span class="t">📳 Global Earthquake</span><span class="d">Shakes the UI for everyone</span></button>
+      <button class="troll-btn" data-bfx="matrix"><span class="t">🟩 Global Matrix Rain</span><span class="d">Everyone gets plugged in</span></button>
+      <button class="troll-btn" data-bfx="disco"><span class="t">🪩 Disco Mode</span><span class="d">Everyone's theme cycles rainbow for 8 seconds</span></button>
+      <button class="btn danger" id="adFreeze" style="margin-top:14px">🧊 Freeze / unfreeze chat for everyone</button>
     </div>
     <div class="admin-panel" data-panel="mod">
       <button class="btn danger" id="modGlobalClear" style="margin-top:0">🧨 GLOBAL chat clear (everyone)</button>
@@ -674,9 +794,11 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, addDoc, updateDoc,
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, addDoc, updateDoc,
   query, orderBy, limit, onSnapshot, serverTimestamp, increment }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref as sref, uploadBytesResumable, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBcKpDm14W4GZqQncV1LOtS3Hn5t1kK-hw",
@@ -689,6 +811,7 @@ const firebaseConfig = {
 };
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
+const storage=getStorage(app);
 const msgsCol=collection(db,"the-void");
 const usersCol=collection(db,"usernames");
 const presenceCol=collection(db,"presence");
@@ -699,6 +822,7 @@ const profilesCol=collection(db,"profiles");
 const watchDoc=doc(db,"control","watchparty");
 
 const ADMIN_PASS="9009";
+const MAX_UPLOAD=250*1024*1024; // 250MB via Firebase Storage
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 const toast=t=>{const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("show"),2400);};
@@ -762,20 +886,92 @@ function linkify(raw,allowImg){
   return s;
 }
 function fmtTime(ts){try{const d=ts&&ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}catch(e){return"";}}
+function fmtSize(b){if(b>1024*1024)return (b/1024/1024).toFixed(1)+" MB";if(b>1024)return Math.round(b/1024)+" KB";return b+" B";}
 function rgbToHex(c){if(!c)return"#ffffff";if(c.startsWith("#"))return c;const m=c.match(/\d+/g);if(!m)return c;return"#"+m.slice(0,3).map(x=>(+x).toString(16).padStart(2,"0")).join("");}
 function rand(a){return a[Math.floor(Math.random()*a.length)];}
 function ri(n){return Math.floor(Math.random()*n);}
 function compressImage(file,max=600,q=0.6){return new Promise((res,rej)=>{const img=new Image(),r=new FileReader();r.onload=e=>img.src=e.target.result;r.onerror=rej;img.onload=()=>{let w=img.width,h=img.height;if(w>h&&w>max){h=h*max/w;w=max;}else if(h>max){w=w*max/h;h=max;}const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);res(c.toDataURL("image/jpeg",q));};img.onerror=rej;r.readAsDataURL(file);});}
 function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});}
 
-/* ---- global clear marker ---- */
-let clearedAt=0;
+/* ================= BIG UPLOADS via Firebase Storage =================
+   Files up to 250MB go to your project's Storage bucket. Small images still
+   use base64 so they work even if Storage rules aren't set up yet.
+   NOTE: your Firebase console → Storage → Rules must allow read/write. */
+function uploadUI(pct,label){
+  const p=$("#upProgress"),l=$("#upLabel");
+  if(pct==null){p.style.display="none";l.style.display="none";return;}
+  p.style.display="block";l.style.display="block";
+  p.querySelector(".bar").style.width=pct+"%";
+  l.textContent=label+" — "+pct+"%";
+}
+function uploadToStorage(file){
+  const safe=file.name.replace(/[^\w.\-]/g,"_").slice(-80);
+  const path=`uploads/${CLIENT_ID}/${Date.now()}_${safe}`;
+  const task=uploadBytesResumable(sref(storage,path),file,{contentType:file.type});
+  return new Promise((res,rej)=>{
+    task.on("state_changed",
+      s=>uploadUI(Math.round(s.bytesTransferred/s.totalBytes*100),`Uploading ${file.name} (${fmtSize(file.size)})`),
+      err=>{uploadUI(null);rej(err);},
+      async()=>{uploadUI(null);res(await getDownloadURL(task.snapshot.ref));});
+  });
+}
+async function sendMedia(file,kind){
+  if(!profile.name){openProfile();toast("Set a username first!");return;}
+  if(file.size>MAX_UPLOAD){toast(`Too big (${fmtSize(file.size)}). Max 250MB.`);return;}
+  const caption=input.value.trim();
+  try{
+    // tiny images/gifs: base64 inline (works even without Storage rules)
+    if(kind==="image"&&file.size<700*1024){
+      const d=file.type==="image/gif"?await fileToBase64(file):await compressImage(file);
+      await send({text:caption,image:d,fileName:file.name});input.value="";return;
+    }
+    toast("Uploading… big files can take a bit ⏳");
+    const url=await uploadToStorage(file);
+    const extra={text:caption,fileName:file.name,fileSize:file.size};
+    if(kind==="image")extra.image=url;
+    else if(kind==="audio"){extra.audio=url;extra.audioName=file.name;}
+    else if(kind==="video")extra.video=url;
+    else extra.file=url;
+    await send(extra);input.value="";
+    toast("Uploaded ✔");
+  }catch(err){
+    console.error(err);uploadUI(null);
+    toast("Upload failed — check your Firebase Storage rules allow read/write");
+  }
+}
+
+/* ---- global clear marker + broadcast fx + freeze ---- */
+let clearedAt=0,lastFx=0,firstControlSnap=true;
 onSnapshot(controlDoc,snap=>{
-  if(snap.exists()&&snap.data().clearedAt){
-    clearedAt=snap.data().clearedAt;
+  const d=snap.exists()?snap.data():{};
+  if(d.clearedAt){
+    clearedAt=d.clearedAt;
     document.querySelectorAll(".msg[data-ms]").forEach(el=>{ if(+el.dataset.ms<clearedAt) el.remove(); });
   }
+  // broadcast effects — only run fresh ones, never on first load
+  if(d.fx&&d.fx.ts){
+    if(firstControlSnap)lastFx=d.fx.ts;
+    else if(d.fx.ts>lastFx&&Date.now()-d.fx.ts<15000){
+      lastFx=d.fx.ts;runBroadcastFx(d.fx.type);
+      toast(`🌍 ${d.fx.by||"an admin"} hit everyone with ${d.fx.type}!`);
+    }else lastFx=Math.max(lastFx,d.fx.ts);
+  }
+  setFrozen(!!d.frozen);
+  firstControlSnap=false;
 },()=>{});
+function runBroadcastFx(type){
+  if(type==="confetti")confetti();
+  else if(type==="quake")quake();
+  else if(type==="matrix")matrixRain();
+  else if(type==="disco"){document.body.classList.add("disco");setTimeout(()=>document.body.classList.remove("disco"),8000);}
+}
+let chatFrozen=false;
+function setFrozen(f){
+  chatFrozen=f;
+  $("#frozenBanner").style.display=f?"block":"none";
+  const inp=$("#msgInput");
+  inp.disabled=f;inp.placeholder=f?"Chat is frozen ❄️":"Message #the-void   (& = admin, /me, /confess, /gift)";
+}
 
 /* ---- render ---- */
 const messagesEl=$("#messages");
@@ -792,8 +988,10 @@ function renderMsg(m,id){
   else if(m.system==="confess")badge=`<span class="badge" style="background:#9b59b6">anon</span>`;
   else if(m.admin)badge=`<span class="badge">admin</span>`;
   let content=linkify(m.text||"");
-  if(m.image)content+=`<img class="attach" src="${m.image}">`;
-  if(m.audio)content+=`<div class="audio-wrap"><div class="fn">🎵 ${esc(m.audioName||"audio")}</div><audio controls src="${m.audio}"></audio></div>`;
+  if(m.image)content+=`<img class="attach" src="${esc(m.image)}" loading="lazy">`;
+  if(m.video)content+=`<video class="attach" controls preload="metadata" src="${esc(m.video)}"></video>`;
+  if(m.audio)content+=`<div class="audio-wrap"><div class="fn">🎵 ${esc(m.audioName||m.fileName||"audio")}${m.fileSize?` · ${fmtSize(m.fileSize)}`:""}</div><audio controls preload="none" src="${esc(m.audio)}"></audio></div>`;
+  if(m.file)content+=`<a class="file-chip" href="${esc(m.file)}" target="_blank" rel="noopener">📎 ${esc(m.fileName||"file")} <span class="fs">${m.fileSize?fmtSize(m.fileSize):""}</span></a>`;
   const ytid=firstYouTube(m.text);
   if(ytid){
     content+=`<div class="yt-card" data-ytid="${ytid}">
@@ -895,7 +1093,11 @@ $("#onlineList").addEventListener("click",e=>{
   openDM(nameEl.dataset.dm,nameEl.dataset.avatar);
 });
 setInterval(heartbeat,15000);
-window.addEventListener("beforeunload",()=>{try{deleteDoc(doc(presenceCol,CLIENT_ID));}catch(e){}});
+window.addEventListener("beforeunload",()=>{
+  try{deleteDoc(doc(presenceCol,CLIENT_ID));}catch(e){}
+  // if I'm hosting a watch party, end it for everyone
+  try{if(watchState&&watchState.hostCid===CLIENT_ID)deleteDoc(watchDoc);}catch(e){}
+});
 
 /* ---- coin grants (admin → user, delivered live) ---- */
 let appliedGrants=new Set(JSON.parse(localStorage.getItem("nexus_grants")||"[]"));
@@ -908,7 +1110,7 @@ onSnapshot(grantsCol,snap=>{
     const id=ch.doc.id,g=ch.doc.data();
     if(appliedGrants.has(id))return;
     if((g.to||"").toLowerCase()!==me)return;
-    if(g.cid&&g.cid===CLIENT_ID)return; // self-grants applied locally already
+    if(g.cid&&g.cid===CLIENT_ID&&!g.rain)return; // self-grants applied locally already
     appliedGrants.add(id);saveAppliedGrants();
     profile.coins+=g.amount;saveProfile();refreshCasino();
     toast(`🪙 +${g.amount} coins from ${g.by||"an admin"}!`);
@@ -953,12 +1155,30 @@ const input=$("#msgInput");
 $("#sendBtn").onclick=trySend;
 input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();trySend();}});
 input.addEventListener("input",()=>{ setTyping(true); clearTimeout(typingTimer); typingTimer=setTimeout(()=>setTyping(false),2500); });
+async function giftCoins(name,amt){
+  amt=Math.floor(amt);
+  if(!name||!amt||amt<1){toast("Usage: /gift name amount");return;}
+  if(amt>profile.coins){toast("Not enough coins!");return;}
+  if(name.toLowerCase()===profile.name.toLowerCase()){toast("Can't gift yourself 🙂");return;}
+  const online=presenceSnapCache.find(u=>(u.name||"").toLowerCase()===name.toLowerCase()&&Date.now()-(u.ts||0)<45000);
+  if(!online){toast(`${name} isn't online right now`);return;}
+  profile.coins-=amt;saveProfile();
+  try{
+    await addDoc(grantsCol,{to:online.name,amount:amt,by:profile.name,ts:Date.now()});
+    await send({text:`🎁 gifted **${amt} coins** to **${online.name}**!`});
+    toast(`Gifted ${amt} 🪙 to ${online.name}`);
+  }catch(e){profile.coins+=amt;saveProfile();toast("Gift failed");}
+}
 function trySend(){
   let v=input.value.trim();if(!v)return;
   if(v==="&"){input.value="";openPassword();return;}
+  if(chatFrozen){toast("Chat is frozen ❄️");return;}
   setTyping(false);
   if(v.startsWith("/me ")){send({text:v.slice(4),action:true});input.value="";return;}
   if(v.startsWith("/confess ")){send({text:v.slice(9),name:"Anonymous",avatar:randomAvatar("anon"+Date.now()),color:"#9b59b6",effect:"none",system:"confess"});input.value="";return;}
+  if(v.startsWith("/gift ")){const p=v.slice(6).trim().split(/\s+/);giftCoins(p.slice(0,-1).join(" "),+p[p.length-1]);input.value="";return;}
+  if(v.startsWith("/hug ")){send({text:`gives ${v.slice(5)} a big hug 🤗`,action:true});input.value="";return;}
+  if(v.startsWith("/slap ")){send({text:`slaps ${v.slice(6)} with a large trout 🐟`,action:true});input.value="";return;}
   if(v==="/shrug"){v="¯\\_(ツ)_/¯";}
   if(v==="/tableflip"){send({text:"(╯°□°)╯︵ ┻━┻"});input.value="";return;}
   if(v==="/unflip"){send({text:"┬─┬ ノ( ゜-゜ノ)"});input.value="";return;}
@@ -968,14 +1188,13 @@ function trySend(){
   send({text:v});input.value="";
 }
 
-/* ---- uploads ---- */
+/* ---- uploads (now big, via Storage) ---- */
 $("#imgBtn").onclick=()=>$("#imgInput").click();
 $("#audioBtn").onclick=()=>$("#audioInput").click();
-$("#imgInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;
-  if(f.type==="image/gif"){if(f.size>900*1024){toast("GIF too big (max ~900KB)");e.target.value="";return;}toast("Uploading GIF...");try{const d=await fileToBase64(f);await send({text:input.value.trim(),image:d});input.value="";}catch(err){toast("GIF failed");}}
-  else{toast("Uploading image...");try{const d=await compressImage(f);await send({text:input.value.trim(),image:d});input.value="";}catch(err){toast("Image failed");}}
-  e.target.value="";};
-$("#audioInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.size>950*1024){toast(`MP3 too big (${(f.size/1024/1024).toFixed(1)}MB). Max ~0.9MB.`);e.target.value="";return;}toast("Uploading audio...");try{const d=await fileToBase64(f);await send({text:input.value.trim(),audio:d,audioName:f.name});input.value="";}catch(err){toast("Audio failed");}e.target.value="";};
+$("#vidBtn").onclick=()=>$("#vidInput").click();
+$("#imgInput").onchange=e=>{const f=e.target.files[0];if(f)sendMedia(f,"image");e.target.value="";};
+$("#audioInput").onchange=e=>{const f=e.target.files[0];if(f)sendMedia(f,"audio");e.target.value="";};
+$("#vidInput").onchange=e=>{const f=e.target.files[0];if(f)sendMedia(f,"video");e.target.value="";};
 
 /* ---- color grids ---- */
 function buildColorGrid(grid,current,onpick){grid.innerHTML="";COLORS.forEach(c=>{const s=document.createElement("div");s.className="swatch"+(rgbToHex(c)===rgbToHex(current)?" sel":"");s.style.background=c;s.onclick=()=>{grid.querySelectorAll(".swatch").forEach(x=>x.classList.remove("sel"));s.classList.add("sel");onpick(c);};grid.appendChild(s);});}
@@ -1110,42 +1329,77 @@ messagesEl.addEventListener("click",e=>{
   if(pl){e.stopPropagation();startWatchParty(pl.dataset.ytid);}
 },true);
 
-/* ----- shared watch party (synced via Firebase) ----- */
-let watchState=null,watchDismissed=0;
+/* ----- shared watch party (synced via Firebase) -----
+   FIXED: parties are now written with a host heartbeat. If the host leaves
+   or goes stale for ~50s, the party auto-ends for everyone. The host also
+   gets an "End for all" button, and closing their theater ends the party. */
+let watchState=null,watchDismissed=0,theaterParty=0;
+function iAmHost(){return watchState&&watchState.hostCid===CLIENT_ID;}
+function partyAlive(d){return d&&d.ytid&&(Date.now()-(d.hostSeen||d.startedAt||0)<50000);}
 async function startWatchParty(id){
   if(!profile.name){toast("Set a username first");return;}
   const info=await fetchYtTitle(id);
   try{
-    await setDoc(watchDoc,{ytid:id,title:info?info.title:"YouTube video",by:profile.name,startedAt:Date.now()});
+    await setDoc(watchDoc,{ytid:id,title:info?info.title:"YouTube video",by:profile.name,hostCid:CLIENT_ID,startedAt:Date.now(),hostSeen:Date.now()});
     toast("🎉 Watch party started for everyone!");
-    joinWatchParty(true);
-  }catch(e){toast("Couldn't start party: "+(e.code||e.message));}
+  }catch(e){toast("Couldn't start party: "+(e.code||e.message)+" — check Firestore rules allow writing control/watchparty");}
 }
+// host heartbeat so everyone knows the party is still alive
+setInterval(()=>{
+  if(iAmHost()&&partyAlive(watchState)){updateDoc(watchDoc,{hostSeen:Date.now()}).catch(()=>{});}
+},15000);
+// watchdog: if the host vanished, shut the party down locally (and clean up the doc)
+setInterval(()=>{
+  if(watchState&&!partyAlive(watchState)){
+    endPartyLocally("Watch party ended — host left");
+    deleteDoc(watchDoc).catch(()=>{});
+    watchState=null;
+  }
+},10000);
 onSnapshot(watchDoc,snap=>{
-  if(!snap.exists()){watchState=null;$("#watchBar").classList.remove("show");return;}
+  if(!snap.exists()){ if(watchState)endPartyLocally("Watch party ended"); watchState=null; return; }
   const d=snap.data();watchState=d;
-  if(!d.ytid){$("#watchBar").classList.remove("show");return;}
-  // show the join bar (unless this exact party was dismissed)
+  if(!partyAlive(d)){$("#watchBar").classList.remove("show");return;}
+  // if I'm currently watching an older party that got replaced, close it
+  if(theaterParty&&theaterParty!==d.startedAt&&$("#watchTheater").classList.contains("show")){
+    closeTheater();
+  }
   if(d.startedAt&&d.startedAt!==watchDismissed){
     $("#wpThumb").src=ytThumb(d.ytid);
     $("#wpTitle").textContent=d.title||"YouTube video";
     $("#wpSub").textContent=`${d.by||"someone"} started a watch party`;
+    $("#wpEnd").style.display=iAmHost()?"inline-block":"none";
     $("#watchBar").classList.add("show");
   }
 },()=>{});
+function endPartyLocally(msg){
+  $("#watchBar").classList.remove("show");
+  if($("#watchTheater").classList.contains("show")){closeTheater();if(msg)toast(msg);}
+}
 function joinWatchParty(){
-  if(!watchState||!watchState.ytid)return;
+  if(!watchState||!watchState.ytid||!partyAlive(watchState))return;
   const d=watchState;
   // sync to roughly where the party is (seconds since start)
   const elapsed=Math.max(0,Math.floor((Date.now()-(d.startedAt||Date.now()))/1000));
   $("#watchTheaterPlayer").innerHTML=`<iframe src="https://www.youtube.com/embed/${d.ytid}?autoplay=1&start=${elapsed}&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
   $("#thTitle").textContent=d.title||"Watch party";
+  theaterParty=d.startedAt||Date.now();
   $("#watchTheater").classList.add("show");
   $("#watchBar").classList.remove("show");
 }
+function closeTheater(){$("#watchTheaterPlayer").innerHTML="";$("#watchTheater").classList.remove("show");theaterParty=0;}
 $("#wpJoin").onclick=()=>joinWatchParty();
 $("#wpClose").onclick=()=>{watchDismissed=watchState?.startedAt||Date.now();$("#watchBar").classList.remove("show");};
-$("#thClose").onclick=()=>{$("#watchTheaterPlayer").innerHTML="";$("#watchTheater").classList.remove("show");};
+$("#wpEnd").onclick=async()=>{if(!iAmHost())return;try{await deleteDoc(watchDoc);toast("Party ended for everyone");}catch(e){toast("Couldn't end party");}};
+$("#thClose").onclick=async()=>{
+  // if the host closes their theater, the party ends for everyone
+  if(iAmHost()){
+    if(confirm("You're the host — end the watch party for everyone?")){
+      try{await deleteDoc(watchDoc);}catch(e){}
+    }
+  }
+  closeTheater();
+};
 
 /* ================= PROFILE CARDS ================= */
 const SOCIALS={
@@ -1212,6 +1466,7 @@ function renderProfileCard(d){
   if(isMe){const e=document.createElement("button");e.className="btn";e.textContent="✏️ Edit my profile";e.onclick=()=>{closeCard();openProfile();};act.appendChild(e);}
   else{
     const dm=document.createElement("button");dm.className="btn";dm.textContent="💬 Message";dm.onclick=()=>{closeCard();openDM(d.name,d.avatar||DEFAULT_AVATAR);};act.appendChild(dm);
+    const gift=document.createElement("button");gift.className="btn alt";gift.textContent="🎁 Gift coins";gift.onclick=()=>{const amt=prompt(`Gift how many coins to ${d.name}? (you have ${profile.coins})`);if(amt)giftCoins(d.name,+amt);};act.appendChild(gift);
   }
   $("#cardOverlay").classList.add("show");
 }
@@ -1289,7 +1544,7 @@ function refreshCasino(){$("#casBal").textContent=profile.coins;$("#casWins").te
 function openCasino(){if(!profile.name){openProfile();toast("Make a profile first");return;}showCasHome();refreshCasino();updateDaily();$("#casinoOverlay").classList.add("show");}
 $("#casinoOpen").onclick=openCasino;$("#casinoClose").onclick=()=>$("#casinoOverlay").classList.remove("show");
 function showCasHome(){if(flappy.running){cancelAnimationFrame(flappy.raf);flappy.running=false;$("#flappyCash").disabled=true;$("#flappyStart").disabled=false;}$("#casHome").style.display="block";$$(".casino-panel").forEach(p=>p.classList.remove("active"));}
-$$(".game-card").forEach(c=>c.onclick=()=>{$("#casHome").style.display="none";$$(".casino-panel").forEach(p=>p.classList.remove("active"));$(`.casino-panel[data-panel="${c.dataset.game}"]`).classList.add("active");if(c.dataset.game==="plinko")buildPlinko();if(c.dataset.game==="dice")updateDice();if(c.dataset.game==="flappy")flappyInit();});
+$$(".game-card").forEach(c=>c.onclick=()=>{$("#casHome").style.display="none";$$(".casino-panel").forEach(p=>p.classList.remove("active"));$(`.casino-panel[data-panel="${c.dataset.game}"]`).classList.add("active");if(c.dataset.game==="plinko")buildPlinko();if(c.dataset.game==="dice")updateDice();if(c.dataset.game==="flappy")flappyInit();if(c.dataset.game==="leaderboard")loadLeaderboard();if(c.dataset.game==="scratch")scrIdleGrid();});
 $$(".casBack").forEach(b=>b.onclick=showCasHome);
 function win(amt){profile.coins+=amt;profile.wins++;if(amt>profile.best)profile.best=amt;saveProfile();}
 function settleLoss(){profile.plays++;saveProfile();}
@@ -1404,106 +1659,165 @@ $("#wheelSpin").onclick=()=>{if(wheelBusy)return;const bet=Math.floor(+$("#wheel
   setTimeout(()=>{clearInterval(iv);face.style.transform="";const m=rand(WHEEL);const payout=Math.floor(bet*m);if(payout>0){if(m>=1)win(payout);else{profile.coins+=payout;saveProfile();}}else settleLoss();
     $("#wheelResult").textContent=`🎡 Landed ${m}x → ${payout} coins (net ${payout-bet>=0?"+":""}${payout-bet})`;refreshCasino();wheelBusy=false;},1700);};
 
-/* ----- FLAPPY (each pipe = a multiplier) ----- */
-const flappy={canvas:null,ctx:null,running:false,bet:0,raf:0,
-  bird:{y:150,v:0},pipes:[],gravity:0.45,flapV:-7.2,gap:110,pipeW:46,speed:2.2,
-  spawnX:420,pipesCleared:0,mult:0,nextMultIdx:0,W:420,H:300};
-const FLAPPY_MULTS=[0.3,0.5,0.7,1,1.2,1.5,2,2.5,3,4,5,7,10];
-function flappyInit(){
-  if(flappy.canvas)return;
-  flappy.canvas=$("#flappyCanvas");flappy.ctx=flappy.canvas.getContext("2d");
-  flappy.W=flappy.canvas.width;flappy.H=flappy.canvas.height;
-  flappy.canvas.addEventListener("click",flappyFlap);
-  document.addEventListener("keydown",e=>{
-    if(e.code==="Space"&&$(".casino-panel[data-panel='flappy']").classList.contains("active")&&flappy.running){e.preventDefault();flappyFlap();}
-  });
-  flappyDraw();
+/* ----- ROULETTE ----- */
+const RL_RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+let rlPick="red",rlBusy=false;
+$$(".rl-bet").forEach(b=>{b.onclick=()=>{rlPick=b.dataset.rl;$$(".rl-bet").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");};});
+$(`.rl-bet[data-rl="red"]`).classList.add("sel");
+$("#rlSpin").onclick=()=>{
+  if(rlBusy)return;const bet=Math.floor(+$("#rlBet").value||0);if(!canBet(bet))return;
+  rlBusy=true;profile.coins-=bet;saveProfile();refreshCasino();
+  const wheel=$("#rlWheel");let n=0;
+  $("#rlResult").textContent="Spinning…";$("#rlNumber").innerHTML="";
+  const iv=setInterval(()=>{wheel.style.transform=`rotate(${n+=45}deg)`;
+    $("#rlNumber").innerHTML=`<span class="rn" style="background:var(--bg3)">${ri(37)}</span>`;},70);
+  setTimeout(()=>{clearInterval(iv);wheel.style.transform="";
+    const num=ri(37);
+    const color=num===0?"green":(RL_RED.has(num)?"red":"black");
+    const bg=color==="green"?"#2e7d32":color==="red"?"#b33":"#1a1a1a";
+    $("#rlNumber").innerHTML=`<span class="rn" style="background:${bg}">${num}</span>`;
+    if(color===rlPick){
+      const pay=color==="green"?bet*14:bet*2;
+      win(pay);$("#rlResult").textContent=`🎉 ${num} ${color.toUpperCase()}! +${pay}`;
+    }else{settleLoss();$("#rlResult").textContent=`💀 ${num} ${color.toUpperCase()}. -${bet}`;}
+    refreshCasino();rlBusy=false;},1600);
+};
+
+/* ----- HI-LO ----- */
+const HL_VALS=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+let hl={running:false,pot:0,cur:0,streak:0,busy:false};
+function hlDrawCard(){return 1+ri(13);} // 1..13
+function hlFace(v){const suit=rand(["♠","♥","♦","♣"]);return{txt:HL_VALS[v-1]+suit,red:suit==="♥"||suit==="♦"};}
+function hlRender(el,v,hidden){
+  const c=$(el);
+  if(hidden){c.className="card big back";c.textContent="?";return;}
+  const f=hlFace(v);c.className="card big"+(f.red?" red":"");c.textContent=f.txt;
 }
-function flappyFlap(){if(flappy.running)flappy.bird.v=flappy.flapV;}
-function randPipeMult(){return rand(FLAPPY_MULTS);}
-function flappyReset(){
-  flappy.bird={y:flappy.H/2,v:0};flappy.pipes=[];flappy.pipesCleared=0;flappy.mult=0;
-  // pre-seed a few pipes
-  let x=flappy.W+40;
-  for(let i=0;i<4;i++){flappy.pipes.push(makePipe(x));x+=170;}
+function hlUpdateOdds(){
+  if(!hl.running){$("#hlHiPay").textContent="";$("#hlLoPay").textContent="";return;}
+  const higher=13-hl.cur, lower=hl.cur-1;
+  const hp=higher>0?(0.94*13/higher):0, lp=lower>0?(0.94*13/lower):0;
+  $("#hlHiPay").textContent=higher>0?`(x${hp.toFixed(2)})`:"(—)";
+  $("#hlLoPay").textContent=lower>0?`(x${lp.toFixed(2)})`:"(—)";
+  $("#hlHi").disabled=higher<=0||hl.busy;
+  $("#hlLo").disabled=lower<=0||hl.busy;
+  $("#hlCash").disabled=hl.pot<=0||hl.busy;
+  $("#hlPot").textContent=hl.pot;$("#hlStreak").textContent=hl.streak;
 }
-function makePipe(x){
-  const minTop=30,maxTop=flappy.H-flappy.gap-30;
-  const top=minTop+Math.random()*(maxTop-minTop);
-  return {x,top,passed:false,mult:randPipeMult()};
-}
-$("#flappyStart").onclick=()=>{
-  flappyInit();
-  if(flappy.running)return;
-  const bet=Math.floor(+$("#flappyBet").value||0);if(!canBet(bet))return;
+$("#hlStart").onclick=()=>{
+  if(hl.running)return;
+  const bet=Math.floor(+$("#hlBet").value||0);if(!canBet(bet))return;
   profile.coins-=bet;saveProfile();refreshCasino();
-  flappy.bet=bet;flappy.running=true;flappyReset();
-  $("#flappyCash").disabled=false;$("#flappyStart").disabled=true;
-  $("#flappyResult").textContent="Flap to clear pipes! Cash out anytime.";
-  updateFlappyHUD();
-  flappy.last=performance.now();
-  flappy.raf=requestAnimationFrame(flappyLoop);
+  hl={running:true,pot:bet,cur:hlDrawCard(),streak:0,busy:false};
+  hlRender("#hlCur",hl.cur);hlRender("#hlNext",0,true);
+  $("#hlStart").disabled=true;
+  $("#hlResult").textContent="Higher or lower than "+HL_VALS[hl.cur-1]+"?";
+  hlUpdateOdds();
 };
-function updateFlappyHUD(){
-  $("#flappyPipes").textContent=flappy.pipesCleared;
-  $("#flappyMult").textContent="x"+flappy.mult.toFixed(2);
-  $("#flappyValue").textContent=Math.floor(flappy.bet*flappy.mult);
-}
-function flappyLoop(now){
-  if(!flappy.running)return;
-  const dt=Math.min(2,(now-(flappy.last||now))/16.67);flappy.last=now;
-  flappy.bird.v+=flappy.gravity*dt;flappy.bird.y+=flappy.bird.v*dt;
-  flappy.pipes.forEach(p=>p.x-=flappy.speed*dt);
-  // recycle / spawn
-  if(flappy.pipes.length&&flappy.pipes[flappy.pipes.length-1].x<flappy.W-170)flappy.pipes.push(makePipe(flappy.pipes[flappy.pipes.length-1].x+170));
-  flappy.pipes=flappy.pipes.filter(p=>p.x+flappy.pipeW>-10);
-  // collision + scoring
-  const bx=70,br=11;
-  for(const p of flappy.pipes){
-    if(!p.passed&&p.x+flappy.pipeW<bx){p.passed=true;flappy.pipesCleared++;flappy.mult+=p.mult;updateFlappyHUD();
-      $("#flappyResult").textContent=`+${p.mult}x! Pipe ${flappy.pipesCleared} cleared.`;}
-    // collision box
-    if(bx+br>p.x&&bx-br<p.x+flappy.pipeW){
-      if(flappy.bird.y-br<p.top||flappy.bird.y+br>p.top+flappy.gap){return flappyCrash();}
+function hlGuess(dir){
+  if(!hl.running||hl.busy)return;hl.busy=true;hlUpdateOdds();
+  const next=hlDrawCard();
+  hlRender("#hlNext",next);
+  setTimeout(()=>{
+    if(next===hl.cur){
+      $("#hlResult").textContent="🤝 Tie — push, card carries over.";
+    }else{
+      const correct=(dir==="hi"&&next>hl.cur)||(dir==="lo"&&next<hl.cur);
+      if(correct){
+        const higher=13-hl.cur, lower=hl.cur-1;
+        const mult=dir==="hi"?(0.94*13/higher):(0.94*13/lower);
+        hl.pot=Math.floor(hl.pot*mult);hl.streak++;
+        $("#hlResult").textContent=`✅ Correct! Pot is now ${hl.pot}. Keep going or cash out.`;
+      }else{
+        $("#hlResult").textContent=`💀 Wrong! Lost the pot of ${hl.pot}.`;
+        hl={running:false,pot:0,cur:0,streak:0,busy:false};
+        settleLoss();refreshCasino();
+        hlRender("#hlCur",0,true);hlRender("#hlNext",0,true);
+        $("#hlStart").disabled=false;hlUpdateOdds();return;
+      }
     }
-  }
-  if(flappy.bird.y+br>flappy.H||flappy.bird.y-br<0)return flappyCrash();
-  flappyDraw();
-  flappy.raf=requestAnimationFrame(flappyLoop);
+    hl.cur=next;hl.busy=false;
+    hlRender("#hlCur",hl.cur);hlRender("#hlNext",0,true);
+    hlUpdateOdds();
+  },500);
 }
-function flappyDraw(){
-  const ctx=flappy.ctx;if(!ctx)return;
-  ctx.clearRect(0,0,flappy.W,flappy.H);
-  // pipes
-  flappy.pipes.forEach(p=>{
-    ctx.fillStyle=p.passed?"#3ba55d":"#2e9e7d";
-    ctx.fillRect(p.x,0,flappy.pipeW,p.top);
-    ctx.fillRect(p.x,p.top+flappy.gap,flappy.pipeW,flappy.H-(p.top+flappy.gap));
-    // multiplier label in the gap
-    ctx.fillStyle="#fff";ctx.font="bold 13px sans-serif";ctx.textAlign="center";
-    ctx.fillText(p.mult+"x",p.x+flappy.pipeW/2,p.top+flappy.gap/2+5);
-  });
-  // bird
-  ctx.fillStyle="#faa61a";ctx.beginPath();ctx.arc(70,flappy.bird.y,11,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#1a1a1a";ctx.beginPath();ctx.arc(74,flappy.bird.y-3,2.5,0,Math.PI*2);ctx.fill();
-}
-function flappyCrash(){
-  cancelAnimationFrame(flappy.raf);flappy.running=false;
-  $("#flappyCash").disabled=true;$("#flappyStart").disabled=false;
-  $("#flappyResult").textContent=`💥 Crashed! Lost ${flappy.bet} (and ${flappy.mult.toFixed(2)}x pot).`;
-  settleLoss();refreshCasino();
-  // flash the canvas red
-  const ctx=flappy.ctx;ctx.fillStyle="rgba(237,66,69,.35)";ctx.fillRect(0,0,flappy.W,flappy.H);
-}
-$("#flappyCash").onclick=()=>{
-  if(!flappy.running)return;
-  if(flappy.mult<=0){toast("Clear at least one pipe first!");return;}
-  cancelAnimationFrame(flappy.raf);flappy.running=false;
-  const payout=Math.floor(flappy.bet*flappy.mult);win(payout);
-  $("#flappyCash").disabled=true;$("#flappyStart").disabled=false;
-  $("#flappyResult").textContent=`💰 Cashed out @ ${flappy.mult.toFixed(2)}x → +${payout}!`;
-  refreshCasino();
+$("#hlHi").onclick=()=>hlGuess("hi");
+$("#hlLo").onclick=()=>hlGuess("lo");
+$("#hlCash").onclick=()=>{
+  if(!hl.running||hl.pot<=0)return;
+  win(hl.pot);$("#hlResult").textContent=`💰 Cashed out +${hl.pot}!`;
+  hl={running:false,pot:0,cur:0,streak:0,busy:false};
+  $("#hlStart").disabled=false;hlUpdateOdds();refreshCasino();
 };
+
+/* ----- SCRATCH CARD ----- */
+const SCR_SYMBOLS=["💎","7️⃣","⭐","🔔","🍒","🍋","💀","🌀"];
+const SCR_PAY={"💎":20,"7️⃣":10,"⭐":5,"🔔":3,"🍒":2};
+let scr={active:false,cells:[],revealed:0,bet:0};
+function scrIdleGrid(){
+  if(scr.active)return;
+  const g=$("#scrGrid");g.innerHTML="";
+  for(let i=0;i<9;i++){const c=document.createElement("div");c.className="scr-cell";c.textContent="?";g.appendChild(c);}
+}
+$("#scrBuy").onclick=()=>{
+  if(scr.active)return;
+  const bet=Math.floor(+$("#scrBet").value||0);if(!canBet(bet))return;
+  profile.coins-=bet;saveProfile();refreshCasino();
+  // weighted symbols: payers are rarer
+  const bag=["💎","7️⃣","7️⃣","⭐","⭐","⭐","🔔","🔔","🔔","🔔","🍒","🍒","🍒","🍒","🍒","🍋","🍋","🍋","🍋","💀","💀","💀","🌀","🌀","🌀"];
+  scr={active:true,cells:Array.from({length:9},()=>rand(bag)),revealed:0,bet};
+  const g=$("#scrGrid");g.innerHTML="";
+  scr.cells.forEach((sym,i)=>{
+    const c=document.createElement("div");c.className="scr-cell";c.textContent=sym;c.dataset.i=i;
+    c.onclick=()=>{
+      if(!scr.active||c.classList.contains("revealed"))return;
+      c.classList.add("revealed");scr.revealed++;
+      if(scr.revealed===9)scrFinish();
+    };
+    g.appendChild(c);
+  });
+  $("#scrResult").textContent="Scratch all 9 cells! 💎=20x · 7️⃣=10x · ⭐=5x · 🔔=3x · 🍒=2x";
+};
+function scrFinish(){
+  scr.active=false;
+  const counts={};scr.cells.forEach(s=>counts[s]=(counts[s]||0)+1);
+  let bestSym=null,bestPay=0;
+  Object.entries(counts).forEach(([sym,n])=>{
+    if(n>=3&&SCR_PAY[sym]&&SCR_PAY[sym]>bestPay){bestPay=SCR_PAY[sym];bestSym=sym;}
+  });
+  if(bestSym){
+    const payout=Math.floor(scr.bet*bestPay);win(payout);
+    $$("#scrGrid .scr-cell").forEach(c=>{if(c.textContent===bestSym)c.classList.add("winner");});
+    $("#scrResult").textContent=`🎉 Matched 3+ ${bestSym}! ${bestPay}x → +${payout}`;
+  }else{
+    settleLoss();
+    $("#scrResult").textContent=`💀 No 3-match. Lost ${scr.bet}. Buy another?`;
+  }
+  refreshCasino();
+}
+
+/* ----- LEADERBOARD ----- */
+async function loadLeaderboard(){
+  const box=$("#lbList");box.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:12px 4px">Loading…</div>`;
+  try{
+    const snap=await getDocs(query(profilesCol,orderBy("coins","desc"),limit(10)));
+    box.innerHTML="";let rank=0;
+    snap.forEach(d=>{
+      const u=d.data();rank++;
+      const medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":rank;
+      const row=document.createElement("div");row.className="lb-row";
+      row.innerHTML=`<div class="lb-rank${rank<=3?" top":""}">${medal}</div>
+        <img src="${esc(u.avatar||DEFAULT_AVATAR)}">
+        <div class="lb-name" style="color:${esc(u.color||"#fff")}">${esc(u.name||"?")}</div>
+        <div class="lb-coins">🪙 ${u.coins||0}</div>`;
+      row.style.cursor="pointer";
+      row.onclick=()=>openProfileCard(u.name);
+      box.appendChild(row);
+    });
+    if(!rank)box.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:12px 4px">No players yet — be the first legend.</div>`;
+  }catch(e){box.innerHTML=`<div style="color:var(--danger);font-size:13px;padding:12px 4px">Couldn't load: ${e.code||e.message}</div>`;}
+}
+$("#lbRefresh").onclick=loadLeaderboard;
 
 /* ================= ADMIN ================= */
 let adminUnlocked=false;
@@ -1553,6 +1867,42 @@ $("#adGiveUser").onclick=async()=>{
     toast(`Sent ${amt} 🪙 to ${to}`);
   }catch(e){$("#adCoinResult").textContent="❌ Failed to send: "+(e.code||e.message);toast("Grant failed");}
 };
+/* NEW: coin rain — grant everyone online at once */
+$("#adCoinRain").onclick=async()=>{
+  const amt=Math.floor(+$("#adCoinAmt").value||0);
+  if(amt<1){toast("Enter a valid amount");return;}
+  const now=Date.now();const seenNames=new Set();let sent=0;
+  for(const u of presenceSnapCache){
+    if(now-(u.ts||0)>45000)continue;
+    if(!u.name||seenNames.has(u.name.toLowerCase()))continue;
+    seenNames.add(u.name.toLowerCase());
+    if(u.name.toLowerCase()===profile.name.toLowerCase()){profile.coins+=amt;saveProfile();sent++;continue;}
+    try{await addDoc(grantsCol,{to:u.name,amount:amt,by:profile.name,cid:CLIENT_ID,rain:true,ts:Date.now()});sent++;}catch(e){}
+  }
+  refreshCasino();
+  await ghost(`🌧️ **COIN RAIN!** ${profile.name} dropped 🪙 ${amt} on everyone online!`);
+  $("#adCoinResult").textContent=`🌧️ Rained ${amt} coins on ${sent} player(s)!`;
+  toast(`Coin rain on ${sent} players 🌧️`);
+};
+
+/* NEW: broadcast effects to everyone */
+$$(".troll-btn[data-bfx]").forEach(b=>b.onclick=async()=>{
+  const type=b.dataset.bfx;
+  try{
+    await setDoc(controlDoc,{fx:{type,ts:Date.now(),by:profile.name}},{merge:true});
+    toast(`🌍 ${type} sent to everyone!`);
+  }catch(e){toast("Broadcast failed: "+(e.code||e.message));}
+});
+/* NEW: freeze chat for everyone */
+$("#adFreeze").onclick=async()=>{
+  try{
+    const next=!chatFrozen;
+    await setDoc(controlDoc,{frozen:next},{merge:true});
+    if(next)await ghost("🧊 Chat has been frozen by an admin.");
+    else await ghost("🌡️ Chat has been unfrozen. Carry on.");
+    toast(next?"Chat frozen 🧊":"Chat unfrozen 🌡️");
+  }catch(e){toast("Freeze failed: "+(e.code||e.message));}
+};
 
 /* GLOBAL CLEAR */
 $("#modGlobalClear").onclick=async()=>{
@@ -1598,7 +1948,7 @@ $("#modClearBtn").onclick=()=>{messagesEl.innerHTML="";toast("View cleared (loca
 let slowOn=false;
 $("#modSlowBtn").onclick=()=>{slowOn=!slowOn;let b=$("#slowBanner");if(slowOn){if(!b){b=document.createElement("div");b.id="slowBanner";b.style.cssText="background:var(--warn);color:#1a1a1a;text-align:center;padding:6px;font-weight:800;font-size:13px";b.textContent="🐌 Slow-mode is enabled";$(".main").insertBefore(b,$(".messages"));}}else if(b)b.remove();toast("Slow-mode "+(slowOn?"on":"off"));};
 
-document.addEventListener("keydown",e=>{if(e.key==="&"&&document.activeElement!==input&&!document.querySelector(".overlay.show")){e.preventDefault();openPassword();}});
+document.addEventListener("keydown",e=>{if(e.key==="&"&&document.activeElement!==input&&!document.querySelector(".overlay.show")&&document.activeElement.tagName!=="INPUT"&&document.activeElement.tagName!=="TEXTAREA"){e.preventDefault();openPassword();}});
 
 applyTheme();refreshMe();refreshCasino();heartbeat();
 if(!profile.name)openProfile();
