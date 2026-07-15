@@ -121,6 +121,13 @@
   .hint p{font-size:12px;color:var(--acid);letter-spacing:1.5px;margin-top:12px;line-height:1.9}
   .hint span{color:var(--ink)}
 
+  /* recording state */
+  button.ctl.recording{background:var(--hot);color:#fff;animation:recpulse 1s steps(2) infinite}
+  @keyframes recpulse{0%{box-shadow:3px 3px 0 rgba(0,0,0,.5),0 0 0 0 rgba(255,47,109,.7)}50%{box-shadow:3px 3px 0 rgba(0,0,0,.5),0 0 0 8px rgba(255,47,109,0)}}
+  .rectime{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:40;font-size:12px;letter-spacing:2px;color:#fff;background:var(--hot);padding:4px 12px;display:none;box-shadow:2px 2px 0 rgba(0,0,0,.5)}
+  .rectime.on{display:block}
+  .rectime b{color:#0a0510}
+
   @media (max-width:820px){
     .colors{position:fixed;top:auto;bottom:82px;right:14px;width:180px}
     .rack{bottom:auto;top:60px;height:44vh}
@@ -162,6 +169,7 @@
     <button data-m="duo">Duotone</button>
     <button data-m="tri">Tritone</button>
     <button data-m="gradient">Grad</button>
+    <button data-m="glow">Glow</button>
   </div>
   <div class="palrow" id="palRow"></div>
   <div class="swatchrow">
@@ -177,26 +185,31 @@
   </div>
 </div>
 
+<div class="rectime" id="recTime">● REC <b id="recClock">0:00</b></div>
+
 <div class="hint" id="hint">
   <div class="k">NO SIGNAL</div>
   <p>
-    <span>1.</span> hit <span>[ ◉ CAM ]</span> to feed the sensor<br>
-    <span>2.</span> load a track or use <span>[ ≋ MIC ]</span><br>
-    <span>3.</span> stack effects &mdash; they bend to the beat
+    <span>1.</span> hit <span>[ ◉ CAM ]</span> &mdash; or load an <span>[ ▨ IMAGE/GIF ]</span><br>
+    <span>2.</span> load a <span>[ ♫ TRACK ]</span> or use the <span>[ ≋ MIC ]</span><br>
+    <span>3.</span> stack effects, then <span>[ ● RECORD ]</span> the whole thing
   </p>
 </div>
 
 <div class="deck">
   <div class="grp">
     <button class="ctl violet" id="camBtn">◉ Cam</button>
+    <span class="file"><button class="ctl" id="mediaBtn">▨ Image/GIF</button><input type="file" id="mediaFile" accept="image/*"></span>
     <button class="ctl" id="micBtn">≋ Mic</button>
-    <span class="file"><button class="ctl alt" id="fileBtn">♫ Load Track</button><input type="file" id="audioFile" accept="audio/*"></span>
+    <span class="file"><button class="ctl alt" id="fileBtn">♫ Track</button><input type="file" id="audioFile" accept="audio/*"></span>
     <button class="ctl" id="playBtn" disabled>▶ Play</button>
   </div>
+  <div class="grp"><span class="lab">Vol</span><input type="range" id="volume" min="0" max="100" value="100"></div>
   <div class="grp"><span class="lab">React</span><input type="range" id="react" min="0" max="200" value="110"></div>
   <div class="grp"><span class="lab">Intensity</span><input type="range" id="intensity" min="0" max="200" value="100"></div>
   <div class="grp"><span class="lab">Level</span><div class="meter" id="meter"></div></div>
   <div class="grp" style="margin-left:auto">
+    <button class="ctl" id="recBtn">● Record</button>
     <button class="ctl violet" id="snap">▣ Snap</button>
     <button class="ctl alt" id="freeze">❄ Freeze</button>
   </div>
@@ -265,19 +278,40 @@ function analyze(){
 const dot=document.getElementById('dot'),recTxt=document.getElementById('recTxt');
 function setSignal(name){dot.classList.add('live');recTxt.textContent='SIGNAL: '+name;}
 
-/* ---------- camera ---------- */
+/* ---------- source: camera OR image/gif ---------- */
 let camOn=false;
+let srcMode='none';          // 'cam' | 'media' | 'none'
+let mediaEl=null;            // <img> for still or animated gif
+let mediaReady=false;
 document.getElementById('camBtn').addEventListener('click',async()=>{
   if(camOn){
     if(video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null;}
-    camOn=false;document.getElementById('camBtn').textContent='◉ Cam';hint.style.display='block';return;
+    camOn=false;document.getElementById('camBtn').textContent='◉ Cam';
+    if(srcMode==='cam'){srcMode=(mediaReady?'media':'none');}
+    if(srcMode==='none')hint.style.display='block';return;
   }
   try{
     const stream=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720,facingMode:'user'}});
     video.srcObject=stream;await video.play();
-    camOn=true;document.getElementById('camBtn').textContent='◉ Cam ON';hint.style.display='none';sizeCanvas();
+    camOn=true;srcMode='cam';document.getElementById('camBtn').textContent='◉ Cam ON';hint.style.display='none';sizeCanvas();
   }catch(e){alert('Camera access denied or unavailable.');}
 });
+
+document.getElementById('mediaFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const url=URL.createObjectURL(f);
+  const img=new Image();
+  img.onload=()=>{
+    mediaEl=img;mediaReady=true;srcMode='media';
+    document.getElementById('mediaBtn').textContent='▨ Loaded';
+    hint.style.display='none';
+    // GIFs keep animating on their own as long as we redraw the <img>
+    mediaW=img.naturalWidth;mediaH=img.naturalHeight;sizeCanvas();
+  };
+  img.onerror=()=>alert('Could not load that image.');
+  img.src=url;
+});
+let mediaW=1280,mediaH=720;
 
 /* ---------- audio controls ---------- */
 const playBtn=document.getElementById('playBtn');
@@ -291,6 +325,11 @@ playBtn.addEventListener('click',()=>{
   else{audioEl.pause();playBtn.textContent='▶ Play';}
 });
 document.getElementById('micBtn').addEventListener('click',startMic);
+
+/* ---------- volume ---------- */
+const volumeEl=document.getElementById('volume');
+volumeEl.addEventListener('input',()=>{audioEl.volume=volumeEl.value/100;});
+audioEl.volume=1;
 
 /* ---------- sliders / toggles ---------- */
 const reactEl=document.getElementById('react'),intensEl=document.getElementById('intensity');
@@ -315,6 +354,13 @@ const PALETTES=[
   ['#ff0000','#00ff00','#0000ff','#000000'], // rgb raw
   ['#e0aaff','#c77dff','#7b2cbf','#10002b'], // ultraviolet
   ['#f4a261','#e76f51','#2a9d8f','#264653'], // earth
+  ['#00ffff','#ff00ff','#ffff00','#000000'], // cmy pop
+  ['#ff4d00','#ffb300','#fff700','#1a0500'], // fire
+  ['#00ff9f','#00b8ff','#001eff','#000212'], // deep sea
+  ['#ffd6e0','#ff85a1','#ff3d7f','#2d0016'], // bubblegum
+  ['#d0f4de','#a9def9','#e4c1f9','#1b1b2f'], // pastel
+  ['#ffffff','#b8b8b8','#585858','#000000'], // mono
+  ['#ff1b6b','#45caff','#ffe700','#0d0221'], // pop art
 ];
 const palRow=document.getElementById('palRow');
 PALETTES.forEach((p,idx)=>{
@@ -371,6 +417,20 @@ const EFFECTS=[
   {id:'solarize',name:'Solarize',cat:'Color'},
   {id:'ascii',name:'ASCII Dots',cat:'Color'},
   {id:'bloom',name:'Bloom',cat:'Color'},
+  {id:'duochan',name:'Duo Channel',cat:'Color'},
+  {id:'edgeglow',name:'Edge Glow',cat:'Color'},
+  {id:'huecycle',name:'Rainbow Cycle',cat:'Color'},
+  // TRIP
+  {id:'feedback',name:'Feedback Zoom',cat:'Trip'},
+  {id:'smear',name:'Motion Smear',cat:'Trip'},
+  {id:'strobe',name:'Beat Strobe',cat:'Trip'},
+  {id:'shockwave',name:'Shockwave',cat:'Trip'},
+  {id:'melt',name:'Pixel Melt',cat:'Trip'},
+  {id:'mosaic',name:'Live Mosaic',cat:'Trip'},
+  {id:'crthum',name:'CRT Roll',cat:'Trip'},
+  {id:'scanmelt',name:'Scan Melt',cat:'Trip'},
+  {id:'voronoi',name:'Shatter Cells',cat:'Trip'},
+  {id:'trails',name:'Light Trails',cat:'Trip'},
 ];
 let active=new Set(['rgbsplit','scanbend','chromashift']);
 const rack=document.getElementById('fxRack');
@@ -430,7 +490,9 @@ let W=0,H=0,DS=1;
 function sizeCanvas(){
   const dpr=Math.min(window.devicePixelRatio||1,2);
   out.width=Math.floor(out.clientWidth*dpr);out.height=Math.floor(out.clientHeight*dpr);
-  const vw=video.videoWidth||1280,vh=video.videoHeight||720;
+  let vw,vh;
+  if(srcMode==='media'&&mediaReady){vw=mediaW;vh=mediaH;}
+  else{vw=video.videoWidth||1280;vh=video.videoHeight||720;}
   const targetW=480;DS=vw>targetW?targetW/vw:1;
   work.width=Math.max(2,Math.floor(vw*DS));work.height=Math.max(2,Math.floor(vh*DS));
   W=work.width;H=work.height;
@@ -772,13 +834,149 @@ function fxBloom(s,d){
   }
 }
 
+function fxDuoChan(s,d){
+  const sd=s.data,dd=d.data,[ar,ag,ab]=hex(colA),[br,bg,bb]=hex(colB);
+  for(let i=0;i<sd.length;i+=4){
+    const lo=sd[i]/255,hi=sd[i+1]/255; // map red->A, green->B, mix
+    dd[i]=ar*lo+br*hi;dd[i+1]=ag*lo+bg*hi;dd[i+2]=ab*lo+bb*hi;dd[i+3]=255;
+  }
+}
+function fxEdgeGlow(s,d){
+  const w=W,h=H,sd=s.data,dd=d.data;
+  const [ar,ag,ab]=hex(colA);const gain=1.5+bass*4*reactAmt()*intensAmt();
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=(y*w+x)*4,xr=Math.min(w-1,x+1),yd=Math.min(h-1,y+1);
+    const l=(sd[i]+sd[i+1]+sd[i+2]);
+    const lr=(sd[(y*w+xr)*4]+sd[(y*w+xr)*4+1]+sd[(y*w+xr)*4+2]);
+    const ld=(sd[(yd*w+x)*4]+sd[(yd*w+x)*4+1]+sd[(yd*w+x)*4+2]);
+    let e=Math.min(1,(Math.abs(l-lr)+Math.abs(l-ld))/765*gain);
+    dd[i]=sd[i]*0.35+ar*e;dd[i+1]=sd[i+1]*0.35+ag*e;dd[i+2]=sd[i+2]*0.35+ab*e;dd[i+3]=255;
+  }
+}
+function fxHueCycle(s,d){
+  const sd=s.data,dd=d.data,off=(t*3+bass*160*reactAmt())%360;
+  for(let i=0;i<sd.length;i+=4){
+    const lum=(sd[i]+sd[i+1]+sd[i+2])/3,H2=(lum/255*360+off)%360,f=H2/60,x2=1-Math.abs(f%2-1);
+    let r,g,b;
+    if(f<1){r=1;g=x2;b=0;}else if(f<2){r=x2;g=1;b=0;}else if(f<3){r=0;g=1;b=x2;}
+    else if(f<4){r=0;g=x2;b=1;}else if(f<5){r=x2;g=0;b=1;}else{r=1;g=0;b=x2;}
+    const v=lum;dd[i]=r*v;dd[i+1]=g*v;dd[i+2]=b*v;dd[i+3]=255;
+  }
+}
+/* --- TRIP --- */
+function fxFeedback(s,d){
+  const w=W,h=H,sd=s.data,dd=d.data;
+  if(!feedbackBuf||feedbackBuf.length!==sd.length)feedbackBuf=new Uint8ClampedArray(sd);
+  const z=1+(0.02+bass*0.08*reactAmt())*intensAmt(),cx=w/2,cy=h/2;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    let sx=Math.round(cx+(x-cx)/z),sy=Math.round(cy+(y-cy)/z);
+    sx=Math.max(0,Math.min(w-1,sx));sy=Math.max(0,Math.min(h-1,sy));
+    const i=(y*w+x)*4,j=(sy*w+sx)*4;
+    dd[i]=sd[i]*0.5+feedbackBuf[j]*0.5;dd[i+1]=sd[i+1]*0.5+feedbackBuf[j+1]*0.5;dd[i+2]=sd[i+2]*0.5+feedbackBuf[j+2]*0.5;dd[i+3]=255;
+  }
+  feedbackBuf.set(dd);
+}
+function fxSmear(s,d){
+  const sd=s.data,dd=d.data;
+  if(!trailBuf||trailBuf.length!==sd.length)trailBuf=new Uint8ClampedArray(sd);
+  const k=0.5+treble*0.45*reactAmt();
+  for(let i=0;i<sd.length;i+=4){
+    dd[i]=sd[i]*(1-k)+trailBuf[i]*k;dd[i+1]=sd[i+1]*(1-k)+trailBuf[i+1]*k;dd[i+2]=sd[i+2]*(1-k)+trailBuf[i+2]*k;dd[i+3]=255;
+  }
+  trailBuf.set(dd);
+}
+function fxStrobe(s,d){
+  const sd=s.data,dd=d.data;dd.set(sd);
+  if(beat>0.5){const inv=Math.random()<0.5;for(let i=0;i<dd.length;i+=4){const v=inv?255-dd[i]:255;dd[i]=v;dd[i+1]=inv?255-dd[i+1]:255;dd[i+2]=inv?255-dd[i+2]:255;}}
+}
+function fxShockwave(s,d){
+  const w=W,h=H,sd=s.data,dd=d.data,cx=w/2,cy=h/2;
+  const phase=(t*0.3+beatCount*2)%40;
+  const amp=(6+bass*30*reactAmt())*intensAmt();
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const dx=x-cx,dy=y-cy,r=Math.hypot(dx,dy);
+    const ring=Math.exp(-Math.pow((r-phase*6)/24,2));
+    const disp=ring*amp;
+    let sx=Math.round(x+(dx/(r||1))*disp),sy=Math.round(y+(dy/(r||1))*disp);
+    sx=Math.max(0,Math.min(w-1,sx));sy=Math.max(0,Math.min(h-1,sy));
+    const i=(y*w+x)*4,j=(sy*w+sx)*4;dd[i]=sd[j];dd[i+1]=sd[j+1];dd[i+2]=sd[j+2];dd[i+3]=255;
+  }
+}
+function fxMelt(s,d){
+  const w=W,h=H,sd=s.data,dd=d.data;dd.set(sd);
+  const amt=Math.floor((1+bass*10*reactAmt())*intensAmt());
+  for(let x=0;x<w;x++){
+    const drop=(Math.floor(Math.sin(x*0.3+t*0.1)*amt)+amt);
+    for(let y=h-1;y>=0;y--){
+      const sy=Math.max(0,y-drop);const i=(y*w+x)*4,j=(sy*w+x)*4;dd[i]=sd[j];dd[i+1]=sd[j+1];dd[i+2]=sd[j+2];
+    }
+  }
+}
+function fxMosaic(s,d){
+  const w=W,h=H,sd=s.data,dd=d.data;
+  const gs=Math.max(2,Math.round(4+bass*30*reactAmt()*intensAmt()));
+  for(let by=0;by<h;by+=gs)for(let bx=0;bx<w;bx+=gs){
+    let r=0,g=0,b=0,c=0;
+    for(let y=0;y<gs&&by+y<h;y++)for(let x=0;x<gs&&bx+x<w;x++){const i=((by+y)*w+bx+x)*4;r+=sd[i];g+=sd[i+1];b+=sd[i+2];c++;}
+    r/=c;g/=c;b/=c;
+    for(let y=0;y<gs&&by+y<h;y++)for(let x=0;x<gs&&bx+x<w;x++){const i=((by+y)*w+bx+x)*4;dd[i]=r;dd[i+1]=g;dd[i+2]=b;dd[i+3]=255;}
+  }
+}
+function fxCRTRoll(s,d){
+  const w=W,h=H,sd=s.data,dd=d.data;
+  const roll=Math.floor((t*2+bass*40*reactAmt())%h);
+  for(let y=0;y<h;y++){const sy=(y+roll)%h;
+    for(let x=0;x<w;x++){const i=(y*w+x)*4,j=(sy*w+x)*4;
+      const band=(Math.sin((y+t)*0.3)*0.15+0.85);
+      dd[i]=sd[j]*band;dd[i+1]=sd[j+1]*band;dd[i+2]=sd[j+2]*band;dd[i+3]=255;}
+  }
+}
+function fxScanMelt(s,d){
+  const w=W,h=H,sd=s.data,dd=d.data;
+  if(!trailBuf||trailBuf.length!==sd.length)trailBuf=new Uint8ClampedArray(sd);
+  for(let y=0;y<h;y++){
+    const pull=(y%3===0)?0.75:0.2;
+    for(let x=0;x<w;x++){const i=(y*w+x)*4;
+      dd[i]=sd[i]*(1-pull)+trailBuf[i]*pull;dd[i+1]=sd[i+1]*(1-pull)+trailBuf[i+1]*pull;dd[i+2]=sd[i+2]*(1-pull)+trailBuf[i+2]*pull;dd[i+3]=255;}
+  }
+  trailBuf.set(dd);
+}
+function fxVoronoi(s,d){
+  const w=W,h=H,sd=s.data,dd=d.data;
+  const cell=Math.max(6,Math.round(10+mid*24));
+  for(let by=0;by<h;by+=cell)for(let bx=0;bx<w;bx+=cell){
+    const jx=Math.floor(Math.sin(bx*0.3+t*0.05)*cell*0.4);
+    const jy=Math.floor(Math.cos(by*0.3+t*0.05)*cell*0.4);
+    const px=Math.max(0,Math.min(w-1,bx+cell/2+jx)),py=Math.max(0,Math.min(h-1,by+cell/2+jy));
+    const si=((py|0)*w+(px|0))*4;
+    for(let y=0;y<cell&&by+y<h;y++)for(let x=0;x<cell&&bx+x<w;x++){const i=((by+y)*w+bx+x)*4;dd[i]=sd[si];dd[i+1]=sd[si+1];dd[i+2]=sd[si+2];dd[i+3]=255;}
+  }
+}
+function fxTrails(s,d){
+  const sd=s.data,dd=d.data;
+  if(!echoBuf||echoBuf.length!==sd.length)echoBuf=new Uint8ClampedArray(sd);
+  const decay=0.82+bass*0.15*reactAmt();
+  for(let i=0;i<sd.length;i+=4){
+    const br=(sd[i]+sd[i+1]+sd[i+2])/3;
+    const keep=br>140; // bright pixels leave trails
+    dd[i]=keep?Math.max(sd[i],echoBuf[i]*decay):sd[i];
+    dd[i+1]=keep?Math.max(sd[i+1],echoBuf[i+1]*decay):sd[i+1];
+    dd[i+2]=keep?Math.max(sd[i+2],echoBuf[i+2]*decay):sd[i+2];
+    dd[i+3]=255;
+  }
+  echoBuf.set(dd);
+}
+
 const PIPELINE={
   rgbsplit:fxRGBSplit,datamosh:fxDatamosh,slice:fxSlice,blockglitch:fxBlock,jpegfry:fxJpegFry,
   shift:fxLineShift,pixelsort:fxPixelSort,noise:fxNoise,dropout:fxDropout,ghosttrail:fxGhost,
   scanbend:fxScanBend,wobble:fxWobble,ripple:fxRipple,lens:fxLens,twist:fxTwist,pinch:fxPinch,shear:fxShear,squares:fxSquares,
   kaleido:fxKaleido,mirrorx:fxMirrorX,mirrory:fxMirrorY,quad:fxQuad,tunnel:fxTunnel,
   chromashift:fxChroma,invert:fxInvert,posterize:fxPosterize,threshold:fxThreshold,hueflow:fxHueFlow,
-  neon:fxNeon,thermal:fxThermal,solarize:fxSolarize,ascii:fxAscii,bloom:fxBloom
+  neon:fxNeon,thermal:fxThermal,solarize:fxSolarize,ascii:fxAscii,bloom:fxBloom,
+  duochan:fxDuoChan,edgeglow:fxEdgeGlow,huecycle:fxHueCycle,
+  feedback:fxFeedback,smear:fxSmear,strobe:fxStrobe,shockwave:fxShockwave,melt:fxMelt,
+  mosaic:fxMosaic,crthum:fxCRTRoll,scanmelt:fxScanMelt,voronoi:fxVoronoi,trails:fxTrails
 };
 const ORDER=EFFECTS.map(e=>e.id);
 
@@ -796,6 +994,12 @@ function applyColorGrade(img){
     }else if(colMode==='tri'){
       if(lum<0.5){const k=lum*2;r=A[0]+(B[0]-A[0])*k;g=A[1]+(B[1]-A[1])*k;b=A[2]+(B[2]-A[2])*k;}
       else{const k=(lum-0.5)*2;r=B[0]+(C[0]-B[0])*k;g=B[1]+(C[1]-B[1])*k;b=B[2]+(C[2]-B[2])*k;}
+    }else if(colMode==='glow'){
+      // tint shadows toward A, highlights toward C, add saturated bloom
+      const q=lum;
+      if(q<0.5){const k=q*2;r=A[0]*(1-k)+B[0]*k;g=A[1]*(1-k)+B[1]*k;b=A[2]*(1-k)+B[2]*k;}
+      else{const k=(q-0.5)*2;r=B[0]*(1-k)+C[0]*k;g=B[1]*(1-k)+C[1]*k;b=B[2]*(1-k)+C[2]*k;}
+      const boost=1+q*q*1.3;r=Math.min(255,r*boost);g=Math.min(255,g*boost);b=Math.min(255,b*boost);
     }else{ // gradient by position + lum
       const k=(lum+Math.sin(t*0.03)*0.2+1)%1;
       if(k<0.5){const q=k*2;r=A[0]+(B[0]-A[0])*q;g=A[1]+(B[1]-A[1])*q;b=A[2]+(B[2]-A[2])*q;}
@@ -814,13 +1018,16 @@ function render(){
   const lv=Math.min(1,level*3);
   for(let i=0;i<bars.length;i++){bars[i].style.height=(Math.max(0.08,lv-i*0.09)*100)+'%';bars[i].style.background=i<3?'var(--acid)':i<7?'var(--cyan)':'var(--hot)';}
 
-  if(!camOn||video.readyState<2)return;
+  const hasCam = camOn && video.readyState>=2;
+  const hasMedia = srcMode==='media' && mediaReady;
+  if(!hasCam && !hasMedia)return;
   if(frozen&&bufA){blit();return;}
   if(W===0)sizeCanvas();
 
+  const useMedia = srcMode==='media' && hasMedia;
   wctx.save();
-  if(mirrorEl.checked){wctx.scale(-1,1);wctx.drawImage(video,-W,0,W,H);}
-  else wctx.drawImage(video,0,0,W,H);
+  if(mirrorEl.checked){wctx.scale(-1,1);wctx.drawImage(useMedia?mediaEl:video,-W,0,W,H);}
+  else wctx.drawImage(useMedia?mediaEl:video,0,0,W,H);
   wctx.restore();
 
   let img=wctx.getImageData(0,0,W,H);
@@ -846,7 +1053,62 @@ function blit(){
 
 sizeCanvas();render();
 audioEl.addEventListener('play',ensureAC);
-audioEl.addEventListener('ended',()=>{playBtn.textContent='▶ Play';});
+audioEl.addEventListener('ended',()=>{playBtn.textContent='▶ Play';if(recording&&autoStopOnEnd)stopRecording();});
+
+/* ===================================================================
+   VIDEO RECORDER  — captures the output canvas + audio to a .webm
+   =================================================================== */
+let recorder=null,recording=false,recChunks=[],recStart=0,recTimer=null,autoStopOnEnd=false;
+const recBtn=document.getElementById('recBtn');
+const recTimeEl=document.getElementById('recTime'),recClock=document.getElementById('recClock');
+
+function pickMime(){
+  const opts=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  for(const o of opts)if(window.MediaRecorder&&MediaRecorder.isTypeSupported(o))return o;
+  return '';
+}
+function startRecording(){
+  if(!camOn && !(srcMode==='media'&&mediaReady)){alert('Turn on the camera or load an image first.');return;}
+  ensureAC();
+  // video from the visible output canvas
+  const canvasStream=out.captureStream(30);
+  // mix audio in if we have an analyser source
+  if(analyser){
+    try{
+      const dest=AC.createMediaStreamDestination();
+      analyser.connect(dest); // analyser already receives the source
+      dest.stream.getAudioTracks().forEach(tk=>canvasStream.addTrack(tk));
+    }catch(e){/* no audio track, video only */}
+  }
+  const mime=pickMime();
+  try{ recorder=new MediaRecorder(canvasStream, mime?{mimeType:mime,videoBitsPerSecond:8_000_000}:undefined); }
+  catch(e){ alert('Recording not supported in this browser.'); return; }
+  recChunks=[];
+  recorder.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};
+  recorder.onstop=()=>{
+    const blob=new Blob(recChunks,{type:mime||'video/webm'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='databend_'+Date.now()+'.webm';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+  };
+  recorder.start(100);
+  recording=true;recStart=performance.now();
+  // if a track is loaded and playing, auto-stop when the song ends and (re)start it from top
+  autoStopOnEnd = !audioEl.paused && audioEl.src!=='';
+  recBtn.classList.add('recording');recBtn.textContent='■ Stop';
+  recTimeEl.classList.add('on');
+  recTimer=setInterval(()=>{
+    const s=Math.floor((performance.now()-recStart)/1000);
+    recClock.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  },250);
+}
+function stopRecording(){
+  if(recorder&&recording){recorder.stop();}
+  recording=false;clearInterval(recTimer);
+  recBtn.classList.remove('recording');recBtn.textContent='● Record';
+  recTimeEl.classList.remove('on');
+}
+recBtn.addEventListener('click',()=>{ recording?stopRecording():startRecording(); });
 </script>
 </body>
 </html>
